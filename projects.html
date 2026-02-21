@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projects | Subash Lama</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Inter', sans-serif;
+      color: #fff;
+    }
+    #bg-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: -1;
+    }
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 0;
+    }
+    .content {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      padding: 60px 20px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    h1, h2 {
+      font-weight: 800;
+      margin-bottom: 20px;
+    }
+    .project-category {
+      background: rgba(0,0,0,0.6);
+      border-radius: 16px;
+      padding: 30px 20px;
+      max-width: 900px;
+      width: 100%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+      margin-bottom: 40px;
+    }
+    .project-card {
+      background: rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: left;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .back-link {
+      color: #ccc;
+      text-decoration: underline;
+      margin-top: 40px;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+  <video autoplay muted loop playsinline id="bg-video">
+    <source src="22183-712840599.mp4" type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+  <div id="overlay"></div>
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-transparent position-absolute w-100" style="z-index:2;">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="index.html">Subash Lama</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="projects.html">Projects</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="about.html">About</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="contact.html">Contact</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <div class="content">
+    <h1>DevOps & Technical Projects</h1>
+
+    <div class="project-category">
+      <h2>DevOps Subfolder</h2>
+      <div class="project-card">
+        <h4>CI/CD Pipeline with GitHub Actions</h4>
+        <p>Automated deployment for web applications using Docker containers and GitHub Actions.</p>
+      </div>
+      <div class="project-card">
+        <h4>Infrastructure as Code (IaC)</h4>
+        <p>Provisioned cloud architecture using Terraform and AWS, emphasizing modular and reusable scripts.</p>
+      </div>
+      <div class="project-card">
+        <h4>Monitoring with Prometheus & Grafana</h4>
+        <p>Implemented real-time visualization and alerting for microservices running on Kubernetes.</p>
+      </div>
+    </div>
+
+    <div class="project-category">
+      <h2>Other Key Projects</h2>
+      <div class="project-card">
+        <h4>Virtual Lab Automation</h4>
+        <p>Reduced system setup time by 70% using custom scripts and pre-configured environments.</p>
+      </div>
+      <div class="project-card">
+        <h4>Cloud Migration Suite</h4>
+        <p>Optimized legacy system migration to cloud platforms, improving performance and reducing costs.</p>
+      </div>
+      <div class="project-card">
+        <h4>Monitoring Dashboard</h4>
+        <p>Created a health monitoring solution with Python and system alerting mechanisms.</p>
+      </div>
+    </div>
+
+    <a class="back-link" href="index.html">← Back to Home</a>
+  </div>
+</body>
+</html>

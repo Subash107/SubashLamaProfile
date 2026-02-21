@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Subash Lama &ndash; DevOps Engineer specializing in CI/CD, Docker, cloud automation, and reliable infrastructure.">
+  <title>Subash Lama &ndash; DevOps Engineer | Automation & CI/CD</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <style>
+    *, 
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Inter', sans-serif;
+      color: #fff;
+    }
+    #bg-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: -2;
+    }
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: -1;
+    }
+    .content {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      text-align: center;
+      padding: 60px 20px 20px 20px;
+      perspective: 2200px;
+      gap: 0.75rem;
+    }
+    h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+    .hero-name {
+      position: relative;
+      display: inline-block;
+      padding: 0 0.75rem;
+      overflow: visible;
+    }
+    .hero-name .hero-letter {
+      opacity: 0;
+      display: inline-block;
+      transform: translateY(14px) scale(0.9);
+      animation:
+        nameReveal 0.85s cubic-bezier(0.3, 0.1, 0.1, 1.2) forwards,
+        heroGlow 3s ease-in-out both,
+        heroDust 1.1s ease-out forwards;
+      animation-delay:
+        calc(var(--letter-index, 0) * 0.08s),
+        calc(var(--letter-index, 0) * 0.08s + 0.85s),
+        calc(var(--letter-index, 0) * 0.08s + 0.05s);
+      animation-fill-mode: forwards, both, forwards;
+      text-shadow: 0 0 18px rgba(255, 255, 255, 0.75);
+      filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.35));
+    }
+    .hero-name::before,
+    .hero-name::after {
+      content: "";
+      position: absolute;
+      inset: -4px;
+      background: radial-gradient(circle, rgba(255,255,255,0.65) 12%, transparent 58%);
+      opacity: 0;
+      filter: blur(6px);
+      mix-blend-mode: screen;
+      pointer-events: none;
+      animation: fairyDust 3s ease-out forwards;
+    }
+    .hero-name::after {
+      animation-delay: 0.7s;
+      inset: -10px;
+      opacity: 0.7;
+    }
+    h2 {
+      margin-bottom: 1.5rem;
+    }
+    p {
+      font-size: 1.2rem;
+      max-width: 600px;
+      margin: 0 auto 1rem;
+    }
+    .btn-outline-light {
+      margin: 1rem;
+      padding: 10px 30px;
+      border-radius: 30px;
+      font-weight: 600;
+      border: 2px solid #fff;
+      color: #fff;
+      background-color: transparent;
+      position: relative;
+      overflow: hidden;
+      transition: color 0.4s ease;
+    }
+    .btn-outline-light::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 100%;
+      background-color: #fff;
+      z-index: -1;
+      transition: width 0.4s ease;
+    }
+    .btn-outline-light:hover {
+      color: #000;
+    }
+    .btn-outline-light:hover::before {
+      width: 100%;
+    }
+    .button-group {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+    section {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0.75rem 0;
+      background: transparent;
+    }
+    .book-card {
+      width: min(860px, 100%);
+      max-width: 860px;
+      perspective: 2200px;
+      position: relative;
+      cursor: pointer;
+      outline: none;
+      margin: 0 auto;
+    }
+    .book-card-inner {
+      position: relative;
+      width: 100%;
+      height: auto;
+      max-height: none;
+      transform-style: preserve-3d;
+      transition: transform 0.95s cubic-bezier(0.36, 0.14, 0.26, 1);
+      will-change: transform;
+      transform: rotateY(0deg);
+    }
+    .book-card-face {
+      position: absolute;
+      inset: 0;
+      padding: 0;
+      border-radius: inherit;
+      background: linear-gradient(160deg, rgba(18, 26, 46, 0.96), rgba(11, 16, 26, 0.92));
+      box-shadow: 0 40px 90px rgba(0, 0, 0, 0.65), inset 0 0 45px rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backface-visibility: hidden;
+      color: #fff;
+      gap: 0;
+      width: 100%;
+      height: auto;
+      max-height: none;
+      overflow: visible;
+    }
+    .section-inner {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .section-content {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 1rem;
+      padding: clamp(2.5rem, 3.25vw, 4rem);
+      line-height: 1.7;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+      text-align: center;
+      min-height: 520px;
+      height: auto;
+      max-height: none;
+      overflow: visible;
+    }
+    .book-card-front h2,
+    .book-card-back h3 {
+      letter-spacing: 0.04em;
+    }
+    .book-card-face h2,
+    .book-card-face h3 {
+      margin-bottom: 1rem;
+      font-size: 2rem;
+      font-weight: 600;
+    }
+    .book-card-back {
+      transform: rotateY(180deg);
+      background: linear-gradient(180deg, rgba(10, 14, 26, 0.92), rgba(8, 12, 20, 0.94));
+      padding: 28px 24px;
+    }
+    .book-card-face p {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.85);
+      line-height: 1.65;
+      max-width: 100%;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+      text-align: center;
+    }
+    .book-card.is-flipped .book-card-inner {
+      transform: rotateY(180deg);
+    }
+    @media (max-width: 768px) {
+      .book-card {
+        perspective: 1500px;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .book-card-inner {
+        transition: none;
+      }
+    }
+    .glass-card {
+      background: linear-gradient(155deg, rgba(12,19,32,0.85), rgba(5,9,17,0.65));
+      border-radius: 18px;
+      margin: 20px 0;
+      padding: clamp(1.75rem, 2.75vw, 3rem);
+      max-width: 920px;
+      width: min(920px, 100%);
+      min-height: 460px;
+      height: auto;
+      box-shadow: 0 35px 85px rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(12px);
+      transform-style: preserve-3d;
+      animation: orbit 12s ease-in-out infinite;
+      transform-origin: center;
+      transition: transform 0.5s ease, box-shadow 0.5s ease;
+      position: relative;
+      overflow: visible;
+      will-change: transform;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    .glass-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.25), transparent 55%);
+      opacity: 0.35;
+      filter: blur(22px);
+      border-radius: inherit;
+      z-index: -2;
+      pointer-events: none;
+    }
+    .glass-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 72% 4%, rgba(255,255,255,0.28), transparent 58%);
+      opacity: 0.45;
+      border-radius: inherit;
+      z-index: -1;
+      filter: blur(18px);
+    }
+    .glass-card:hover {
+      animation: pulse 3s ease-in-out infinite alternate;
+      transform: translateY(-12px) rotateX(6deg) rotateY(-3deg) scale(1.03);
+      box-shadow: 0 60px 90px rgba(0,0,0,0.7);
+    }
+    #projects.glass-card,
+    #contact.glass-card {
+      max-width: 920px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .project-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: clamp(1rem, 2vw, 1.5rem);
+      width: 100%;
+      max-width: 960px;
+      justify-items: stretch;
+      align-items: stretch;
+      margin: 0.5rem auto 0;
+      grid-auto-rows: minmax(0, auto);
+    }
+    .project-card {
+      background: linear-gradient(180deg, rgba(24, 33, 56, 0.92), rgba(14, 18, 30, 0.96));
+      border-radius: 12px;
+      padding: clamp(1rem, 2vw, 1.5rem);
+      width: 100%;
+      max-width: none;
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: stretch;
+      text-align: left;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+      box-sizing: border-box;
+    }
+    .project-card h4 {
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      font-size: 1rem;
+    }
+    .project-card p {
+      color: rgba(255, 255, 255, 0.78);
+      line-height: 1.6;
+      margin: 0;
+      font-size: 0.95rem;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+    }
+    .project-purpose {
+      margin-top: 0.2rem;
+      margin-bottom: 0.35rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    .project-tech {
+      margin-bottom: 0.45rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.7);
+      letter-spacing: 0.03em;
+    }
+    .project-links {
+      display: flex;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+    .project-links a {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #8ae8ff;
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+    }
+    .project-links a:hover {
+      border-color: #8ae8ff;
+    }
+    .hero-section {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      padding-bottom: 2rem;
+      animation: heroFadeIn 1.2s ease-out both;
+    }
+    .hero-content {
+      max-width: 780px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      text-align: center;
+      animation: heroRise 1s ease-out both;
+    }
+    .hero-content .hero-greeting,
+    .hero-content .hero-role,
+    .hero-content .hero-summary {
+      margin: 0;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: clamp(1.1rem, 2vw, 1.45rem);
+    }
+    .hero-content .hero-role {
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+    .hero-summary {
+      font-weight: 400;
+    }
+    .about-panel {
+      min-height: 460px;
+    }
+    .skill-section .section-content,
+    .why-hire-section .section-content,
+    .contact-section .section-content {
+      align-items: flex-start;
+      text-align: left;
+      width: 100%;
+      max-width: 640px;
+    }
+    .skill-groups {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: clamp(1rem, 2.5vw, 1.75rem);
+    }
+    .skill-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .skill-group h4 {
+      margin: 0;
+      font-size: 1.1rem;
+      letter-spacing: 0.03em;
+    }
+    .skill-group ul {
+      margin: 0;
+      padding-left: 1.15rem;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .skill-group li {
+      margin-bottom: 0.35rem;
+      font-size: 0.95rem;
+    }
+    .why-hire-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.87);
+      line-height: 1.6;
+    }
+    .why-hire-list li::before {
+      content: "•";
+      margin-right: 0.55rem;
+      color: #8ae8ff;
+      font-weight: 600;
+    }
+    .contact-cta {
+      margin: 0;
+      font-size: 1.45rem;
+      letter-spacing: 0.02em;
+      font-weight: 600;
+    }
+    .contact-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      font-size: 1.05rem;
+    }
+    .contact-details a {
+      color: #8ae8ff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .contact-details,
+    .contact-details p,
+    .contact-details a {
+      word-break: break-word;
+    }
+    .footer {
+      margin-top: 40px;
+      color: #ccc;
+      font-size: 0.95rem;
+    }
+    /* YouTube link style */
+    .youtube-link {
+      margin-top: 15px;
+      font-size: 1.1rem;
+    }
+    .youtube-link a {
+      color: #ff4d4d;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .youtube-link a:hover {
+      color: #ff1a1a;
+      text-decoration: underline;
+    }
+    @keyframes heroRise {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      65% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes heroFadeIn {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+    @keyframes orbit {
+      0% {
+        transform: rotateX(3deg) rotateY(-2deg) translateZ(2px);
+      }
+      25% {
+        transform: rotateX(-4deg) rotateY(4deg) translateZ(6px);
+      }
+      50% {
+        transform: rotateX(6deg) rotateY(-5deg) translateZ(8px);
+      }
+      75% {
+      transform: rotateX(-3deg) rotateY(3deg) translateZ(4px);
+      }
+      100% {
+        transform: rotateX(3deg) rotateY(-2deg) translateZ(2px);
+      }
+    }
+    @keyframes pulse {
+      from {
+        transform: translateY(-10px) rotateX(2deg) rotateY(-2deg) scale(1.02);
+      }
+      to {
+        transform: translateY(-15px) rotateX(5deg) rotateY(-4deg) scale(1.04);
+      }
+    }
+    @keyframes fairyDust {
+      0% {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.92);
+      }
+      40% {
+        opacity: 0.7;
+        transform: translateY(-2px) scale(1.05);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(4px) scale(1.15);
+      }
+    }
+    @keyframes nameReveal {
+      0% {
+        opacity: 0;
+        transform: translateY(18px) scale(0.88);
+        filter: blur(6px);
+      }
+      65% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+    }
+    @keyframes heroGlow {
+      0% {
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.55);
+        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.35));
+      }
+      50% {
+        text-shadow: 0 0 18px rgba(255, 255, 255, 0.85);
+        filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.55));
+      }
+      100% {
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.55);
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.35));
+      }
+    }
+    @keyframes heroDust {
+      0% {
+        opacity: 0;
+        transform: translateY(18px) scale(0.92);
+        filter: blur(5px);
+      }
+      60% {
+        opacity: 1;
+        transform: translateY(-3px) scale(1);
+        filter: blur(0);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1.01);
+        filter: blur(0);
+      }
+    }
+    @media (max-width: 768px) {
+      body {
+        font-size: 90%;
+      }
+      .content {
+        padding: 40px 16px 32px;
+      }
+      .hero-section {
+        gap: 0.5rem;
+      }
+      .hero-section h1 {
+        font-size: clamp(2.2rem, 9vw, 2.7rem);
+      }
+      .button-group {
+        gap: 12px;
+        margin-bottom: 1rem;
+      }
+      .btn-outline-light {
+        padding: 0.75rem 1.5rem;
+        border-width: 1px;
+      }
+      .glass-card {
+        padding: 1.25rem;
+        min-height: 420px;
+        margin: 0.85rem auto;
+        max-width: 460px;
+        width: min(92vw, 460px);
+      }
+      .section-content {
+        padding: 1.5rem 1rem;
+        min-height: 380px;
+      }
+      .project-list {
+        gap: 0.75rem;
+      }
+      .project-card {
+        padding: 0.95rem 0.85rem;
+      }
+      .skill-groups {
+        grid-template-columns: 1fr;
+      }
+      .contact-details {
+        font-size: 1rem;
+      }
+      .book-card {
+        width: 100%;
+      }
+      .book-card-inner {
+        transform: none !important;
+      }
+      .book-card-face {
+        position: static !important;
+        inset: auto !important;
+        padding: 0;
+        border-radius: 12px;
+      }
+      .book-card-back {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 🔊 Background Ocean Sound -->
+  <audio autoplay loop>
+    <source src="ocean-waves-250310.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <!-- 🎥 Background Video -->
+  <video autoplay muted loop playsinline id="bg-video">
+    <source src="22183-712840599.mp4" type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+
+  <div id="overlay"></div>
+
+  <div class="content">
+    <div class="hero-section">
+      <div class="hero-content">
+        <h1 class="hero-name">Subash Lama</h1>
+        <p class="hero-greeting">Hi, I&rsquo;m Subash Lama</p>
+        <p class="hero-role">DevOps Engineer | Cloud & Automation Specialist</p>
+        <p class="hero-summary">I design, automate, and operate reliable infrastructure using Docker, CI/CD, and cloud platforms.</p>
+      </div>
+      <div class="button-group">
+        <a href="#about" class="btn btn-outline-light">About</a>
+        <a href="projects.html" target="_blank" class="btn btn-outline-light">Projects</a>
+        <a href="#skills" class="btn btn-outline-light">Skills</a>
+        <a href="#contact" class="btn btn-outline-light">Contact</a>
+        <a href="record-producer.html" target="_blank" class="btn btn-outline-light">Record Producer</a>
+      </div>
+    </div>
+
+    <section id="about" class="glass-card">
+      <div class="book-card" data-flip-card tabindex="0">
+        <div class="book-card-inner">
+          <article class="book-card-face book-card-front">
+            <div class="section-inner">
+              <div class="section-content about-panel">
+                <h2>About Me</h2>
+                <p>I&rsquo;m a DevOps Engineer with hands-on experience in CI/CD pipelines, containerized applications, and cloud automation.</p>
+                <p>I work primarily with Docker, GitHub Actions, Linux, and cloud platforms, focusing on automation, reliability, and clean deployment workflows.</p>
+                <p>I enjoy turning manual processes into automated systems and collaborating across development and operations teams to ship production-ready solutions.</p>
+              </div>
+            </div>
+          </article>
+          <article class="book-card-face book-card-back">
+            <div class="section-content">
+              <h3>What I Bring</h3>
+              <p>Architected cross-platform labs, Docker-based CI/CD, and observability stacks that span cloud, hybrid, and on-prem estates.</p>
+              <p><strong>Open to collaborations</strong> where operational discipline meets experimental ideas.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="projects" class="glass-card">
+      <div class="book-card" data-flip-card tabindex="0">
+        <div class="book-card-inner">
+          <article class="book-card-face book-card-front">
+            <div class="section-inner">
+              <div class="section-content">
+                <h2>Projects</h2>
+                <div class="project-list">
+                  <div class="project-card">
+                    <h4>Virtual Lab Automation</h4>
+                    <p class="project-purpose">Outcome: Reduced onboarding friction with self-service virtualization sandboxes.</p>
+                    <p class="project-tech"><strong>Tech Used:</strong> Docker, GitHub Actions, Linux</p>
+                    <div class="project-links">
+                      <a href="https://github.com/lamasubash107/virtual-lab-automation" target="_blank" rel="noopener noreferrer">GitHub</a>
+                      <a href="projects.html" target="_blank" rel="noopener noreferrer">Live Demo</a>
+                    </div>
+                  </div>
+                  <div class="project-card">
+                    <h4>Cloud Migration Suite</h4>
+                    <p class="project-purpose">Outcome: Delivered zero-downtime hybrid cloud migrations with automated validation and cost telemetry.</p>
+                    <p class="project-tech"><strong>Tech Used:</strong> Terraform, GitHub Actions, Azure</p>
+                    <div class="project-links">
+                      <a href="https://github.com/lamasubash107/cloud-migration-suite" target="_blank" rel="noopener noreferrer">GitHub</a>
+                      <a href="projects.html" target="_blank" rel="noopener noreferrer">Live Demo</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+          <article class="book-card-face book-card-back">
+            <div class="section-content">
+              <h3>Delivery Notes</h3>
+            <p>Every experiment is backed by automated tests, versioned infra, and GitHub Actions so production stays steady.</p>
+            <p>Record-producer work and multimedia demos live alongside infrastructure stories-always ready to show live artifacts.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills" class="glass-card skill-section">
+      <div class="book-card" data-flip-card tabindex="0">
+        <div class="book-card-inner">
+            <article class="book-card-face book-card-front">
+              <div class="section-inner">
+                <div class="section-content">
+                  <h2>Skills</h2>
+                  <div class="skill-groups">
+                    <div class="skill-group">
+                      <h4>Cloud & Infrastructure</h4>
+                      <ul>
+                        <li>Designing resilient AWS and Azure environments</li>
+                        <li>Containerized deployments with Docker and Kubernetes</li>
+                        <li>Observability-first hybrid infrastructure operations</li>
+                      </ul>
+                    </div>
+                    <div class="skill-group">
+                      <h4>DevOps & Automation</h4>
+                      <ul>
+                        <li>GitHub Actions-driven CI/CD pipelines</li>
+                        <li>Automating releases, tests, and rollback guardrails</li>
+                        <li>Monitoring, alerting, and incident triage automation</li>
+                      </ul>
+                    </div>
+                    <div class="skill-group">
+                      <h4>Scripting & Tools</h4>
+                      <ul>
+                        <li>Bash, PowerShell, and Python scripting for ops</li>
+                        <li>Terraform, Ansible, and Docker tooling for repeatability</li>
+                        <li>Git, GitHub, and documentation to keep teams aligned</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+          <article class="book-card-face book-card-back">
+            <div class="section-content">
+              <h3>Depth</h3>
+              <p>IaC, observability, and multimedia storytelling keep the message clear while the ops stay predictable.</p>
+              <p>Pair automation with creative productions-Subash ships end-to-end experiences.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+      </section>
+
+      <section id="why-hire" class="glass-card why-hire-section">
+        <div class="book-card" data-flip-card tabindex="0">
+          <div class="book-card-inner">
+            <article class="book-card-face book-card-front">
+              <div class="section-inner">
+                <div class="section-content">
+                  <h2>Why Hire Me</h2>
+                  <ul class="why-hire-list">
+                    <li>Hands-on DevOps experience</li>
+                    <li>Strong automation mindset</li>
+                    <li>Comfortable with Linux, containers, and CI/CD</li>
+                    <li>Clear communication and documentation</li>
+                    <li>Continuous learner with real-world projects</li>
+                  </ul>
+                </div>
+              </div>
+            </article>
+            <article class="book-card-face book-card-back">
+              <div class="section-content">
+                <h3>Dependable partner</h3>
+                <p>Brings an automation-first focus to operations, keeping systems reliable while teams innovate.</p>
+                <p>Documented deliverables and shared learnings keep cross-functional teams aligned.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact" class="glass-card contact-section">
+      <div class="book-card" data-flip-card tabindex="0">
+        <div class="book-card-inner">
+            <article class="book-card-face book-card-front">
+              <div class="section-inner">
+                <div class="section-content">
+                  <h2>Contact</h2>
+                  <h3 class="contact-cta">Let&rsquo;s Work Together</h3>
+                  <div class="contact-details">
+                    <p>Email: <a href="mailto:lamasubash107@gmail.com" style="color:#fff;text-decoration:underline;">lamasubash107@gmail.com</a></p>
+                    <p>GitHub: <a href="https://github.com/lamasubash107" target="_blank" rel="noopener noreferrer">https://github.com/lamasubash107</a></p>
+                    <p>LinkedIn: <a href="https://www.linkedin.com/in/subash-lama" target="_blank" rel="noopener noreferrer">https://www.linkedin.com/in/subash-lama</a></p>
+                  </div>
+                  <div class="youtube-link">
+                    dYZ Visit my YouTube Channel: 
+                    <a href="https://www.youtube.com/@AHalf-h5n" target="_blank" rel="noopener noreferrer">
+                      @AHalf-h5n
+                    </a>
+                  </div>
+                  <p>Available for DevOps partnerships, creative technology consulting, and music-production collaborations.</p>
+                </div>
+              </div>
+            </article>
+          <article class="book-card-face book-card-back">
+            <div class="section-content">
+              <h3>Stay in Touch</h3>
+              <p>Share your next infrastructure sprint, hybrid-cloud proof of concept, or sonic experiment and I'll respond within 24 hours.</p>
+              <p>Join the beta demos, catch a live stream, or set up a quick sync-always game for the next hybrid challenge.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+  <div class="footer">
+      &copy; 2024 Subash Lama. All rights reserved.
+    </div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const heroName = document.querySelector('.hero-name');
+      if (heroName && !heroName.dataset.animated) {
+        const letters = heroName.textContent.trim().split('');
+        heroName.textContent = '';
+        heroName.setAttribute('aria-label', 'Subash Lama');
+        letters.forEach((letter, index) => {
+          const span = document.createElement('span');
+          span.classList.add('hero-letter');
+          span.textContent = letter === ' ' ? '\u00a0' : letter;
+          span.style.setProperty('--letter-index', index);
+          heroName.appendChild(span);
+        });
+        heroName.dataset.animated = 'true';
+      }
+      document.querySelectorAll('[data-flip-card]').forEach(card => {
+        let locked = false;
+        let holding = false;
+        const applyFlip = state => card.classList.toggle('is-flipped', state);
+        const toggleLock = () => {
+          locked = !locked;
+          applyFlip(locked);
+        };
+        const interactiveElement = target => target.closest('a, button, input, textarea, select');
+        card.addEventListener('click', event => {
+          if (interactiveElement(event.target)) {
+            return;
+          }
+          toggleLock();
+        });
+        card.addEventListener('keydown', event => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            toggleLock();
+          }
+        });
+        card.addEventListener('mouseenter', () => {
+          if (!locked && !holding) {
+            applyFlip(true);
+          }
+        });
+        card.addEventListener('mouseleave', () => {
+          if (!locked && !holding) {
+            applyFlip(false);
+          }
+        });
+        const startHold = event => {
+          if (event.button !== 0 || interactiveElement(event.target)) {
+            return;
+          }
+          holding = true;
+          applyFlip(true);
+        };
+        const releaseHold = () => {
+          if (!holding) {
+            return;
+          }
+          holding = false;
+          if (!locked) {
+            applyFlip(false);
+          }
+        };
+        card.addEventListener('pointerdown', startHold);
+        ['pointerup', 'pointerleave', 'pointercancel'].forEach(name => {
+          card.addEventListener(name, releaseHold);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

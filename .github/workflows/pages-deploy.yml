@@ -1,0 +1,46 @@
+name: Deploy static site to GitHub Pages
+
+on:
+  push:
+    branches: [ "main" ]
+  # Optional: allow manual trigger
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 👉 If your site is just HTML/CSS/JS in the repo root, this is enough.
+      # If you later add a build step (npm run build, etc.), we will add it here.
+
+      - name: Upload static files for GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # If your built site lives in another folder (e.g. dist/ or public/),
+          # change this path to that folder.
+          path: .
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

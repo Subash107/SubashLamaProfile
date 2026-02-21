@@ -1,0 +1,68 @@
+/*
+Theme Name: Contact1
+Theme URI: https://templatesjungle.com/
+Author: TemplatesJungle
+Author URI: https://templatesjungle.com/
+Description: Contact1 is specially designed product packaged for Contact Form.
+Version: 1.1
+*/
+
+/*--------------------------------------------------------------
+Styles
+--------------------------------------------------------------*/
+
+*,
+*::before,
+*::after {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+html {
+    box-sizing: border-box;
+}
+
+/* Fonts */
+:root {
+    --heading-font: "Lora", serif;
+    --body-font: "Poppins", serif;
+}
+
+/* Bootstrap Override */
+body {
+    background-color: #f0f0f0;
+    --bs-font-sans-serif: "Poppins", serif;
+    --bs-body-font-family: var(--bs-font-sans-serif);
+    --bs-body-font-size: 1rem;
+    --bs-body-font-weight: 400;
+    --bs-body-line-height: 2;
+    --bs-body-color: #222222;
+}
+
+h3,
+h4 {
+    font-family: var(--heading-font);
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.form-control:focus {
+    border-color: #3f3f3f;
+}
+
+.bg-image {
+    background-image: url('https://images.unsplash.com/photo-1651065566483-422c476f2047?q=80&w=2127&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+}
+
+
+@media screen and (min-width: 1200px) {
+
+    .bg-image {
+        height: 65vh;
+    }
+
+    .top-margin {
+        margin-top: 150px;
+    }
+}

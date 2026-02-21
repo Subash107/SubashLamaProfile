@@ -1,0 +1,34 @@
+# 🔒 Sensitive Environment Files
+.env
+backup.env
+
+# 🗑️ Logs & Temporary Files
+*.log
+logs/
+
+# ⚙️ System Files
+.DS_Store
+Thumbs.db
+
+# 💻 VS Code Settings
+.vscode/
+
+# 🚀 Docker-related
+*.tar
+*.gz
+*.zip
+
+# 🧪 Bash Script Outputs (if any)
+*.out
+*.tmp
+*.bak
+
+# 🖼️ Media Cache
+*.mp4
+*.wav
+*.avi
+*.mov
+
+# ⚒️ Node/npm files (if ever used)
+node_modules/
+npm-debug.log
