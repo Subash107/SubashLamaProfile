@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Subash Lama &ndash; DevOps Engineer specializing in CI/CD, Docker, cloud automation, and reliable infrastructure.">
+  <meta name="theme-color" content="#07111c" />
+  <title>Subash Lama &ndash; DevOps Engineer | Automation & CI/CD</title>
+  <link href="assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet" />
+  <script src="assets/js/site.js" defer></script>
+  <link rel="stylesheet" href="assets/css/motion.css" />
+  <link rel="stylesheet" href="assets/css/index.css" />
+</head>
+
+<body>
+
+  <!-- Background ocean sound (manual toggle in JS) -->
+  <audio id="bg-audio" data-bg-audio loop preload="none">
+    <source data-src="assets/media/audio/ocean-waves-250310.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <!-- Background video -->
+  <video autoplay muted loop playsinline id="bg-video" data-bg-video poster="assets/images/bg-poster.jpg" preload="none" aria-hidden="true">
+    <source data-src="assets/media/video/bg-video.mp4" data-src-mobile="assets/media/video/bg-video-mobile.mp4" type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+
+  <div id="overlay"></div>
+
+  <div class="content">
+    <div class="hero-section">
+      <div class="hero-content">
+        <h1 class="hero-name">
+          <svg id="heroNameSvg" class="hero-name-svg" viewBox="0 0 760 170" role="img" aria-label="Subash Lama">
+            <defs id="heroNameDefs">
+              <linearGradient id="heroNameFill" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#f6fdff" />
+                <stop offset="55%" stop-color="#d6f4ff" />
+                <stop offset="100%" stop-color="#ffffff" />
+              </linearGradient>
+              <filter id="heroGlassFilter" x="-30%" y="-70%" width="160%" height="240%" color-interpolation-filters="sRGB">
+                <feTurbulence id="heroGlassNoise" type="fractalNoise" baseFrequency="0.012 0.085" numOctaves="2" seed="8" stitchTiles="stitch" result="noise" />
+                <feDisplacementMap id="heroGlassDisplace" in="SourceGraphic" in2="noise" scale="7" xChannelSelector="R" yChannelSelector="G" result="displaced" />
+                <feSpecularLighting in="noise" surfaceScale="4.2" specularConstant="0.9" specularExponent="24" lighting-color="#d5f4ff" result="spec">
+                  <fePointLight id="heroGlassLight" x="380" y="72" z="150" />
+                </feSpecularLighting>
+                <feComposite in="spec" in2="displaced" operator="in" result="specOnText" />
+                <feBlend in="displaced" in2="specOnText" mode="screen" result="glassMix" />
+                <feGaussianBlur in="glassMix" stdDeviation="0.15" result="glassSoft" />
+                <feMerge>
+                  <feMergeNode in="glassSoft" />
+                </feMerge>
+              </filter>
+            </defs>
+            <g filter="url(#heroGlassFilter)">
+              <text id="heroNameSolid" class="hero-name-text hero-name-text-core hero-name-text-solid" x="380" y="86">Subash Lama</text>
+              <g id="heroNameShards" class="hero-name-shards"></g>
+            </g>
+            <text id="heroNameHighlight" class="hero-name-text hero-name-text-reflect" x="380" y="86">Subash Lama</text>
+          </svg>
+        </h1>
+        <p class="hero-greeting">DevOps, Platform Engineering, DevSecOps, CI/CD, Kubernetes, Cloud Automation</p>
+        <p class="hero-role">GitHub Actions, Docker, Linux, Terraform, Helm, Bash, PowerShell, Python</p>
+        <p class="hero-summary">AWS, Azure, Prometheus, Grafana, OpenTelemetry, Security Hardening, SIEM/SOC</p>
+      </div>
+      <div class="hero-badges">
+        <span class="role-badge">Open to DevOps / DevSecOps roles</span>
+        <span class="role-badge secondary">UTC+5:45</span>
+      </div>
+      <div class="cta-group">
+        <a href="assets/docs/cv/latest-resume.pdf" class="btn btn-outline-light btn-resume" download>Download Resume</a>
+        <a href="mailto:lamasubash107@gmail.com?subject=DevOps%20Call%20-%20Subash%20Lama%20Portfolio&body=Hi%20Subash%2C%0A%0AI%27d%20like%20to%20schedule%20a%20quick%20call%20to%20discuss%20DevOps%20work.%0A%0AMy%20availability%3A%20%5Badd%20times%5D%0A%0AThanks%2C%0A%5BYour%20Name%5D" class="btn btn-outline-light">Book a Call</a>
+      </div>
+      <div class="button-group">
+        <a href="#about" class="btn btn-outline-light">About</a>
+        <a href="projects.html" target="_blank" class="btn btn-outline-light">Projects</a>
+        <a href="#skills" class="btn btn-outline-light">Skills</a>
+        <a href="#contact" class="btn btn-outline-light">Contact</a>
+        <a href="record-producer.html" target="_blank" class="btn btn-outline-light">Record Producer</a>
+        <button type="button" class="btn btn-outline-light" data-audio-toggle data-audio-storage-key="portfolio_audio_enabled" data-audio-label-on="Sound: On" data-audio-label-off="Sound: Off" aria-pressed="false">Sound: Off</button>
+      </div>
+    </div>
+
+    <section id="about" class="glass-card">
+      <div class="book-card" data-flip-card tabindex="0">
+        <div class="book-card-inner">
+          <article class="book-card-face book-card-front">
+            <div class="section-inner">
+              <div class="section-content about-panel">
+                <h2>About Me</h2>
+                <p>I design and operate DevOps platforms that improve release speed, reliability, and security across cloud-native environments.</p>
+                <p>Hands-on strengths include GitHub Actions pipeline architecture, Docker and Kubernetes operations, Linux administration, and Terraform-based infrastructure automation.</p>
+                <p>Current study focus includes Kubernetes security controls, SOC and SIEM workflows, threat-aware monitoring, and deeper OpenTelemetry instrumentation.</p>
+              </div>
+            </div>
+          </article>
+          <article class="book-card-face book-card-back">
+            <div class="section-content">
+              <h3>What I Deliver</h3>
+              <p>Secure-by-default delivery systems with reusable workflows, quality gates, traceable deployments, and clean handoff documentation.</p>
+              <p><strong>Open to collaborations</strong> in DevOps, platform engineering, cloud security, and automation modernization.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="projects" class="glass-card">
+      <div class="book-card" data-flip-card tabindex="0">
+        <div class="book-card-inner">
+          <article class="book-card-face book-card-front">
+            <div class="section-inner">
+              <div class="section-content">
+                <h2>Projects</h2>
+                <div class="project-list">
+                  <div class="project-card">
+                    <h4>Secure Virtual Lab Automation</h4>
+                    <p class="project-purpose"><strong>Problem:</strong> Local lab setup was manual, inconsistent, and lacked baseline security controls.</p>
+                    <p class="project-purpose"><strong>Built:</strong> Reusable Docker templates, bootstrap scripts, and CI checks for predictable and hardened environment provisioning.</p>
+                    <p class="project-purpose"><strong>Impact:</strong> Cut setup time by ~70% and improved onboarding consistency with safer defaults.</p>
+                    <p class="project-tech"><strong>Tech Used:</strong> Docker, Docker Compose, GitHub Actions, Linux, Bash/PowerShell</p>
+                    <div class="project-links">
+                      <a href="https://github.com/lamasubash107/virtual-lab-automation" target="_blank" rel="noopener noreferrer">GitHub</a>
+                      <a href="projects.html#virtual-lab-automation" target="_blank" rel="noopener noreferrer">Case Study</a>
+                    </div>
+                  </div>
+                  <div class="project-card">
+                    <h4>Cloud Migration & Governance Suite</h4>
+                    <p class="project-purpose"><strong>Problem:</strong> Migration rollouts required stronger governance, less configuration drift, and better security visibility.</p>
+                    <p class="project-purpose"><strong>Built:</strong> Terraform-driven environments with GitHub Actions validation, plan approvals, and policy/security checks before deploy.</p>
+                    <p class="project-purpose"><strong>Impact:</strong> Improved cutover reliability and confidence through repeatable, auditable release workflows.</p>
+                    <p class="project-tech"><strong>Tech Used:</strong> Terraform, GitHub Actions, Azure, Linux</p>
+                    <div class="project-links">
+                      <a href="https://github.com/lamasubash107/cloud-migration-suite" target="_blank" rel="noopener noreferrer">GitHub</a>
+                      <a href="projects.html#cloud-migration-suite" target="_blank" rel="noopener noreferrer">Case Study</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+          <article class="book-card-face book-card-back">
+            <div class="section-content">
+              <h3>Delivery Notes</h3>
+            <p>Projects are built with automation-first release design, versioned infrastructure, and practical controls that balance velocity with governance.</p>
+            <p>Current research includes Kubernetes runtime security, SIEM signal engineering, and observability strategy with Prometheus, Grafana, and OpenTelemetry.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills" class="glass-card skill-section">
+      <div class="book-card" data-flip-card tabindex="0">
+        <div class="book-card-inner">
+            <article class="book-card-face book-card-front">
+              <div class="section-inner">
+                <div class="section-content">
+                  <h2>Skills</h2>
+                  <div class="skill-groups">
+                    <div class="skill-group">
+                      <h4>Cloud, Containers & Platform</h4>
+                      <ul>
+                        <li>Docker containerization, image optimization, and Compose workflows</li>
+                        <li>Kubernetes workloads, Helm-based packaging, and cluster operations fundamentals</li>
+                        <li>AWS and Azure foundations across compute, networking, and IAM basics</li>
+                      </ul>
+                    </div>
+                    <div class="skill-group">
+                      <h4>CI/CD & Release Engineering</h4>
+                      <ul>
+                        <li>GitHub Actions workflows for build, test, deploy, and environment promotion</li>
+                        <li>Quality gates, artifact lifecycle controls, and rollback-friendly release patterns</li>
+                        <li>Reusable pipeline templates for consistent team-wide automation</li>
+                      </ul>
+                    </div>
+                    <div class="skill-group">
+                      <h4>IaC & Automation</h4>
+                      <ul>
+                        <li>Terraform provisioning with structured modules, variables, and remote-state workflows</li>
+                        <li>Bash, PowerShell, and Python for operations automation and tooling integration</li>
+                        <li>Configuration consistency through repeatable scripts and policy-aware provisioning</li>
+                      </ul>
+                    </div>
+                    <div class="skill-group">
+                      <h4>Security & Observability</h4>
+                      <ul>
+                        <li>DevSecOps controls: secrets hygiene, dependency/image checks, and IaC scanning practices</li>
+                        <li>SIEM/SOC learning track: alert triage, log correlation, and incident response workflows</li>
+                        <li>Prometheus, Grafana, and OpenTelemetry for metrics, tracing, dashboards, and alerting</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+          <article class="book-card-face book-card-back">
+            <div class="section-content">
+              <h3>Depth</h3>
+              <p>Core depth is in secure delivery engineering, infrastructure automation, and reliability-focused operations.</p>
+              <p>I build systems that are easy to operate, easy to audit, and easy to hand over to teams.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+      </section>
+
+      <section id="why-hire" class="glass-card why-hire-section">
+        <div class="book-card" data-flip-card tabindex="0">
+          <div class="book-card-inner">
+            <article class="book-card-face book-card-front">
+              <div class="section-inner">
+                <div class="section-content">
+                  <h2>Why Hire Me</h2>
+                  <ul class="why-hire-list">
+                    <li>Builds secure CI/CD pipelines with practical controls and predictable release behavior</li>
+                    <li>Balances engineering speed with governance using IaC, policy checks, and change traceability</li>
+                    <li>Strong in Linux and container debugging, incident triage, and root-cause analysis</li>
+                    <li>Creates clear runbooks, architecture notes, and handoff documentation for teams</li>
+                    <li>Actively advancing in DevSecOps, SIEM/SOC workflows, Kubernetes security, and observability</li>
+                  </ul>
+                </div>
+              </div>
+            </article>
+            <article class="book-card-face book-card-back">
+              <div class="section-content">
+                <h3>Dependable partner</h3>
+                <p>I communicate clearly, ship incremental value, and keep delivery decisions aligned with reliability and security goals.</p>
+                <p>Structured collaboration and transparent documentation help teams move faster with confidence.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact" class="glass-card contact-section">
+      <div class="book-card" data-flip-card tabindex="0">
+        <div class="book-card-inner">
+            <article class="book-card-face book-card-front">
+              <div class="section-inner">
+                <div class="section-content">
+                  <h2>Contact</h2>
+                  <h3 class="contact-cta">Let&rsquo;s Work Together</h3>
+                  <div class="contact-details">
+                    <p>Email: <a href="mailto:lamasubash107@gmail.com">lamasubash107@gmail.com</a></p>
+                    <p>GitHub: <a href="https://github.com/lamasubash107" target="_blank" rel="noopener noreferrer">https://github.com/lamasubash107</a></p>
+                    <p>LinkedIn: <a href="https://www.linkedin.com/in/subash-lama" target="_blank" rel="noopener noreferrer">https://www.linkedin.com/in/subash-lama</a></p>
+                    <p>Call: <a href="mailto:lamasubash107@gmail.com?subject=DevOps%20Call%20-%20Subash%20Lama%20Portfolio&body=Hi%20Subash%2C%0A%0AI%27d%20like%20to%20schedule%20a%20quick%20call.%0A%0AMy%20availability%20(UTC%2B5%3A45)%3A%20%5Badd%20times%5D%0A%0AThanks%2C%0A%5BYour%20Name%5D">Request a call (UTC+5:45)</a></p>
+                  </div>
+                  <p>Open to DevOps, Platform Engineering, DevSecOps, SRE-track roles, and cloud security consulting.</p>
+                </div>
+              </div>
+            </article>
+          <article class="book-card-face book-card-back">
+              <div class="section-content">
+              <h3>Stay in Touch</h3>
+              <p>Share your goals around CI/CD, Kubernetes, Terraform, DevSecOps, or observability and I will reply with practical next steps.</p>
+              <p>For a quick call, send 2-3 time options in UTC+5:45 with your project context.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+  <div class="footer">
+      &copy; 2026 Subash Lama. All rights reserved.
+    </div>
+  </div>
+  <script src="assets/js/index.js" defer></script>
+</body>
+</html>
+

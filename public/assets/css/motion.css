@@ -1,0 +1,301 @@
+﻿:root {
+  --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --motion-duration-lg: 900ms;
+  --motion-duration-md: 520ms;
+  --motion-duration-sm: 220ms;
+  --reading-float-y: 8px;
+  --reading-float-x: 3px;
+  --reading-float-tilt: 1.5deg;
+}
+
+@keyframes readingFloat {
+  0% {
+    transform: translate3d(0, 0, 0) rotateX(1deg) rotateY(calc(var(--reading-float-tilt) * -1));
+  }
+  25% {
+    transform: translate3d(var(--reading-float-x), calc(var(--reading-float-y) * -0.45), 0) rotateX(1.2deg) rotateY(0.75deg);
+  }
+  50% {
+    transform: translate3d(0, calc(var(--reading-float-y) * -1), 0) rotateX(0.65deg) rotateY(var(--reading-float-tilt));
+  }
+  75% {
+    transform: translate3d(calc(var(--reading-float-x) * -1), calc(var(--reading-float-y) * -0.4), 0) rotateX(0.9deg) rotateY(0.35deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotateX(1deg) rotateY(calc(var(--reading-float-tilt) * -1));
+  }
+}
+
+@keyframes readingGlowA {
+  0%,
+  100% {
+    opacity: 0.32;
+    filter: blur(20px);
+  }
+  50% {
+    opacity: 0.5;
+    filter: blur(26px);
+  }
+}
+
+@keyframes readingGlowB {
+  0%,
+  100% {
+    opacity: 0.42;
+    filter: blur(14px);
+  }
+  50% {
+    opacity: 0.58;
+    filter: blur(20px);
+  }
+}
+
+@keyframes overlayBreathe {
+  0%,
+  100% {
+    background: rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    background: rgba(0, 0, 0, 0.56);
+  }
+}
+
+.motion-ok .glass-card {
+  animation: readingFloat 22s ease-in-out infinite;
+  transition:
+    transform 700ms var(--motion-ease-out),
+    box-shadow 700ms var(--motion-ease-out),
+    filter var(--motion-duration-md) var(--motion-ease-out);
+}
+
+.motion-ok section.glass-card:nth-of-type(2n) {
+  animation-duration: 25s;
+  animation-delay: -5s;
+}
+
+.motion-ok section.glass-card:nth-of-type(3n) {
+  animation-duration: 28s;
+  animation-delay: -11s;
+}
+
+.motion-ok .glass-card::before {
+  animation: readingGlowA 14s ease-in-out infinite;
+}
+
+.motion-ok .glass-card::after {
+  animation: readingGlowB 17s ease-in-out infinite;
+}
+
+.motion-ok .glass-card:hover,
+.motion-ok .glass-card:focus-within {
+  animation-play-state: paused;
+  transform: translate3d(0, -4px, 0) rotateX(0.85deg) rotateY(-0.6deg) scale(1.01);
+  box-shadow: 0 46px 92px rgba(0, 0, 0, 0.66);
+}
+
+.motion-ok #overlay {
+  animation: overlayBreathe 18s ease-in-out infinite;
+  transition: background var(--motion-duration-md) var(--motion-ease-out);
+}
+
+.motion-ok .book-card-face {
+  transition:
+    box-shadow 700ms var(--motion-ease-out),
+    border-color 700ms var(--motion-ease-out);
+}
+
+.motion-ok .section-content {
+  transition: transform 700ms var(--motion-ease-out);
+}
+
+.motion-ok .glass-card:hover .book-card-face,
+.motion-ok .glass-card:focus-within .book-card-face {
+  box-shadow: 0 46px 105px rgba(0, 0, 0, 0.72), inset 0 0 56px rgba(255, 255, 255, 0.07);
+}
+
+.motion-ok .glass-card:hover .section-content,
+.motion-ok .glass-card:focus-within .section-content {
+  transform: translate3d(0, -2px, 0);
+}
+
+/* Stronger scroll-reveal animations (JS adds `.motion-ok` + `[data-reveal]`). */
+.motion-ok [data-reveal] {
+  opacity: 0;
+  filter: blur(12px);
+  transition:
+    opacity var(--motion-duration-lg) var(--motion-ease-out),
+    filter var(--motion-duration-lg) var(--motion-ease-out),
+    transform var(--motion-duration-lg) var(--motion-ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, filter, transform;
+}
+
+.motion-ok [data-reveal="lift"] {
+  transform: translate3d(0, 22px, 0) scale(0.985);
+}
+
+.motion-ok [data-reveal="pop"] {
+  transform: translate3d(0, 18px, 0) scale(0.97);
+}
+
+.motion-ok [data-reveal="fade"] {
+  transform: none;
+}
+
+.motion-ok [data-reveal].is-visible {
+  opacity: 1;
+  filter: blur(0);
+  transform: none;
+}
+
+/* Card hover upgrades (keeps existing floating glass panels untouched). */
+@media (hover: hover) and (pointer: fine) {
+  .motion-ok .project-card,
+  .motion-ok .project-category,
+  .motion-ok .music-panel {
+    position: relative;
+    isolation: isolate;
+    transform: translateZ(0);
+    transition:
+      transform var(--motion-duration-md) var(--motion-ease-out),
+      box-shadow var(--motion-duration-md) var(--motion-ease-out),
+      border-color var(--motion-duration-md) var(--motion-ease-out),
+      filter var(--motion-duration-md) var(--motion-ease-out);
+    will-change: transform;
+  }
+
+  .motion-ok .project-card > *,
+  .motion-ok .project-category > *,
+  .motion-ok .music-panel > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .motion-ok .project-card::after,
+  .motion-ok .project-category::after,
+  .motion-ok .music-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+      120deg,
+      transparent 30%,
+      rgba(138, 232, 255, 0.22) 48%,
+      transparent 66%
+    );
+    background-size: 200% 100%;
+    background-position: 0% 0%;
+    opacity: 0;
+    z-index: 0;
+    transition:
+      opacity var(--motion-duration-sm) ease,
+      background-position var(--motion-duration-lg) var(--motion-ease-out);
+    pointer-events: none;
+  }
+
+  .motion-ok .project-card:hover,
+  .motion-ok .music-panel:hover {
+    transform: translate3d(0, -10px, 0) scale(1.02);
+    filter: brightness(1.06);
+    box-shadow: 0 22px 70px rgba(0, 0, 0, 0.55);
+  }
+
+  .motion-ok .project-category:hover {
+    transform: translate3d(0, -8px, 0) scale(1.01);
+    filter: brightness(1.04);
+    box-shadow: 0 26px 80px rgba(0, 0, 0, 0.5);
+  }
+
+  .motion-ok .project-card:hover::after,
+  .motion-ok .project-category:hover::after,
+  .motion-ok .music-panel:hover::after {
+    opacity: 1;
+    background-position: 100% 0%;
+  }
+}
+
+/* Button micro-interactions (doesn't change your background mp4 or floating panels). */
+.motion-ok .btn-outline-light {
+  transition:
+    color 0.4s ease,
+    transform var(--motion-duration-sm) var(--motion-ease-spring),
+    box-shadow var(--motion-duration-sm) var(--motion-ease-out),
+    filter var(--motion-duration-sm) var(--motion-ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .motion-ok .btn-outline-light:hover {
+    transform: translate3d(0, -2px, 0);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+    filter: brightness(1.03);
+  }
+
+  .motion-ok .btn-outline-light:active {
+    transform: translate3d(0, 0, 0) scale(0.99);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Cleaner, animated underline for key links. */
+.motion-ok .project-links a,
+.motion-ok .back-link,
+.motion-ok .navbar .nav-link {
+  position: relative;
+  text-decoration: none;
+}
+
+.motion-ok .project-links a {
+  border-bottom: none;
+}
+
+.motion-ok .project-links a::after,
+.motion-ok .back-link::after,
+.motion-ok .navbar .nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.55;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--motion-duration-md) var(--motion-ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .motion-ok .project-links a:hover::after,
+  .motion-ok .back-link:hover::after,
+  .motion-ok .navbar .nav-link:hover::after {
+    transform: scaleX(1);
+  }
+}
+
+/* Visible keyboard focus. */
+.motion-ok :focus-visible {
+  outline: 2px solid rgba(138, 232, 255, 0.8);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-ok [data-reveal] {
+    opacity: 1;
+    filter: none;
+    transform: none;
+    transition: none;
+  }
+
+  .motion-ok .glass-card,
+  .motion-ok .glass-card::before,
+  .motion-ok .glass-card::after,
+  .motion-ok .project-card,
+  .motion-ok .project-category,
+  .motion-ok .music-panel,
+  .motion-ok .btn-outline-light {
+    animation: none;
+    transition: none;
+  }
+}

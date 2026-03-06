@@ -1,0 +1,100 @@
+body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #fff;
+    }
+    #bg-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: -1;
+    }
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 0;
+    }
+    .content {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      padding: 60px 20px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    h1, h2 {
+      font-weight: 800;
+      margin-bottom: 20px;
+    }
+    .project-category {
+      background: rgba(0,0,0,0.6);
+      border-radius: 16px;
+      padding: 30px 20px;
+      max-width: 900px;
+      width: 100%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+      margin-bottom: 40px;
+    }
+    .project-card {
+      background: rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: left;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .project-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+    }
+    .project-meta h3 {
+      margin: 0;
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: 0.02em;
+    }
+    .project-links {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .project-links a {
+      color: #8ae8ff;
+      text-decoration: none;
+      font-weight: 700;
+      border-bottom: 1px solid transparent;
+    }
+    .project-links a:hover {
+      border-color: #8ae8ff;
+    }
+    .project-card p {
+      margin: 0.4rem 0;
+      color: rgba(255, 255, 255, 0.88);
+      line-height: 1.65;
+    }
+    .project-tech {
+      margin-top: 0.6rem;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 0.95rem;
+    }
+    .back-link {
+      color: #ccc;
+      text-decoration: underline;
+      margin-top: 40px;
+      font-size: 1rem;
+    }

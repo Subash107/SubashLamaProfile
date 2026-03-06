@@ -23,10 +23,10 @@ jobs:
       - name: 🧪 Validate HTML (optional)
         run: |
           sudo apt-get install tidy -y
-          tidy -e index.html || true
+          tidy -e public/index.html || true
 
       - name: 📦 Upload Docker image artifact (optional)
         uses: actions/upload-artifact@v4
         with:
           name: static-website-image
-          path: .
+          path: public
