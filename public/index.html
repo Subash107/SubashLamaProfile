@@ -40,6 +40,21 @@
                 <stop offset="55%" stop-color="#d6f4ff" />
                 <stop offset="100%" stop-color="#ffffff" />
               </linearGradient>
+              <radialGradient id="heroNameAuraGradient" cx="50%" cy="50%" r="62%">
+                <stop offset="0%" stop-color="#dff8ff" stop-opacity="0.96" />
+                <stop offset="38%" stop-color="#9ce8ff" stop-opacity="0.42" />
+                <stop offset="100%" stop-color="#dff8ff" stop-opacity="0" />
+              </radialGradient>
+              <linearGradient id="heroNameSweepGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
+                <stop offset="36%" stop-color="#dcf8ff" stop-opacity="0.08" />
+                <stop offset="50%" stop-color="#ffffff" stop-opacity="0.94" />
+                <stop offset="62%" stop-color="#9de9ff" stop-opacity="0.24" />
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+              </linearGradient>
+              <clipPath id="heroNameTextClip" clipPathUnits="userSpaceOnUse">
+                <text x="380" y="86" text-anchor="middle" dominant-baseline="middle" font-family="Segoe UI, system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="96" font-weight="800" letter-spacing="1.5">Subash Lama</text>
+              </clipPath>
               <filter id="heroGlassFilter" x="-30%" y="-70%" width="160%" height="240%" color-interpolation-filters="sRGB">
                 <feTurbulence id="heroGlassNoise" type="fractalNoise" baseFrequency="0.012 0.085" numOctaves="2" seed="8" stitchTiles="stitch" result="noise" />
                 <feDisplacementMap id="heroGlassDisplace" in="SourceGraphic" in2="noise" scale="7" xChannelSelector="R" yChannelSelector="G" result="displaced" />
@@ -54,10 +69,12 @@
                 </feMerge>
               </filter>
             </defs>
+            <ellipse id="heroNameAura" class="hero-name-aura" cx="380" cy="84" rx="272" ry="64" />
             <g filter="url(#heroGlassFilter)">
               <text id="heroNameSolid" class="hero-name-text hero-name-text-core hero-name-text-solid" x="380" y="86">Subash Lama</text>
               <g id="heroNameShards" class="hero-name-shards"></g>
             </g>
+            <rect id="heroNameSweep" class="hero-name-sweep" x="-260" y="-20" width="220" height="210" clip-path="url(#heroNameTextClip)"></rect>
             <text id="heroNameHighlight" class="hero-name-text hero-name-text-reflect" x="380" y="86">Subash Lama</text>
           </svg>
         </h1>

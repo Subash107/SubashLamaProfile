@@ -52,9 +52,11 @@
       margin: 0 0 0.3rem;
       transform-style: preserve-3d;
       perspective: 1400px;
+      isolation: isolate;
       --name-rotate-x: 0deg;
       --name-rotate-y: 0deg;
       --name-depth: 0px;
+      --name-float-y: 0px;
     }
     .hero-name-svg {
       width: min(760px, 100%);
@@ -62,7 +64,7 @@
       display: block;
       overflow: visible;
       transform-style: preserve-3d;
-      transform: translateZ(var(--name-depth)) rotateX(var(--name-rotate-x)) rotateY(var(--name-rotate-y));
+      transform: translate3d(0, var(--name-float-y), 0) translateZ(var(--name-depth)) rotateX(var(--name-rotate-x)) rotateY(var(--name-rotate-y));
       filter: drop-shadow(0 10px 20px rgba(10, 20, 34, 0.45)) drop-shadow(0 0 12px rgba(180, 240, 255, 0.2));
       will-change: transform, filter;
     }
@@ -85,6 +87,15 @@
     .hero-name-text-solid {
       opacity: 0;
     }
+    .hero-name-aura {
+      fill: url(#heroNameAuraGradient);
+      opacity: 0.22;
+      filter: blur(20px);
+      mix-blend-mode: screen;
+      transform-origin: 380px 84px;
+      pointer-events: none;
+      will-change: opacity, transform;
+    }
     .hero-name-shards {
       transform-style: preserve-3d;
       pointer-events: none;
@@ -105,6 +116,14 @@
       filter: blur(0.6px);
       animation: heroNameShine 6.4s ease-in-out infinite;
       pointer-events: none;
+    }
+    .hero-name-sweep {
+      fill: url(#heroNameSweepGradient);
+      opacity: 0.18;
+      filter: blur(1.2px);
+      mix-blend-mode: screen;
+      pointer-events: none;
+      will-change: opacity, transform;
     }
     h2 {
       margin-bottom: 1.5rem;
@@ -797,6 +816,10 @@
       }
       .hero-name-text-reflect {
         animation: none;
+      }
+      .hero-name-aura,
+      .hero-name-sweep {
+        display: none;
       }
       .hero-name-shards {
         display: none;
