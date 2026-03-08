@@ -26,10 +26,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const heroNameSvg = document.getElementById('heroNameSvg');
       const heroNameDefs = document.getElementById('heroNameDefs');
       const heroNameShards = document.getElementById('heroNameShards');
+      const heroNameLetterGhosts = document.getElementById('heroNameLetterGhosts');
       const heroNameSolid = document.getElementById('heroNameSolid');
       const heroNameHighlight = document.getElementById('heroNameHighlight');
       const heroNameAura = document.getElementById('heroNameAura');
       const heroNameSweep = document.getElementById('heroNameSweep');
+      const heroNameSweepSecondary = document.getElementById('heroNameSweepSecondary');
       const heroGlassNoise = document.getElementById('heroGlassNoise');
       const heroGlassDisplace = document.getElementById('heroGlassDisplace');
       const heroGlassLight = document.getElementById('heroGlassLight');
@@ -51,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (heroName && heroNameSvg && heroNameDefs && heroNameShards && heroNameSolid && heroGlassNoise && heroGlassDisplace && heroGlassLight && !reducedMotion) {
         const shardItems = [];
+        const letterItems = [];
         const shardRows = 4;
         const shardCols = 8;
         const viewBox = heroNameSvg.viewBox && heroNameSvg.viewBox.baseVal
@@ -74,6 +77,47 @@ document.addEventListener('DOMContentLoaded', () => {
           };
         } catch {
           // Fallback keeps the original effect working if SVG bounds are unavailable.
+        }
+
+        if (heroNameLetterGhosts) {
+          const characterCount = typeof heroNameSolid.getNumberOfChars === 'function'
+            ? heroNameSolid.getNumberOfChars()
+            : 0;
+          for (let charIndex = 0; charIndex < characterCount; charIndex += 1) {
+            const char = heroNameSolid.textContent.charAt(charIndex);
+            if (!char.trim()) {
+              continue;
+            }
+
+            try {
+              const box = heroNameSolid.getExtentOfChar(charIndex);
+              if (!box || !Number.isFinite(box.width) || box.width <= 0) {
+                continue;
+              }
+
+              const letter = document.createElementNS(SVG_NS, 'text');
+              letter.setAttribute('class', 'hero-name-text hero-name-letter');
+              letter.setAttribute('text-anchor', 'middle');
+              letter.setAttribute('x', `${box.x + box.width / 2}`);
+              letter.setAttribute('y', '86');
+              letter.textContent = char;
+              heroNameLetterGhosts.appendChild(letter);
+
+              letterItems.push({
+                element: letter,
+                centerX: box.x + box.width / 2,
+                centerY: 86,
+                baseWidth: box.width,
+                phase: seededNoise(charIndex + 41) * Math.PI * 2,
+                speed: 0.65 + seededNoise(charIndex + 42) * 0.65,
+                depthBias: (seededNoise(charIndex + 43) - 0.5) * 2,
+                heightBias: (seededNoise(charIndex + 44) - 0.5) * 2,
+                anchorBias: remap01(charIndex, 0, Math.max(1, characterCount - 1)) * 2 - 1
+              });
+            } catch {
+              // Skip characters that cannot be measured in the current browser.
+            }
+          }
         }
 
         for (let row = 0; row < shardRows; row += 1) {
@@ -145,7 +189,35 @@ document.addEventListener('DOMContentLoaded', () => {
           currentX: 0,
           currentY: 0,
           targetIntensity: 0,
-          currentIntensity: 0
+          currentIntensity: 0,
+          shockwaveX: 380,
+          shockwaveY: 86,
+          shockwaveRadius: 0,
+          shockwaveStrength: 0,
+          lastShockwaveAt: 0
+        };
+
+        const pointerToViewBox = event => {
+          const bounds = heroName.getBoundingClientRect();
+          if (!bounds.width || !bounds.height) {
+            return null;
+          }
+          return {
+            x: viewBox.x + ((event.clientX - bounds.left) / bounds.width) * viewBox.width,
+            y: viewBox.y + ((event.clientY - bounds.top) / bounds.height) * viewBox.height
+          };
+        };
+
+        const triggerShockwave = (event, timestamp = performance.now()) => {
+          const point = pointerToViewBox(event);
+          if (!point) {
+            return;
+          }
+          motion.shockwaveX = point.x;
+          motion.shockwaveY = point.y;
+          motion.shockwaveRadius = 0;
+          motion.shockwaveStrength = 1;
+          motion.lastShockwaveAt = timestamp;
         };
 
         const handlePointer = event => {
@@ -158,6 +230,9 @@ document.addEventListener('DOMContentLoaded', () => {
           motion.targetX = clamp(normalizedX, -1, 1);
           motion.targetY = clamp(normalizedY, -1, 1);
           motion.targetIntensity = clamp(Math.hypot(normalizedX, normalizedY), 0, 1);
+          if ((performance.now() - motion.lastShockwaveAt) > 105) {
+            triggerShockwave(event);
+          }
           heroName.classList.add('is-interacting');
         };
 
@@ -168,11 +243,19 @@ document.addEventListener('DOMContentLoaded', () => {
           heroName.classList.remove('is-interacting');
         };
 
+        let previousTimestamp = 0;
         const animateHeroGlass = timestamp => {
           const time = timestamp * 0.001;
+          const frameDeltaMs = previousTimestamp ? Math.min(40, timestamp - previousTimestamp) : 16.7;
+          previousTimestamp = timestamp;
           motion.currentX += (motion.targetX - motion.currentX) * 0.11;
           motion.currentY += (motion.targetY - motion.currentY) * 0.11;
           motion.currentIntensity += (motion.targetIntensity - motion.currentIntensity) * 0.08;
+          motion.shockwaveRadius += frameDeltaMs * (0.9 + motion.currentIntensity * 0.35);
+          motion.shockwaveStrength *= Math.pow(0.92, frameDeltaMs / 16.7);
+          if (motion.shockwaveStrength < 0.018) {
+            motion.shockwaveStrength = 0;
+          }
 
           const cycleDuration = 12000;
           const cycleProgress = (timestamp % cycleDuration) / cycleDuration;
@@ -189,6 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
           );
           const ambientFloat = Math.sin(time * 1.14) * 5.6 + Math.cos(time * 0.48) * 2.4;
           const auraPulse = (Math.sin(time * 1.82) + 1) * 0.5;
+          const shockPulse = motion.shockwaveStrength;
 
           const distortionPower = 0.18 + motion.currentIntensity * 1.05 + Math.sin(time * 0.62) * 0.04;
           const displacementScale = 4.8 + distortionPower * 11.8;
@@ -226,12 +310,40 @@ document.addEventListener('DOMContentLoaded', () => {
           if (heroNameSweep) {
             const sweepPhase = (time * 0.18 + motion.currentIntensity * 0.06) % 1;
             const sweepX = lerp(-300, 840, sweepPhase);
-            const sweepOpacity = 0.08 + auraPulse * 0.08 + travelVisibility + motion.currentIntensity * 0.14 + (isHolding ? 0.2 : 0);
+            const sweepY = 10 + Math.sin(time * 1.6) * 8 + shockPulse * 8;
+            const sweepWidth = 220 + auraPulse * 30 + shockPulse * 48;
+            const sweepOpacity = 0.08 + auraPulse * 0.08 + travelVisibility + motion.currentIntensity * 0.14 + shockPulse * 0.28 + (isHolding ? 0.2 : 0);
             heroNameSweep.setAttribute('x', sweepX.toFixed(2));
+            heroNameSweep.setAttribute('y', sweepY.toFixed(2));
+            heroNameSweep.setAttribute('width', sweepWidth.toFixed(2));
+            heroNameSweep.setAttribute(
+              'transform',
+              `rotate(${(Math.sin(time * 0.8) * 7 + motion.currentX * 12 + shockPulse * 9).toFixed(2)} 380 86) skewX(${(Math.cos(time * 0.66) * 4).toFixed(2)})`
+            );
             heroNameSweep.style.opacity = sweepOpacity.toFixed(3);
           }
 
+          if (heroNameSweepSecondary) {
+            const secondaryPhase = (time * 0.23 + 0.35 + motion.currentIntensity * 0.08) % 1;
+            const secondaryX = lerp(-360, 860, secondaryPhase);
+            const secondaryY = -4 + Math.cos(time * 1.25) * 12 - shockPulse * 10;
+            const secondaryWidth = 164 + Math.sin(time * 1.4) * 24 + shockPulse * 36;
+            const secondaryOpacity = 0.07 + auraPulse * 0.1 + travelVisibility * 0.65 + shockPulse * 0.32;
+            heroNameSweepSecondary.setAttribute('x', secondaryX.toFixed(2));
+            heroNameSweepSecondary.setAttribute('y', secondaryY.toFixed(2));
+            heroNameSweepSecondary.setAttribute('width', secondaryWidth.toFixed(2));
+            heroNameSweepSecondary.setAttribute(
+              'transform',
+              `rotate(${(-9 + Math.sin(time * 0.94) * 6 + motion.currentY * 9 - shockPulse * 14).toFixed(2)} 380 86) skewX(${(Math.sin(time * 0.52) * 6).toFixed(2)})`
+            );
+            heroNameSweepSecondary.style.opacity = secondaryOpacity.toFixed(3);
+          }
+
           shardItems.forEach((shard, shardIndex) => {
+            const shardCenterX = shardArea.x + ((shardIndex % shardCols) + 0.5) * (shardArea.width / shardCols);
+            const shardCenterY = shardArea.y + (Math.floor(shardIndex / shardCols) + 0.5) * (shardArea.height / shardRows);
+            const shockDistance = Math.hypot(shardCenterX - motion.shockwaveX, shardCenterY - motion.shockwaveY);
+            const shockRing = Math.exp(-Math.pow(shockDistance - motion.shockwaveRadius, 2) / 720) * shockPulse;
             const entryX = lerp(shard.startX, 0, assemblyAlignProgress);
             const entryY = lerp(shard.startY, 0, assemblyAlignProgress);
             const entryZ = lerp(shard.startZ, 0, assemblyAlignProgress);
@@ -240,18 +352,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const exitY = lerp(0, shard.endY, scatterProgress);
             const exitZ = lerp(0, shard.endZ, scatterProgress);
             const exitRot = lerp(0, shard.endRotation, scatterProgress);
-            const translateX = entryX + exitX;
-            const translateY = entryY + exitY;
-            const depthOffset = entryZ + exitZ;
-            const rotation = entryRot + exitRot;
+            const driftX = motion.currentX * 6 + Math.sin(time * 1.25 + shardIndex * 0.3) * 2.2 + (shardCenterX - motion.shockwaveX) * shockRing * 0.18;
+            const driftY = motion.currentY * 4 + Math.cos(time * 1.1 + shardIndex * 0.27) * 1.6 + (shardCenterY - motion.shockwaveY) * shockRing * 0.08;
+            const translateX = entryX + exitX + driftX;
+            const translateY = entryY + exitY + driftY;
+            const depthOffset = entryZ + exitZ - shockRing * 22;
+            const rotation = entryRot + exitRot + shockRing * 16;
             const entryScale = lerp(shard.startScale, 1, assemblyAlignProgress);
             const exitScale = lerp(1, shard.endScale, scatterProgress);
-            const scale = entryScale * exitScale * (1 + (-depthOffset / 520));
+            const scale = entryScale * exitScale * (1 + (-depthOffset / 520) + shockRing * 0.028);
             const preHoldVisibility = Math.pow(assemblyAlignProgress, 3) * 0.16;
             const postHoldVisibility = cycleProgress >= holdEnd ? (1 - scatterProgress) * 0.58 : 0;
             const movingOpacity = Math.max(preHoldVisibility, postHoldVisibility);
-            const opacity = isHolding ? 1 : movingOpacity;
-            const blur = (1 - assemblyAlignProgress) * 3 + scatterProgress * 2.1 + (shardIndex % 3) * 0.05 + Math.abs(depthOffset) * 0.005 + (1 - coreVisibility) * 1.25 + (isHolding ? 0 : 1.35);
+            const opacity = isHolding ? Math.min(1, 1 + shockRing * 0.22) : Math.min(1, movingOpacity + shockRing * 0.18);
+            const blur = (1 - assemblyAlignProgress) * 3 + scatterProgress * 2.1 + (shardIndex % 3) * 0.05 + Math.abs(depthOffset) * 0.005 + (1 - coreVisibility) * 1.25 + (isHolding ? 0 : 1.35) - shockRing * 0.55;
             shard.element.setAttribute(
               'transform',
               `translate(${translateX.toFixed(2)} ${translateY.toFixed(2)}) rotate(${rotation.toFixed(2)} 380 86) scale(${scale.toFixed(3)})`
@@ -260,12 +374,36 @@ document.addEventListener('DOMContentLoaded', () => {
             shard.element.style.filter = `blur(${blur.toFixed(2)}px)`;
           });
 
+          letterItems.forEach((letter, index) => {
+            const driftPhase = time * letter.speed + letter.phase;
+            const baseWaveX = Math.sin(driftPhase) * (2.6 + letter.depthBias * 0.35);
+            const baseWaveY = Math.cos(driftPhase * 1.14) * (1.85 + letter.heightBias * 0.25);
+            const parallaxX = motion.currentX * (9 + Math.abs(letter.anchorBias) * 3.5) + letter.anchorBias * 3.4;
+            const parallaxY = motion.currentY * 6.2;
+            const distance = Math.hypot(letter.centerX - motion.shockwaveX, letter.centerY - motion.shockwaveY);
+            const shockRing = Math.exp(-Math.pow(distance - motion.shockwaveRadius, 2) / 610) * shockPulse;
+            const shockDirectionX = distance > 0 ? (letter.centerX - motion.shockwaveX) / distance : 0;
+            const shockDirectionY = distance > 0 ? (letter.centerY - motion.shockwaveY) / distance : -0.15;
+            const shockX = shockDirectionX * shockRing * 16;
+            const shockY = shockDirectionY * shockRing * 8 - shockRing * 3.2;
+            const depthLift = Math.sin(driftPhase * 0.82) * 0.06 + shockRing * 0.13 + motion.currentIntensity * 0.04;
+            const scale = 1 + depthLift;
+            const opacity = Math.min(0.82, 0.12 + coreVisibility * 0.26 + travelVisibility * 0.42 + shockRing * 0.32 + auraPulse * 0.08);
+            const blur = Math.max(0, 0.45 + Math.abs(letter.anchorBias) * 0.22 - shockRing * 0.42 + (index % 2) * 0.07);
+            letter.element.setAttribute(
+              'transform',
+              `translate(${(baseWaveX + parallaxX + shockX).toFixed(2)} ${(baseWaveY + parallaxY + shockY).toFixed(2)}) scale(${scale.toFixed(3)})`
+            );
+            letter.element.style.opacity = opacity.toFixed(3);
+            letter.element.style.filter = `blur(${blur.toFixed(2)}px) drop-shadow(0 0 ${(4 + shockRing * 10 + motion.currentIntensity * 6).toFixed(2)}px rgba(170, 239, 255, ${(0.12 + shockRing * 0.28).toFixed(3)}))`;
+          });
+
           heroNameSolid.style.opacity = coreVisibility.toFixed(3);
-          heroNameSolid.style.filter = `drop-shadow(0 0 ${(10 + auraPulse * 8 + motion.currentIntensity * 12).toFixed(2)}px rgba(186, 241, 255, ${(0.18 + motion.currentIntensity * 0.18).toFixed(3)}))`;
+          heroNameSolid.style.filter = `drop-shadow(0 0 ${(10 + auraPulse * 8 + motion.currentIntensity * 12 + shockPulse * 12).toFixed(2)}px rgba(186, 241, 255, ${(0.18 + motion.currentIntensity * 0.18 + shockPulse * 0.16).toFixed(3)}))`;
           if (heroNameHighlight) {
-            const reflectX = motion.currentX * 10 + Math.sin(time * 1.38) * 4.4;
-            const reflectY = motion.currentY * 6 + Math.cos(time * 1.7) * 1.8 - 1.2;
-            const reflectOpacity = Math.max(0.16, coreVisibility * 0.48 + travelVisibility + auraPulse * 0.06 + motion.currentIntensity * 0.12);
+            const reflectX = motion.currentX * 10 + Math.sin(time * 1.38) * 4.4 + shockPulse * 7;
+            const reflectY = motion.currentY * 6 + Math.cos(time * 1.7) * 1.8 - 1.2 - shockPulse * 2.8;
+            const reflectOpacity = Math.max(0.16, coreVisibility * 0.48 + travelVisibility + auraPulse * 0.06 + motion.currentIntensity * 0.12 + shockPulse * 0.18);
             heroNameHighlight.setAttribute('transform', `translate(${reflectX.toFixed(2)} ${reflectY.toFixed(2)})`);
             heroNameHighlight.style.opacity = reflectOpacity.toFixed(3);
           }
@@ -273,7 +411,10 @@ document.addEventListener('DOMContentLoaded', () => {
           requestAnimationFrame(animateHeroGlass);
         };
 
-        heroName.addEventListener('pointerenter', handlePointer);
+        heroName.addEventListener('pointerenter', event => {
+          triggerShockwave(event);
+          handlePointer(event);
+        });
         heroName.addEventListener('pointermove', handlePointer);
         heroName.addEventListener('pointerleave', resetPointer);
         requestAnimationFrame(animateHeroGlass);

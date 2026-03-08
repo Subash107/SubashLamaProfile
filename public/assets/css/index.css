@@ -100,6 +100,11 @@
       transform-style: preserve-3d;
       pointer-events: none;
     }
+    .hero-name-letter-ghosts {
+      transform-style: preserve-3d;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
     .hero-name-shard {
       will-change: transform, opacity, filter;
       transform-origin: 380px 86px;
@@ -117,6 +122,15 @@
       animation: heroNameShine 6.4s ease-in-out infinite;
       pointer-events: none;
     }
+    .hero-name-letter {
+      fill: rgba(226, 250, 255, 0.88);
+      stroke: rgba(157, 233, 255, 0.26);
+      stroke-width: 0.7;
+      opacity: 0;
+      filter: blur(0.55px);
+      will-change: transform, opacity, filter;
+      paint-order: stroke fill;
+    }
     .hero-name-sweep {
       fill: url(#heroNameSweepGradient);
       opacity: 0.18;
@@ -124,6 +138,11 @@
       mix-blend-mode: screen;
       pointer-events: none;
       will-change: opacity, transform;
+    }
+    .hero-name-sweep-secondary {
+      fill: url(#heroNameCausticGradient);
+      opacity: 0.1;
+      filter: blur(6px);
     }
     h2 {
       margin-bottom: 1.5rem;
@@ -819,6 +838,9 @@
       }
       .hero-name-aura,
       .hero-name-sweep {
+        display: none;
+      }
+      .hero-name-letter-ghosts {
         display: none;
       }
       .hero-name-shards {
