@@ -1,11 +1,11 @@
-# CV Upload Folder
+# Published CV Files
 
-Keep your latest resume in this folder as:
+This folder is generated from the newest PDF in:
 
-`latest-resume.pdf`
+`assets/cv/`
 
-The `Download Resume` button on the portfolio homepage is linked to:
+The portfolio download button always points to:
 
 `assets/docs/cv/latest-resume.pdf`
 
-If your file has a different name, replace `latest-resume.pdf` with your newest version.
+`resume-manifest.json` stores the current download filename and cache-busting version.

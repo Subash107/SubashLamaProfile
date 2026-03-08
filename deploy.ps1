@@ -1,4 +1,9 @@
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
 Set-Location $PSScriptRoot
+
+& "$PSScriptRoot\scripts\sync-resume.ps1"
 
 docker stop static-site 2>$null
 docker rm static-site 2>$null

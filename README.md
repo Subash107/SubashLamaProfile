@@ -11,14 +11,21 @@ This repository hosts Subash Lama's multimedia-rich portfolio as a static site, 
 Run a local server (or Docker) so media assets and animations load the same way they do in production. The deployed site now lives under `public/`, while Docker serves that folder directly:
 ```bash
 # Option A: Docker (recommended)
+pwsh ./scripts/sync-resume.ps1
 docker build -t static-site .
 docker run --rm -p 8080:80 --name static-site static-site
 
 # Option B: Any static server (if installed)
+# pwsh ./scripts/sync-resume.ps1
 # python -m http.server 8000 --directory public
 # npx serve public
 ```
 Then open `http://localhost:8080/` (Docker) or your chosen server URL.
+
+## Resume Updates
+- Put your current resume PDF in `assets/cv/`.
+- The newest PDF in that folder is automatically copied to `public/assets/docs/cv/latest-resume.pdf` during local deploy and GitHub Actions.
+- If you keep multiple PDFs there, the most recently modified one becomes the download target.
 
 ## Deployment
 - GitHub Actions automatically publishes the `main` branch to GitHub Pages.

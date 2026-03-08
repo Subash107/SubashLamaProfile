@@ -167,6 +167,34 @@
     });
   }
 
+  async function initResumeDownload() {
+    const resumeLink = document.querySelector("[data-resume-download]");
+    if (!resumeLink || typeof window.fetch !== "function") return;
+
+    const manifestPath = resumeLink.getAttribute("data-resume-manifest");
+    if (!manifestPath) return;
+
+    try {
+      const response = await fetch(manifestPath, { cache: "no-store" });
+      if (!response.ok) return;
+
+      const manifest = await response.json();
+      if (!manifest || !manifest.publicPath) return;
+
+      const versionSuffix = manifest.version
+        ? `?v=${encodeURIComponent(manifest.version)}`
+        : "";
+
+      resumeLink.setAttribute("href", `${manifest.publicPath}${versionSuffix}`);
+
+      if (manifest.downloadFileName) {
+        resumeLink.setAttribute("download", manifest.downloadFileName);
+      }
+    } catch {
+      // Keep the fallback href already in the markup.
+    }
+  }
+
   function initScrollReveal() {
     if (prefersReducedMotion()) return;
 
@@ -267,6 +295,7 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
+    initResumeDownload();
     initBackgroundVideo();
     initAudioToggle();
     initScrollReveal();
