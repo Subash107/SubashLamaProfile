@@ -1,6 +1,19 @@
 # 🔒 Sensitive Environment Files
 .env
+.env.*
+!.env.example
 backup.env
+secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.crt
+*.csr
+*.tfstate
+*.tfstate.*
+.terraform/
 
 # 🗑️ Logs & Temporary Files
 *.log

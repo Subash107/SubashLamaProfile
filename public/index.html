@@ -4,6 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests" />
+  <meta name="referrer" content="no-referrer" />
   <meta name="description" content="Subash Lama &ndash; DevOps Engineer specializing in CI/CD, Docker, cloud automation, and reliable infrastructure.">
   <meta name="theme-color" content="#07111c" />
   <title>Subash Lama &ndash; DevOps Engineer | Automation & CI/CD</title>
@@ -92,10 +94,10 @@
       </div>
       <div class="button-group">
         <a href="#about" class="btn btn-outline-light">About</a>
-        <a href="projects.html" target="_blank" class="btn btn-outline-light">Projects</a>
+        <a href="projects.html" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light">Projects</a>
         <a href="#skills" class="btn btn-outline-light">Skills</a>
         <a href="#contact" class="btn btn-outline-light">Contact</a>
-        <a href="record-producer.html" target="_blank" class="btn btn-outline-light">Record Producer</a>
+        <a href="record-producer.html" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light">Record Producer</a>
         <button type="button" class="btn btn-outline-light" data-audio-toggle data-audio-storage-key="portfolio_audio_enabled" data-audio-label-on="Sound: On" data-audio-label-off="Sound: Off" aria-pressed="false">Sound: Off</button>
       </div>
     </div>
