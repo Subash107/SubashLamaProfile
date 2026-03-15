@@ -37,7 +37,7 @@ jobs:
           tidy -e public/index.html || true
 
       - name: 📦 Upload Docker image artifact (optional)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: static-website-image
           path: public
