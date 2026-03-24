@@ -1,0 +1,23 @@
+* text=auto
+
+# Keep PowerShell scripts Windows-friendly.
+*.ps1 text eol=crlf
+
+# Keep site and workflow sources normalized for CI and GitHub diffs.
+*.md text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.conf text eol=lf
+
+# Prevent line-ending normalization on binary assets.
+*.pdf binary
+*.mp3 binary
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.gif binary
+*.ico binary
