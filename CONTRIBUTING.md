@@ -33,3 +33,4 @@ Thanks for contributing to this portfolio site.
 - Include screenshots when layout or visual content changes.
 - Mention any updated media, resume, or deployment behavior.
 - Call out any follow-up work that should happen after merge.
+- Repository ownership and default review routing are defined in `.github/CODEOWNERS`.
