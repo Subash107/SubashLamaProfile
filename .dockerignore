@@ -1,5 +1,7 @@
-.git
-.github
-archive
-assets
-README.md
+*
+!.dockerignore
+!Dockerfile
+!nginx/
+!nginx/**
+!public/
+!public/**
