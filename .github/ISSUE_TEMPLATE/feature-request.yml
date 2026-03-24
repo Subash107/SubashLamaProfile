@@ -1,0 +1,52 @@
+name: Feature request
+description: Suggest an improvement to the site, repository workflow, or deployment setup.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing an idea.
+        Clear requests make it much easier to review and plan improvements.
+
+  - type: input
+    id: area
+    attributes:
+      label: Affected area
+      description: Which part of the site or repository would this improve?
+      placeholder: homepage, projects page, resume workflow, Docker image, GitHub Actions
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Explain the current gap, friction, or missed opportunity.
+      placeholder: Describe the current limitation or pain point.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: Describe the feature or improvement you would like to see.
+      placeholder: Explain the change you want and how it should work.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Mention any workarounds or other approaches you thought about.
+      placeholder: List any alternatives, tradeoffs, or temporary workarounds.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add screenshots, references, or implementation notes if helpful.
+      placeholder: Include mockups, links, or extra context here.
