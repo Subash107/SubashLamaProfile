@@ -32,6 +32,9 @@ docker run --rm -p 8080:80 --name static-site static-site
 ```
 Then open `http://localhost:8080/` (Docker) or your chosen server URL.
 
+If `pwsh` is not installed on your machine, use:
+`powershell -ExecutionPolicy Bypass -File .\scripts\sync-resume.ps1`
+
 ## Resume Updates
 - Put your current resume PDF in `assets/cv/`.
 - The newest PDF in that folder is automatically copied to `public/assets/docs/cv/latest-resume.pdf` during local deploy and GitHub Actions.
@@ -40,6 +43,9 @@ Then open `http://localhost:8080/` (Docker) or your chosen server URL.
 ## Deployment
 - GitHub Actions automatically publishes the `main` branch to GitHub Pages.
 - For workflow details, see `.github/workflows`.
+
+## Contributing
+- See `CONTRIBUTING.md` for the local check and pull request workflow.
 
 ## Security Notes
 - Only the generated `public/assets/docs/cv/latest-resume.pdf` is published for resume downloads.
