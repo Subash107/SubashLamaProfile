@@ -1,0 +1,10 @@
+# Default review owner for this repository.
+* @Subash107
+
+# Site content and assets.
+/public/ @Subash107
+
+# Deployment and automation.
+/.github/ @Subash107
+/scripts/ @Subash107
+/nginx/ @Subash107
