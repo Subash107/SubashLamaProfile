@@ -1,0 +1,55 @@
+name: Bug report
+description: Report a reproducible problem with the site, content, or automation.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a problem.
+        Please provide enough detail for someone else to reproduce it.
+
+  - type: input
+    id: area
+    attributes:
+      label: Affected area
+      description: Which part of the repository or site is affected?
+      placeholder: public/index.html, GitHub Actions, Docker image, resume download
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the bug and what you expected to happen instead.
+      placeholder: A short summary of the issue and the expected behavior.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Provide a short, ordered reproduction path.
+      placeholder: |
+        1. Open ...
+        2. Click ...
+        3. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Share browser, OS, screen size, or runner details if relevant.
+      placeholder: Windows 11, Chrome 134, mobile viewport, ubuntu-latest GitHub runner
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs, screenshots, or links
+      description: Add any supporting details that would help with triage.
+      placeholder: Paste logs, screenshots, or related URLs here.
