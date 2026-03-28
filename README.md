@@ -25,7 +25,11 @@ pwsh ./scripts/sync-resume.ps1
 docker build -t static-site .
 docker run --rm -p 8080:80 --name static-site static-site
 
-# Option B: Any static server (if installed)
+# Option B: Built-in PowerShell static server
+# pwsh ./scripts/sync-resume.ps1
+# pwsh ./scripts/serve-static.ps1 -Port 8080
+
+# Option C: Any static server (if installed)
 # pwsh ./scripts/sync-resume.ps1
 # python -m http.server 8000 --directory public
 # npx serve public
@@ -37,6 +41,7 @@ If `pwsh` is not installed on your machine, use:
 
 ## Resume Updates
 - Put your current resume PDF in `assets/cv/`.
+- Use a professional source filename such as `Subash-Lama-Resume.pdf`.
 - The newest PDF in that folder is automatically copied to `public/assets/docs/cv/latest-resume.pdf` during local deploy and GitHub Actions.
 - If you keep multiple PDFs there, the most recently modified one becomes the download target.
 

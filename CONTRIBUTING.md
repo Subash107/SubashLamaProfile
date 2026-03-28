@@ -17,11 +17,13 @@ Thanks for contributing to this portfolio site.
   `pwsh ./scripts/sync-resume.ps1`
   or
   `powershell -ExecutionPolicy Bypass -File .\scripts\sync-resume.ps1`
+- Keep resume source filenames professional and descriptive, for example:
+  `Subash-Lama-Resume.pdf`
 - Run the secret hygiene check before pushing:
   `pwsh ./scripts/check-secret-hygiene.ps1`
   or
   `powershell -ExecutionPolicy Bypass -File .\scripts\check-secret-hygiene.ps1`
-- Preview locally with Docker or a static server as described in [README.md](README.md).
+- Preview locally with Docker, `pwsh ./scripts/serve-static.ps1`, or another static server as described in [README.md](README.md).
 
 ## Content Notes
 - Only commit public assets that are meant to ship with the site.

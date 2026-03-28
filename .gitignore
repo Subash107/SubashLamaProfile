@@ -1,4 +1,4 @@
-# 🔒 Sensitive Environment Files
+# Sensitive environment files
 .env
 .env.*
 !.env.example
@@ -15,33 +15,30 @@ secrets/
 *.tfstate.*
 .terraform/
 
-# 🗑️ Logs & Temporary Files
+# Logs and temporary files
 *.log
+*.out
+*.tmp
+*.bak
+*.err
 logs/
+artifacts/
 
-# ⚙️ System Files
+# OS and editor files
 .DS_Store
 Thumbs.db
-
-# 💻 VS Code Settings
 .vscode/
 
-# 🚀 Docker-related
+# Archive and package exports
 *.tar
 *.gz
 *.zip
 
-# 🧪 Bash Script Outputs (if any)
-*.out
-*.tmp
-*.bak
-
-# 🖼️ Media Cache
-*.mp4
+# Large media added outside curated asset folders
 *.wav
 *.avi
 *.mov
 
-# ⚒️ Node/npm files (if ever used)
+# Node/npm files
 node_modules/
 npm-debug.log
