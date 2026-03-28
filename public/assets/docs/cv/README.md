@@ -9,3 +9,6 @@ The portfolio download button always points to:
 `assets/docs/cv/latest-resume.pdf`
 
 `resume-manifest.json` stores the current download filename and cache-busting version.
+
+The source resume should be kept in `assets/cv/` with a professional filename such as
+`Subash-Lama-Resume.pdf`.
