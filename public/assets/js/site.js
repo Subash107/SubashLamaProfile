@@ -39,6 +39,23 @@
     }
   }
 
+  function scheduleDeferredTask(callback, { timeout = 1500, delay = 0 } = {}) {
+    const run = () => {
+      if (delay > 0) {
+        window.setTimeout(callback, delay);
+        return;
+      }
+      callback();
+    };
+
+    if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(run, { timeout });
+      return;
+    }
+
+    window.setTimeout(run, delay || 180);
+  }
+
   function initBackgroundVideo() {
     const policy = getBackgroundVideoPolicy();
 
@@ -295,9 +312,19 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    initResumeDownload();
-    initBackgroundVideo();
     initAudioToggle();
     initScrollReveal();
+
+    const scheduleNonCriticalStartup = () => {
+      scheduleDeferredTask(initResumeDownload, { timeout: 1200 });
+      scheduleDeferredTask(initBackgroundVideo, { timeout: 2200, delay: 220 });
+    };
+
+    if (document.readyState === "complete") {
+      scheduleNonCriticalStartup();
+      return;
+    }
+
+    window.addEventListener("load", scheduleNonCriticalStartup, { once: true });
   });
 })();

@@ -21,168 +21,438 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { once: true });
       };
 
-      scheduleNonCriticalWork(() => {
-      const heroName = document.querySelector('.hero-name');
-      const heroNameSvg = document.getElementById('heroNameSvg');
-      const heroNameDefs = document.getElementById('heroNameDefs');
-      const heroNameShards = document.getElementById('heroNameShards');
-      const heroNameLetterGhosts = document.getElementById('heroNameLetterGhosts');
-      const heroNameSolid = document.getElementById('heroNameSolid');
-      const heroNameHighlight = document.getElementById('heroNameHighlight');
-      const heroNameAura = document.getElementById('heroNameAura');
-      const heroNameSweep = document.getElementById('heroNameSweep');
-      const heroNameSweepSecondary = document.getElementById('heroNameSweepSecondary');
-      const heroGlassNoise = document.getElementById('heroGlassNoise');
-      const heroGlassDisplace = document.getElementById('heroGlassDisplace');
-      const heroGlassLight = document.getElementById('heroGlassLight');
-      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const SVG_NS = 'http://www.w3.org/2000/svg';
-      const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-      const lerp = (start, end, progress) => start + (end - start) * progress;
-      const easeOutCubic = progress => 1 - Math.pow(1 - progress, 3);
-      const easeInOutCubic = progress => (
-        progress < 0.5
-          ? 4 * progress * progress * progress
-          : 1 - Math.pow(-2 * progress + 2, 3) / 2
-      );
-      const remap01 = (value, start, end) => clamp((value - start) / (end - start), 0, 1);
-      const seededNoise = seed => {
-        const x = Math.sin(seed * 91.137 + 17.913) * 43758.5453123;
-        return x - Math.floor(x);
+      const body = document.body;
+      const loader = document.querySelector('[data-loader]');
+      const loaderStatus = document.querySelector('[data-loader-status]');
+      const loaderIndicator = document.querySelector('[data-loader-indicator]');
+      const loaderLab = document.querySelector('[data-loader-lab]');
+      const loaderSelectButtons = Array.from(document.querySelectorAll('[data-loader-select]'));
+      const loaderReplayButton = document.querySelector('[data-loader-replay]');
+      const heroTerminalName = document.querySelector('[data-terminal-name]');
+      const heroTerminalCursor = document.querySelector('[data-terminal-cursor]');
+      const heroTerminalFullName = heroTerminalName
+        ? (heroTerminalName.dataset.terminalFull || heroTerminalName.textContent || '').trim()
+        : '';
+      const reducedLoaderMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const loaderStyleStorageKey = 'portfolio_loader_style_preview';
+      const loaderStyleQueryParam = 'loaderStyle';
+      const loaderSeenStorageKey = 'portfolio_loader_seen';
+      const loaderStyles = {
+        boot: {
+          label: 'Cyber Screenshot Boot',
+          statuses: [
+            'Initializing portfolio workspace...',
+            'Mounting deployment snapshots...',
+            'Syncing observability surfaces...',
+            'Opening secure interface...'
+          ],
+          checkpoints: [50, 180, 390, 640],
+          progress: [0.16, 0.44, 0.74, 0.9],
+          duration: 980,
+          finalStatus: 'Cyber screenshot boot ready.'
+        },
+        hud: {
+          label: 'Terminal + HUD Loader',
+          statuses: [
+            'Booting terminal surface...',
+            'Loading secure session traces...',
+            'Aligning HUD vectors...',
+            'Command layer online...'
+          ],
+          checkpoints: [50, 170, 360, 610],
+          progress: [0.18, 0.46, 0.74, 0.9],
+          duration: 940,
+          finalStatus: 'Terminal HUD synchronized.'
+        },
+        reveal: {
+          label: 'Name Scan Reveal',
+          statuses: [
+            'Preparing identity signature...',
+            'Sweeping name scanline...',
+            'Locking visual signal...',
+            'Revealing portfolio...'
+          ],
+          checkpoints: [50, 150, 320, 560],
+          progress: [0.18, 0.48, 0.76, 0.9],
+          duration: 900,
+          finalStatus: 'Name reveal complete.'
+        }
       };
 
-      if (heroName && heroNameSvg && heroNameDefs && heroNameShards && heroNameSolid && heroGlassNoise && heroGlassDisplace && heroGlassLight && !reducedMotion) {
-        const shardItems = [];
-        const letterItems = [];
-        const shardRows = 4;
-        const shardCols = 8;
-        const viewBox = heroNameSvg.viewBox && heroNameSvg.viewBox.baseVal
-          ? heroNameSvg.viewBox.baseVal
-          : { x: 0, y: 0, width: 760, height: 170 };
-        let shardArea = { x: 96, y: 24, width: 568, height: 126 };
+      let activeLoaderStyle = 'boot';
+      let loaderRunToken = 0;
+      let loaderTimerHandles = [];
+      let heroTerminalRunToken = 0;
+      let heroTerminalTimerHandles = [];
+      let hasSeenLoader = false;
+
+      try {
+        hasSeenLoader = window.sessionStorage.getItem(loaderSeenStorageKey) === 'true';
+      } catch {
+        hasSeenLoader = false;
+      }
+
+      const clearLoaderTimers = () => {
+        loaderTimerHandles.forEach(handle => window.clearTimeout(handle));
+        loaderTimerHandles = [];
+      };
+
+      const clearHeroTerminalTimers = () => {
+        heroTerminalTimerHandles.forEach(handle => window.clearTimeout(handle));
+        heroTerminalTimerHandles = [];
+      };
+
+      const startHeroTerminalTyping = () => {
+        if (!heroTerminalName) {
+          return;
+        }
+
+        heroTerminalRunToken += 1;
+        const runToken = heroTerminalRunToken;
+
+        clearHeroTerminalTimers();
+
+        if (reducedLoaderMotion || !heroTerminalFullName) {
+          heroTerminalName.textContent = heroTerminalFullName;
+          return;
+        }
+
+        const characters = Array.from(heroTerminalFullName);
+        heroTerminalName.textContent = '';
+
+        characters.forEach((_, index) => {
+          heroTerminalTimerHandles.push(window.setTimeout(() => {
+            if (runToken !== heroTerminalRunToken) {
+              return;
+            }
+
+            heroTerminalName.textContent = characters.slice(0, index + 1).join('');
+          }, 40 + index * 52));
+        });
+      };
+
+      const syncLoaderStyleUrl = style => {
+        if (!window.history || typeof window.history.replaceState !== 'function') {
+          return;
+        }
 
         try {
-          const textBounds = heroNameSolid.getBBox();
-          const padX = 28;
-          const padY = 20;
-          const minX = Math.max(viewBox.x, textBounds.x - padX);
-          const minY = Math.max(viewBox.y, textBounds.y - padY);
-          const maxX = Math.min(viewBox.x + viewBox.width, textBounds.x + textBounds.width + padX);
-          const maxY = Math.min(viewBox.y + viewBox.height, textBounds.y + textBounds.height + padY);
-          shardArea = {
-            x: minX,
-            y: minY,
-            width: maxX - minX,
-            height: maxY - minY
-          };
+          const nextUrl = new URL(window.location.href);
+          nextUrl.searchParams.set(loaderStyleQueryParam, style);
+          window.history.replaceState({}, '', `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
         } catch {
-          // Fallback keeps the original effect working if SVG bounds are unavailable.
+          // Ignore malformed URLs or browser limitations.
+        }
+      };
+
+      const resolveLoaderStyle = style => (Object.prototype.hasOwnProperty.call(loaderStyles, style) ? style : 'boot');
+
+      const setLoaderProgress = progress => {
+        if (!loader) {
+          return;
         }
 
-        if (heroNameLetterGhosts) {
-          const characterCount = typeof heroNameSolid.getNumberOfChars === 'function'
-            ? heroNameSolid.getNumberOfChars()
-            : 0;
-          for (let charIndex = 0; charIndex < characterCount; charIndex += 1) {
-            const char = heroNameSolid.textContent.charAt(charIndex);
-            if (!char.trim()) {
-              continue;
-            }
+        loader.style.setProperty('--loader-progress', String(progress));
+      };
 
-            try {
-              const box = heroNameSolid.getExtentOfChar(charIndex);
-              if (!box || !Number.isFinite(box.width) || box.width <= 0) {
-                continue;
-              }
+      const setLoaderStatus = text => {
+        if (loaderStatus) {
+          loaderStatus.textContent = text;
+        }
+      };
 
-              const letter = document.createElementNS(SVG_NS, 'text');
-              letter.setAttribute('class', 'hero-name-text hero-name-letter');
-              letter.setAttribute('text-anchor', 'middle');
-              letter.setAttribute('x', `${box.x + box.width / 2}`);
-              letter.setAttribute('y', '86');
-              letter.textContent = char;
-              heroNameLetterGhosts.appendChild(letter);
+      const applyLoaderStyle = (style, { persist = true, syncUrl = true } = {}) => {
+        const nextStyle = resolveLoaderStyle(style);
+        activeLoaderStyle = nextStyle;
 
-              letterItems.push({
-                element: letter,
-                centerX: box.x + box.width / 2,
-                centerY: 86,
-                baseWidth: box.width,
-                phase: seededNoise(charIndex + 41) * Math.PI * 2,
-                speed: 0.65 + seededNoise(charIndex + 42) * 0.65,
-                depthBias: (seededNoise(charIndex + 43) - 0.5) * 2,
-                heightBias: (seededNoise(charIndex + 44) - 0.5) * 2,
-                anchorBias: remap01(charIndex, 0, Math.max(1, characterCount - 1)) * 2 - 1
-              });
-            } catch {
-              // Skip characters that cannot be measured in the current browser.
-            }
+        if (loader) {
+          loader.dataset.loaderStyle = nextStyle;
+        }
+
+        if (loaderIndicator) {
+          loaderIndicator.textContent = loaderStyles[nextStyle].label;
+        }
+
+        loaderSelectButtons.forEach(button => {
+          const isActive = button.dataset.loaderSelect === nextStyle;
+          button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
+
+        if (persist) {
+          try {
+            window.localStorage.setItem(loaderStyleStorageKey, nextStyle);
+          } catch {
+            // Ignore private mode or storage issues.
           }
         }
 
-        for (let row = 0; row < shardRows; row += 1) {
-          for (let col = 0; col < shardCols; col += 1) {
-            const shardIndex = row * shardCols + col;
-            const cellX0 = shardArea.x + (col / shardCols) * shardArea.width;
-            const cellX1 = shardArea.x + ((col + 1) / shardCols) * shardArea.width;
-            const cellY0 = shardArea.y + (row / shardRows) * shardArea.height;
-            const cellY1 = shardArea.y + ((row + 1) / shardRows) * shardArea.height;
-            const jitter = 8;
-            const topLeftX = cellX0 + (seededNoise(shardIndex + 1.2) - 0.5) * jitter;
-            const topLeftY = cellY0 + (seededNoise(shardIndex + 2.3) - 0.5) * jitter;
-            const topRightX = cellX1 + (seededNoise(shardIndex + 3.4) - 0.5) * jitter;
-            const topRightY = cellY0 + (seededNoise(shardIndex + 4.5) - 0.5) * jitter;
-            const bottomRightX = cellX1 + (seededNoise(shardIndex + 5.6) - 0.5) * jitter;
-            const bottomRightY = cellY1 + (seededNoise(shardIndex + 6.7) - 0.5) * jitter;
-            const bottomLeftX = cellX0 + (seededNoise(shardIndex + 7.8) - 0.5) * jitter;
-            const bottomLeftY = cellY1 + (seededNoise(shardIndex + 8.9) - 0.5) * jitter;
-
-            const clipId = `heroShardClip${shardIndex}`;
-            const clipPath = document.createElementNS(SVG_NS, 'clipPath');
-            clipPath.setAttribute('id', clipId);
-            const polygon = document.createElementNS(SVG_NS, 'polygon');
-            polygon.setAttribute('points', `${topLeftX},${topLeftY} ${topRightX},${topRightY} ${bottomRightX},${bottomRightY} ${bottomLeftX},${bottomLeftY}`);
-            clipPath.appendChild(polygon);
-            heroNameDefs.appendChild(clipPath);
-
-            const shardGroup = document.createElementNS(SVG_NS, 'g');
-            shardGroup.setAttribute('class', 'hero-name-shard');
-            shardGroup.setAttribute('clip-path', `url(#${clipId})`);
-            const shardText = document.createElementNS(SVG_NS, 'text');
-            shardText.setAttribute('class', 'hero-name-text hero-name-shard-text');
-            shardText.setAttribute('x', '380');
-            shardText.setAttribute('y', '86');
-            shardText.textContent = 'Subash Lama';
-            shardGroup.appendChild(shardText);
-            heroNameShards.appendChild(shardGroup);
-
-            const startX = -220 - seededNoise(shardIndex + 10) * 240;
-            const startY = (seededNoise(shardIndex + 11) - 0.5) * 150;
-            const startZ = -55 - seededNoise(shardIndex + 12) * 70;
-            const startRotation = (seededNoise(shardIndex + 13) - 0.5) * 90;
-            const endX = 130 + seededNoise(shardIndex + 14) * 220;
-            const endY = (seededNoise(shardIndex + 15) - 0.5) * 130;
-            const endZ = -45 - seededNoise(shardIndex + 16) * 65;
-            const endRotation = (seededNoise(shardIndex + 17) - 0.5) * 95;
-            const startScale = 0.72 + seededNoise(shardIndex + 18) * 0.18;
-            const endScale = 0.74 + seededNoise(shardIndex + 19) * 0.2;
-
-            shardItems.push({
-              element: shardGroup,
-              startX,
-              startY,
-              startZ,
-              startRotation,
-              endX,
-              endY,
-              endZ,
-              endRotation,
-              startScale,
-              endScale
-            });
-          }
+        if (syncUrl) {
+          syncLoaderStyleUrl(nextStyle);
         }
 
+        return nextStyle;
+      };
+
+      const restartLoaderAnimations = () => {
+        if (!loader) {
+          return;
+        }
+
+        loader.classList.remove('is-running');
+        void loader.offsetWidth;
+        loader.classList.add('is-running');
+      };
+
+      const finishLoaderRun = runToken => {
+        if (runToken !== loaderRunToken) {
+          return;
+        }
+
+        clearLoaderTimers();
+
+        if (loader) {
+          loader.classList.remove('is-running');
+          loader.setAttribute('aria-hidden', 'true');
+        }
+
+        if (body) {
+          body.classList.remove('loader-active');
+        }
+
+        try {
+          window.sessionStorage.setItem(loaderSeenStorageKey, 'true');
+          hasSeenLoader = true;
+        } catch {
+          hasSeenLoader = true;
+        }
+
+        startHeroTerminalTyping();
+      };
+
+      const startLoaderRun = (style, { persist = true, syncUrl = true, mode = 'auto' } = {}) => {
+        if (!loader || !body) {
+          if (body) {
+            body.classList.remove('loader-active');
+          }
+          return;
+        }
+
+        const nextStyle = applyLoaderStyle(style, { persist, syncUrl });
+        const config = loaderStyles[nextStyle];
+
+        loaderRunToken += 1;
+        const runToken = loaderRunToken;
+
+        clearLoaderTimers();
+        body.classList.add('loader-active');
+        loader.setAttribute('aria-hidden', 'false');
+        setLoaderProgress(0.02);
+        setLoaderStatus(config.statuses[0]);
+        restartLoaderAnimations();
+
+        const useQuickPath = mode === 'auto' && hasSeenLoader;
+
+        if (reducedLoaderMotion || useQuickPath) {
+          setLoaderProgress(1);
+          setLoaderStatus(config.finalStatus);
+          loaderTimerHandles.push(window.setTimeout(() => finishLoaderRun(runToken), useQuickPath ? 120 : 260));
+          return;
+        }
+
+        config.statuses.forEach((status, index) => {
+          const checkpoint = config.checkpoints[index];
+          const progress = config.progress[index];
+
+          loaderTimerHandles.push(window.setTimeout(() => {
+            if (runToken !== loaderRunToken) {
+              return;
+            }
+
+            setLoaderStatus(status);
+            setLoaderProgress(progress);
+          }, checkpoint));
+        });
+
+        loaderTimerHandles.push(window.setTimeout(() => {
+          if (runToken !== loaderRunToken) {
+            return;
+          }
+
+          setLoaderProgress(1);
+          setLoaderStatus(config.finalStatus);
+        }, Math.max(0, config.duration - 180)));
+
+        loaderTimerHandles.push(window.setTimeout(() => finishLoaderRun(runToken), config.duration));
+      };
+
+      const getInitialLoaderStyle = () => {
+        try {
+          const queryStyle = new URLSearchParams(window.location.search).get(loaderStyleQueryParam);
+          const savedStyle = window.localStorage.getItem(loaderStyleStorageKey);
+
+          if (queryStyle) {
+            return resolveLoaderStyle(queryStyle);
+          }
+
+          if (savedStyle) {
+            return resolveLoaderStyle(savedStyle);
+          }
+        } catch {
+          // Ignore URL or storage failures and use the default style.
+        }
+
+        return 'boot';
+      };
+
+      if (loader) {
+        const initialLoaderStyle = getInitialLoaderStyle();
+        startLoaderRun(initialLoaderStyle, { persist: false, syncUrl: false, mode: 'auto' });
+
+        loaderSelectButtons.forEach(button => {
+          button.addEventListener('click', () => {
+            startLoaderRun(button.dataset.loaderSelect, { mode: 'full' });
+          });
+        });
+
+        if (loaderReplayButton) {
+          loaderReplayButton.addEventListener('click', () => {
+            startLoaderRun(activeLoaderStyle, { mode: 'full' });
+          });
+        }
+      } else if (body) {
+        body.classList.remove('loader-active');
+        startHeroTerminalTyping();
+      }
+
+      scheduleNonCriticalWork(() => {
+      const enableLegacyHeroAnimation = false;
+
+      if (enableLegacyHeroAnimation) {
+      const heroName = document.querySelector('.hero-name');
+      const heroNameSvg = document.getElementById('heroNameSvg');
+      const heroVariantButtons = Array.from(document.querySelectorAll('[data-hero-variant-value]'));
+      const heroNameSolidParts = Array.from(document.querySelectorAll('[data-hero-name-solid]'));
+      const heroNameHighlightParts = Array.from(document.querySelectorAll('[data-hero-name-highlight]'));
+      const heroNamePrimarySweeps = Array.from(document.querySelectorAll('[data-hero-name-sweep="primary"]'));
+      const heroNameSecondarySweeps = Array.from(document.querySelectorAll('[data-hero-name-sweep="secondary"]'));
+      const heroNamePrimarySignals = Array.from(document.querySelectorAll('[data-hero-name-signal="primary"]'));
+      const heroNameSecondarySignals = Array.from(document.querySelectorAll('[data-hero-name-signal="secondary"]'));
+      const heroNameAura = document.getElementById('heroNameAura');
+      const heroNameHud = document.getElementById('heroNameHud');
+      const heroCircularBand = document.getElementById('heroCircularBand');
+      const heroCircularRails = document.getElementById('heroCircularRails');
+      const heroCircularFrame = document.getElementById('heroCircularFrame');
+      const heroCircularHud = document.getElementById('heroCircularHud');
+      const heroCircularHalo = document.getElementById('heroCircularHalo');
+      const heroCircularOuterDots = document.getElementById('heroCircularOuterDots');
+      const heroCircularOuterRing = document.getElementById('heroCircularOuterRing');
+      const heroCircularRotorOuter = document.getElementById('heroCircularRotorOuter');
+      const heroCircularRotorInner = document.getElementById('heroCircularRotorInner');
+      const heroCircularCore = document.getElementById('heroCircularCore');
+      const heroCircularCoreOutline = document.getElementById('heroCircularCoreOutline');
+      const heroCircularScanLine = document.getElementById('heroCircularScanLine');
+      const heroCircularScanGlow = document.getElementById('heroCircularScanGlow');
+      const heroNameLightBand = document.getElementById('heroNameLightBand');
+      const heroNameRails = document.getElementById('heroNameRails');
+      const heroNameFrame = document.getElementById('heroNameFrame');
+      const heroCenterHud = document.getElementById('heroCenterHud');
+      const heroCenterHalo = document.getElementById('heroCenterHalo');
+      const heroCenterOuter = document.getElementById('heroCenterOuter');
+      const heroCenterTicks = document.getElementById('heroCenterTicks');
+      const heroCenterRotorPrimary = document.getElementById('heroCenterRotorPrimary');
+      const heroCenterRotorSecondary = document.getElementById('heroCenterRotorSecondary');
+      const heroCenterCore = document.getElementById('heroCenterCore');
+      const heroCenterCoreOutline = document.getElementById('heroCenterCoreOutline');
+      const heroCenterScanLine = document.getElementById('heroCenterScanLine');
+      const heroCenterScanGlow = document.getElementById('heroCenterScanGlow');
+      const heroSciFiBand = document.getElementById('heroSciFiBand');
+      const heroSciFiRails = document.getElementById('heroSciFiRails');
+      const heroSciFiFrame = document.getElementById('heroSciFiFrame');
+      const heroSciFiCore = document.getElementById('heroSciFiCore');
+      const heroSciFiHalo = document.getElementById('heroSciFiHalo');
+      const heroSciFiOuter = document.getElementById('heroSciFiOuter');
+      const heroSciFiOuterTicks = document.getElementById('heroSciFiOuterTicks');
+      const heroSciFiRotorPrimary = document.getElementById('heroSciFiRotorPrimary');
+      const heroSciFiRotorSecondary = document.getElementById('heroSciFiRotorSecondary');
+      const heroSciFiHex = document.getElementById('heroSciFiHex');
+      const heroSciFiScanLine = document.getElementById('heroSciFiScanLine');
+      const heroSciFiScanGlow = document.getElementById('heroSciFiScanGlow');
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+      const lerp = (start, end, progress) => start + (end - start) * progress;
+      const scaleAround = (centerX, centerY, scaleValue) => (
+        `translate(${centerX} ${centerY}) scale(${scaleValue.toFixed(3)}) translate(${-centerX} ${-centerY})`
+      );
+      const heroVariantStorageKey = 'portfolio_hero_name_variant_preview';
+      const heroVariantQueryParam = 'heroVariant';
+      const validHeroVariants = new Set(['circular', 'premium', 'scifi']);
+      const syncHeroVariantUrl = nextVariant => {
+        if (!window.history || typeof window.history.replaceState !== 'function') {
+          return;
+        }
+
+        try {
+          const nextUrl = new URL(window.location.href);
+          if (nextUrl.searchParams.get(heroVariantQueryParam) === nextVariant) {
+            return;
+          }
+          nextUrl.searchParams.set(heroVariantQueryParam, nextVariant);
+          window.history.replaceState({}, '', `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
+        } catch {
+          // Ignore malformed URLs or browser limitations.
+        }
+      };
+      const setHeroVariant = (variant, { syncUrl = true } = {}) => {
+        const nextVariant = validHeroVariants.has(variant) ? variant : 'circular';
+        if (heroName) {
+          heroName.dataset.heroVariant = nextVariant;
+        }
+        heroVariantButtons.forEach(button => {
+          const isActive = button.dataset.heroVariantValue === nextVariant;
+          button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
+        try {
+          window.localStorage.setItem(heroVariantStorageKey, nextVariant);
+        } catch {
+          // Ignore storage issues in private browsing or restricted contexts.
+        }
+        if (syncUrl) {
+          syncHeroVariantUrl(nextVariant);
+        }
+      };
+      const getHeroVariant = () => {
+        if (heroName && validHeroVariants.has(heroName.dataset.heroVariant)) {
+          return heroName.dataset.heroVariant;
+        }
+        return 'circular';
+      };
+      let initialHeroVariant = 'circular';
+      try {
+        const queryVariant = new URLSearchParams(window.location.search).get(heroVariantQueryParam);
+        const savedVariant = window.localStorage.getItem(heroVariantStorageKey);
+        if (queryVariant && validHeroVariants.has(queryVariant)) {
+          initialHeroVariant = queryVariant;
+        } else if (savedVariant && validHeroVariants.has(savedVariant)) {
+          initialHeroVariant = savedVariant;
+        } else if (heroName && validHeroVariants.has(heroName.dataset.heroVariant)) {
+          initialHeroVariant = heroName.dataset.heroVariant;
+        }
+      } catch {
+        const queryVariant = new URLSearchParams(window.location.search).get(heroVariantQueryParam);
+        if (queryVariant && validHeroVariants.has(queryVariant)) {
+          initialHeroVariant = queryVariant;
+        } else if (heroName && validHeroVariants.has(heroName.dataset.heroVariant)) {
+          initialHeroVariant = heroName.dataset.heroVariant;
+        }
+      }
+      setHeroVariant(initialHeroVariant);
+      heroVariantButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          setHeroVariant(button.dataset.heroVariantValue);
+        });
+      });
+      if (heroName && heroNameSvg && heroNameSolidParts.length && !reducedMotion) {
+        const hudCenter = { x: 380, y: 108 };
         const motion = {
           targetX: 0,
           targetY: 0,
@@ -190,34 +460,13 @@ document.addEventListener('DOMContentLoaded', () => {
           currentY: 0,
           targetIntensity: 0,
           currentIntensity: 0,
-          shockwaveX: 380,
-          shockwaveY: 86,
-          shockwaveRadius: 0,
-          shockwaveStrength: 0,
-          lastShockwaveAt: 0
+          pulse: 0,
+          lastPulseAt: 0
         };
 
-        const pointerToViewBox = event => {
-          const bounds = heroName.getBoundingClientRect();
-          if (!bounds.width || !bounds.height) {
-            return null;
-          }
-          return {
-            x: viewBox.x + ((event.clientX - bounds.left) / bounds.width) * viewBox.width,
-            y: viewBox.y + ((event.clientY - bounds.top) / bounds.height) * viewBox.height
-          };
-        };
-
-        const triggerShockwave = (event, timestamp = performance.now()) => {
-          const point = pointerToViewBox(event);
-          if (!point) {
-            return;
-          }
-          motion.shockwaveX = point.x;
-          motion.shockwaveY = point.y;
-          motion.shockwaveRadius = 0;
-          motion.shockwaveStrength = 1;
-          motion.lastShockwaveAt = timestamp;
+        const triggerPulse = (timestamp = performance.now()) => {
+          motion.pulse = 1;
+          motion.lastPulseAt = timestamp;
         };
 
         const handlePointer = event => {
@@ -230,8 +479,8 @@ document.addEventListener('DOMContentLoaded', () => {
           motion.targetX = clamp(normalizedX, -1, 1);
           motion.targetY = clamp(normalizedY, -1, 1);
           motion.targetIntensity = clamp(Math.hypot(normalizedX, normalizedY), 0, 1);
-          if ((performance.now() - motion.lastShockwaveAt) > 105) {
-            triggerShockwave(event);
+          if ((performance.now() - motion.lastPulseAt) > 140) {
+            triggerPulse();
           }
           heroName.classList.add('is-interacting');
         };
@@ -244,185 +493,428 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         let previousTimestamp = 0;
-        const animateHeroGlass = timestamp => {
+        const animateHeroHud = timestamp => {
           const time = timestamp * 0.001;
           const frameDeltaMs = previousTimestamp ? Math.min(40, timestamp - previousTimestamp) : 16.7;
           previousTimestamp = timestamp;
-          motion.currentX += (motion.targetX - motion.currentX) * 0.11;
-          motion.currentY += (motion.targetY - motion.currentY) * 0.11;
+
+          motion.currentX += (motion.targetX - motion.currentX) * 0.1;
+          motion.currentY += (motion.targetY - motion.currentY) * 0.1;
           motion.currentIntensity += (motion.targetIntensity - motion.currentIntensity) * 0.08;
-          motion.shockwaveRadius += frameDeltaMs * (0.9 + motion.currentIntensity * 0.35);
-          motion.shockwaveStrength *= Math.pow(0.92, frameDeltaMs / 16.7);
-          if (motion.shockwaveStrength < 0.018) {
-            motion.shockwaveStrength = 0;
+          motion.pulse *= Math.pow(0.9, frameDeltaMs / 16.7);
+          if (motion.pulse < 0.01) {
+            motion.pulse = 0;
           }
 
-          const cycleDuration = 12000;
-          const cycleProgress = (timestamp % cycleDuration) / cycleDuration;
-          const holdStart = 0.52;
-          const holdEnd = 0.6;
-          const assembleProgress = easeOutCubic(remap01(cycleProgress, 0, 0.44));
-          const scatterProgress = easeInOutCubic(remap01(cycleProgress, holdEnd, 1));
-          const assemblyAlignProgress = easeInOutCubic(remap01(assembleProgress, 0.86, 1));
-          const isHolding = cycleProgress >= holdStart && cycleProgress < holdEnd;
-          const coreVisibility = isHolding ? 1 : 0;
-          const travelVisibility = Math.max(
-            Math.pow(assemblyAlignProgress, 2) * 0.2,
-            cycleProgress >= holdEnd ? (1 - scatterProgress) * 0.22 : 0
-          );
-          const ambientFloat = Math.sin(time * 1.14) * 5.6 + Math.cos(time * 0.48) * 2.4;
-          const auraPulse = (Math.sin(time * 1.82) + 1) * 0.5;
-          const shockPulse = motion.shockwaveStrength;
+          const ambientFloat = Math.sin(time * 0.86) * 2.8 + Math.cos(time * 0.46) * 1.2;
+          const glowPulse = (Math.sin(time * 1.34) + 1) * 0.5;
+          const currentVariant = getHeroVariant();
+          const railShiftX = motion.currentX * 5.5;
+          const railShiftY = motion.currentY * 2.4;
+          const hudShiftX = motion.currentX * 7;
+          const hudShiftY = motion.currentY * 3.5 + ambientFloat * 0.2;
 
-          const distortionPower = 0.18 + motion.currentIntensity * 1.05 + Math.sin(time * 0.62) * 0.04;
-          const displacementScale = 4.8 + distortionPower * 11.8;
-          heroGlassDisplace.setAttribute('scale', displacementScale.toFixed(2));
-
-          const frequencyX = 0.011 + motion.currentIntensity * 0.0035 + Math.sin(time * 0.55) * 0.0007;
-          const frequencyY = 0.079 + motion.currentIntensity * 0.019 + Math.cos(time * 0.63) * 0.0015;
-          heroGlassNoise.setAttribute('baseFrequency', `${frequencyX.toFixed(4)} ${frequencyY.toFixed(4)}`);
-          heroGlassLight.setAttribute('x', `${380 + motion.currentX * 150}`);
-          heroGlassLight.setAttribute('y', `${74 + motion.currentY * 74}`);
-          heroGlassLight.setAttribute('z', `${148 + motion.currentIntensity * 52}`);
-
-          const tiltX = -motion.currentY * 8 + Math.cos(time * 0.9) * 1.1;
-          const tiltY = motion.currentX * 13 + Math.sin(time * 1.1) * 1.5;
-          const depth = 6 + motion.currentIntensity * 9;
+          const tiltX = -motion.currentY * 4.4 + Math.cos(time * 0.72) * 0.5;
+          const tiltY = motion.currentX * 6.8 + Math.sin(time * 0.84) * 0.7;
+          const depth = 3.2 + motion.currentIntensity * 4.2 + motion.pulse * 1.8;
           heroName.style.setProperty('--name-float-y', `${ambientFloat.toFixed(2)}px`);
           heroName.style.setProperty('--name-rotate-x', `${tiltX.toFixed(2)}deg`);
           heroName.style.setProperty('--name-rotate-y', `${tiltY.toFixed(2)}deg`);
           heroName.style.setProperty('--name-depth', `${depth.toFixed(2)}px`);
 
           if (heroNameAura) {
-            const auraRx = 272 + auraPulse * 24 + motion.currentIntensity * 32;
-            const auraRy = 64 + auraPulse * 10 + motion.currentIntensity * 14;
-            const auraOpacity = 0.14 + auraPulse * 0.14 + travelVisibility + motion.currentIntensity * 0.16 + (isHolding ? 0.18 : 0);
+            const auraRx = currentVariant === 'circular'
+              ? 296 + glowPulse * 18 + motion.currentIntensity * 24 + motion.pulse * 18
+              : currentVariant === 'scifi'
+                ? 304 + glowPulse * 20 + motion.currentIntensity * 28 + motion.pulse * 22
+                : 286 + glowPulse * 14 + motion.currentIntensity * 18 + motion.pulse * 14;
+            const auraRy = currentVariant === 'circular'
+              ? 50 + glowPulse * 4 + motion.currentIntensity * 7
+              : currentVariant === 'scifi'
+                ? 54 + glowPulse * 5 + motion.currentIntensity * 9
+                : 46 + glowPulse * 3 + motion.currentIntensity * 6;
+            const auraOpacity = currentVariant === 'circular'
+              ? 0.08 + glowPulse * 0.08 + motion.currentIntensity * 0.09 + motion.pulse * 0.14
+              : currentVariant === 'scifi'
+                ? 0.1 + glowPulse * 0.1 + motion.currentIntensity * 0.1 + motion.pulse * 0.16
+                : 0.06 + glowPulse * 0.07 + motion.currentIntensity * 0.08 + motion.pulse * 0.12;
             heroNameAura.setAttribute('rx', auraRx.toFixed(2));
             heroNameAura.setAttribute('ry', auraRy.toFixed(2));
-            heroNameAura.setAttribute('cy', `${84 + ambientFloat * 0.16}`);
-            heroNameAura.setAttribute(
-              'transform',
-              `rotate(${(Math.sin(time * 0.36) * 1.2).toFixed(2)} 380 84)`
-            );
             heroNameAura.style.opacity = auraOpacity.toFixed(3);
           }
 
-          if (heroNameSweep) {
-            const sweepPhase = (time * 0.18 + motion.currentIntensity * 0.06) % 1;
-            const sweepX = lerp(-300, 840, sweepPhase);
-            const sweepY = 10 + Math.sin(time * 1.6) * 8 + shockPulse * 8;
-            const sweepWidth = 220 + auraPulse * 30 + shockPulse * 48;
-            const sweepOpacity = 0.08 + auraPulse * 0.08 + travelVisibility + motion.currentIntensity * 0.14 + shockPulse * 0.28 + (isHolding ? 0.2 : 0);
-            heroNameSweep.setAttribute('x', sweepX.toFixed(2));
-            heroNameSweep.setAttribute('y', sweepY.toFixed(2));
-            heroNameSweep.setAttribute('width', sweepWidth.toFixed(2));
-            heroNameSweep.setAttribute(
-              'transform',
-              `rotate(${(Math.sin(time * 0.8) * 7 + motion.currentX * 12 + shockPulse * 9).toFixed(2)} 380 86) skewX(${(Math.cos(time * 0.66) * 4).toFixed(2)})`
-            );
-            heroNameSweep.style.opacity = sweepOpacity.toFixed(3);
+          if (heroNameHud) {
+            heroNameHud.setAttribute('transform', `translate(${hudShiftX.toFixed(2)} ${hudShiftY.toFixed(2)})`);
+            heroNameHud.style.opacity = (0.74 + motion.currentIntensity * 0.1 + motion.pulse * 0.08).toFixed(3);
           }
 
-          if (heroNameSweepSecondary) {
-            const secondaryPhase = (time * 0.23 + 0.35 + motion.currentIntensity * 0.08) % 1;
-            const secondaryX = lerp(-360, 860, secondaryPhase);
-            const secondaryY = -4 + Math.cos(time * 1.25) * 12 - shockPulse * 10;
-            const secondaryWidth = 164 + Math.sin(time * 1.4) * 24 + shockPulse * 36;
-            const secondaryOpacity = 0.07 + auraPulse * 0.1 + travelVisibility * 0.65 + shockPulse * 0.32;
-            heroNameSweepSecondary.setAttribute('x', secondaryX.toFixed(2));
-            heroNameSweepSecondary.setAttribute('y', secondaryY.toFixed(2));
-            heroNameSweepSecondary.setAttribute('width', secondaryWidth.toFixed(2));
-            heroNameSweepSecondary.setAttribute(
+          if (heroCircularBand) {
+            const bandScale = 1 + glowPulse * 0.016 + motion.pulse * 0.05;
+            heroCircularBand.style.opacity = (0.03 + glowPulse * 0.02 + motion.currentIntensity * 0.018).toFixed(3);
+            heroCircularBand.setAttribute(
               'transform',
-              `rotate(${(-9 + Math.sin(time * 0.94) * 6 + motion.currentY * 9 - shockPulse * 14).toFixed(2)} 380 86) skewX(${(Math.sin(time * 0.52) * 6).toFixed(2)})`
+              `${scaleAround(hudCenter.x, hudCenter.y, bandScale)} translate(${(motion.currentX * 2.6).toFixed(2)} ${(motion.currentY * 1.2).toFixed(2)})`
             );
-            heroNameSweepSecondary.style.opacity = secondaryOpacity.toFixed(3);
           }
 
-          shardItems.forEach((shard, shardIndex) => {
-            const shardCenterX = shardArea.x + ((shardIndex % shardCols) + 0.5) * (shardArea.width / shardCols);
-            const shardCenterY = shardArea.y + (Math.floor(shardIndex / shardCols) + 0.5) * (shardArea.height / shardRows);
-            const shockDistance = Math.hypot(shardCenterX - motion.shockwaveX, shardCenterY - motion.shockwaveY);
-            const shockRing = Math.exp(-Math.pow(shockDistance - motion.shockwaveRadius, 2) / 720) * shockPulse;
-            const entryX = lerp(shard.startX, 0, assemblyAlignProgress);
-            const entryY = lerp(shard.startY, 0, assemblyAlignProgress);
-            const entryZ = lerp(shard.startZ, 0, assemblyAlignProgress);
-            const entryRot = lerp(shard.startRotation, 0, assemblyAlignProgress);
-            const exitX = lerp(0, shard.endX, scatterProgress);
-            const exitY = lerp(0, shard.endY, scatterProgress);
-            const exitZ = lerp(0, shard.endZ, scatterProgress);
-            const exitRot = lerp(0, shard.endRotation, scatterProgress);
-            const driftX = motion.currentX * 6 + Math.sin(time * 1.25 + shardIndex * 0.3) * 2.2 + (shardCenterX - motion.shockwaveX) * shockRing * 0.18;
-            const driftY = motion.currentY * 4 + Math.cos(time * 1.1 + shardIndex * 0.27) * 1.6 + (shardCenterY - motion.shockwaveY) * shockRing * 0.08;
-            const translateX = entryX + exitX + driftX;
-            const translateY = entryY + exitY + driftY;
-            const depthOffset = entryZ + exitZ - shockRing * 22;
-            const rotation = entryRot + exitRot + shockRing * 16;
-            const entryScale = lerp(shard.startScale, 1, assemblyAlignProgress);
-            const exitScale = lerp(1, shard.endScale, scatterProgress);
-            const scale = entryScale * exitScale * (1 + (-depthOffset / 520) + shockRing * 0.028);
-            const preHoldVisibility = Math.pow(assemblyAlignProgress, 3) * 0.16;
-            const postHoldVisibility = cycleProgress >= holdEnd ? (1 - scatterProgress) * 0.58 : 0;
-            const movingOpacity = Math.max(preHoldVisibility, postHoldVisibility);
-            const opacity = isHolding ? Math.min(1, 1 + shockRing * 0.22) : Math.min(1, movingOpacity + shockRing * 0.18);
-            const blur = (1 - assemblyAlignProgress) * 3 + scatterProgress * 2.1 + (shardIndex % 3) * 0.05 + Math.abs(depthOffset) * 0.005 + (1 - coreVisibility) * 1.25 + (isHolding ? 0 : 1.35) - shockRing * 0.55;
-            shard.element.setAttribute(
+          if (heroCircularRails) {
+            heroCircularRails.setAttribute('transform', `translate(${(motion.currentX * 3.8).toFixed(2)} ${(motion.currentY * 1.8).toFixed(2)})`);
+            heroCircularRails.style.opacity = (0.52 + glowPulse * 0.12 + motion.currentIntensity * 0.08).toFixed(3);
+          }
+
+          if (heroCircularFrame) {
+            heroCircularFrame.setAttribute('transform', `translate(${(motion.currentX * 2.8).toFixed(2)} 0)`);
+            heroCircularFrame.style.opacity = (0.36 + glowPulse * 0.1 + motion.currentIntensity * 0.08).toFixed(3);
+          }
+
+          if (heroCircularHud) {
+            const circularScale = 1 + glowPulse * 0.024 + motion.currentIntensity * 0.014 + motion.pulse * 0.08;
+            heroCircularHud.setAttribute(
               'transform',
-              `translate(${translateX.toFixed(2)} ${translateY.toFixed(2)}) rotate(${rotation.toFixed(2)} 380 86) scale(${scale.toFixed(3)})`
+              `rotate(${(Math.sin(time * 0.36) * 1.2 + motion.currentX * 2.2).toFixed(2)} ${hudCenter.x} ${hudCenter.y}) ${scaleAround(hudCenter.x, hudCenter.y, circularScale)}`
             );
-            shard.element.style.opacity = opacity.toFixed(3);
-            shard.element.style.filter = `blur(${blur.toFixed(2)}px)`;
+          }
+
+          if (heroCircularHalo) {
+            heroCircularHalo.setAttribute('r', `${(96 + glowPulse * 8 + motion.currentIntensity * 8 + motion.pulse * 10).toFixed(2)}`);
+            heroCircularHalo.style.opacity = (0.1 + glowPulse * 0.1 + motion.currentIntensity * 0.07 + motion.pulse * 0.14).toFixed(3);
+          }
+
+          if (heroCircularOuterRing) {
+            heroCircularOuterRing.style.opacity = (0.36 + glowPulse * 0.12 + motion.currentIntensity * 0.1).toFixed(3);
+          }
+
+          if (heroCircularOuterDots) {
+            heroCircularOuterDots.setAttribute(
+              'transform',
+              `rotate(${(-time * 8 - motion.pulse * 16).toFixed(2)} ${hudCenter.x} ${hudCenter.y})`
+            );
+            heroCircularOuterDots.style.opacity = (0.5 + glowPulse * 0.18 + motion.currentIntensity * 0.1).toFixed(3);
+          }
+
+          if (heroCircularRotorOuter) {
+            heroCircularRotorOuter.setAttribute(
+              'transform',
+              `rotate(${(time * 18 + motion.currentX * 8 + motion.pulse * 18).toFixed(2)} ${hudCenter.x} ${hudCenter.y})`
+            );
+          }
+
+          if (heroCircularRotorInner) {
+            heroCircularRotorInner.setAttribute(
+              'transform',
+              `rotate(${(-time * 24 - motion.currentY * 8 - motion.pulse * 20).toFixed(2)} ${hudCenter.x} ${hudCenter.y})`
+            );
+          }
+
+          if (heroCircularCore) {
+            heroCircularCore.setAttribute('r', `${(20 + glowPulse * 1.3 + motion.pulse * 2.4).toFixed(2)}`);
+            heroCircularCore.style.opacity = (0.7 + glowPulse * 0.1 + motion.pulse * 0.08).toFixed(3);
+          }
+
+          if (heroCircularCoreOutline) {
+            heroCircularCoreOutline.setAttribute('r', `${(20 + glowPulse * 0.8 + motion.pulse * 1.6).toFixed(2)}`);
+            heroCircularCoreOutline.style.opacity = (0.68 + glowPulse * 0.12 + motion.pulse * 0.1).toFixed(3);
+          }
+
+          if (heroCircularScanLine) {
+            const scanY = 82 + ((Math.sin(time * 1.92) + 1) * 0.5) * 12 + motion.pulse * 1.2;
+            heroCircularScanLine.setAttribute('y', scanY.toFixed(2));
+            heroCircularScanLine.style.opacity = (0.36 + glowPulse * 0.16 + motion.pulse * 0.12).toFixed(3);
+          }
+
+          if (heroCircularScanGlow) {
+            const glowY = 74 + ((Math.sin(time * 1.92) + 1) * 0.5) * 12 + motion.pulse * 1.2;
+            heroCircularScanGlow.setAttribute('y', glowY.toFixed(2));
+            heroCircularScanGlow.style.opacity = (0.14 + glowPulse * 0.1 + motion.pulse * 0.1).toFixed(3);
+          }
+
+          if (heroNameLightBand) {
+            const bandOpacity = 0.035 + glowPulse * 0.024 + motion.currentIntensity * 0.018;
+            const bandScale = 1 + motion.currentIntensity * 0.01 + motion.pulse * 0.03;
+            heroNameLightBand.style.opacity = bandOpacity.toFixed(3);
+            heroNameLightBand.setAttribute(
+              'transform',
+              `${scaleAround(hudCenter.x, hudCenter.y, bandScale)} translate(${(motion.currentX * 3).toFixed(2)} ${(motion.currentY * 1.5).toFixed(2)})`
+            );
+          }
+
+          if (heroNameRails) {
+            heroNameRails.setAttribute('transform', `translate(${railShiftX.toFixed(2)} ${railShiftY.toFixed(2)})`);
+            heroNameRails.style.opacity = (0.6 + glowPulse * 0.12 + motion.currentIntensity * 0.08).toFixed(3);
+          }
+
+          if (heroNameFrame) {
+            const frameShiftX = motion.currentX * 3.5 + Math.sin(time * 0.9) * 0.6;
+            heroNameFrame.setAttribute('transform', `translate(${frameShiftX.toFixed(2)} 0)`);
+            heroNameFrame.style.opacity = (0.42 + glowPulse * 0.08 + motion.currentIntensity * 0.06).toFixed(3);
+          }
+
+          if (heroCenterHud) {
+            const centerScale = 1 + glowPulse * 0.02 + motion.currentIntensity * 0.015 + motion.pulse * 0.08;
+            const centerRotate = Math.sin(time * 0.42) * 1.2 + motion.currentX * 2.6;
+            const centerTranslateX = motion.currentX * 2.8;
+            const centerTranslateY = motion.currentY * 1.6;
+            heroCenterHud.setAttribute(
+              'transform',
+              `translate(${centerTranslateX.toFixed(2)} ${centerTranslateY.toFixed(2)}) rotate(${centerRotate.toFixed(2)} ${hudCenter.x} ${hudCenter.y}) ${scaleAround(hudCenter.x, hudCenter.y, centerScale)}`
+            );
+          }
+
+          if (heroCenterHalo) {
+            heroCenterHalo.setAttribute('r', `${(76 + glowPulse * 6 + motion.pulse * 8 + motion.currentIntensity * 5).toFixed(2)}`);
+            heroCenterHalo.style.opacity = (0.08 + glowPulse * 0.08 + motion.currentIntensity * 0.06 + motion.pulse * 0.12).toFixed(3);
+          }
+
+          if (heroCenterOuter) {
+            heroCenterOuter.style.opacity = (0.34 + glowPulse * 0.12 + motion.currentIntensity * 0.1).toFixed(3);
+          }
+
+          if (heroCenterTicks) {
+            heroCenterTicks.setAttribute(
+              'transform',
+              `rotate(${(-time * 10 - motion.pulse * 18).toFixed(2)} ${hudCenter.x} ${hudCenter.y})`
+            );
+            heroCenterTicks.style.opacity = (0.44 + glowPulse * 0.18 + motion.currentIntensity * 0.1).toFixed(3);
+          }
+
+          if (heroCenterRotorPrimary) {
+            heroCenterRotorPrimary.setAttribute(
+              'transform',
+              `rotate(${(time * 26 + motion.currentX * 10 + motion.pulse * 16).toFixed(2)} ${hudCenter.x} ${hudCenter.y})`
+            );
+          }
+
+          if (heroCenterRotorSecondary) {
+            heroCenterRotorSecondary.setAttribute(
+              'transform',
+              `rotate(${(-time * 34 - motion.currentY * 10 - motion.pulse * 22).toFixed(2)} ${hudCenter.x} ${hudCenter.y})`
+            );
+          }
+
+          if (heroCenterCore) {
+            heroCenterCore.setAttribute('r', `${(22 + glowPulse * 1.5 + motion.pulse * 2.6).toFixed(2)}`);
+            heroCenterCore.style.opacity = (0.68 + glowPulse * 0.12 + motion.pulse * 0.08).toFixed(3);
+          }
+
+          if (heroCenterCoreOutline) {
+            heroCenterCoreOutline.setAttribute('r', `${(22 + glowPulse * 1 + motion.pulse * 1.8).toFixed(2)}`);
+            heroCenterCoreOutline.style.opacity = (0.6 + glowPulse * 0.12 + motion.pulse * 0.08).toFixed(3);
+          }
+
+          if (heroCenterScanLine) {
+            const scanY = 82 + ((Math.sin(time * 2.4) + 1) * 0.5) * 12 + motion.pulse * 1.4;
+            heroCenterScanLine.setAttribute('y', scanY.toFixed(2));
+            heroCenterScanLine.style.opacity = (0.34 + glowPulse * 0.14 + motion.pulse * 0.12).toFixed(3);
+          }
+
+          if (heroCenterScanGlow) {
+            const glowY = 74 + ((Math.sin(time * 2.4) + 1) * 0.5) * 12 + motion.pulse * 1.4;
+            heroCenterScanGlow.setAttribute('y', glowY.toFixed(2));
+            heroCenterScanGlow.style.opacity = (0.12 + glowPulse * 0.08 + motion.pulse * 0.1).toFixed(3);
+          }
+
+          if (heroSciFiBand) {
+            const bandScale = 1 + glowPulse * 0.02 + motion.currentIntensity * 0.015 + motion.pulse * 0.05;
+            heroSciFiBand.style.opacity = (0.04 + glowPulse * 0.026 + motion.currentIntensity * 0.02 + motion.pulse * 0.02).toFixed(3);
+            heroSciFiBand.setAttribute(
+              'transform',
+              `${scaleAround(hudCenter.x, hudCenter.y, bandScale)} translate(${(motion.currentX * 4).toFixed(2)} ${(motion.currentY * 1.8).toFixed(2)})`
+            );
+          }
+
+          if (heroSciFiRails) {
+            heroSciFiRails.setAttribute('transform', `translate(${(motion.currentX * 6.2).toFixed(2)} ${(motion.currentY * 2.6).toFixed(2)})`);
+            heroSciFiRails.style.opacity = (0.64 + glowPulse * 0.12 + motion.currentIntensity * 0.1).toFixed(3);
+          }
+
+          if (heroSciFiFrame) {
+            const frameScale = 1 + motion.currentIntensity * 0.01 + motion.pulse * 0.03;
+            heroSciFiFrame.setAttribute(
+              'transform',
+              `${scaleAround(hudCenter.x, hudCenter.y, frameScale)} translate(${(motion.currentX * 4.2).toFixed(2)} 0)`
+            );
+            heroSciFiFrame.style.opacity = (0.5 + glowPulse * 0.1 + motion.currentIntensity * 0.08 + motion.pulse * 0.08).toFixed(3);
+          }
+
+          if (heroSciFiCore) {
+            const coreScale = 1 + glowPulse * 0.026 + motion.currentIntensity * 0.02 + motion.pulse * 0.09;
+            heroSciFiCore.setAttribute(
+              'transform',
+              `rotate(${(Math.sin(time * 0.52) * 2.4 + motion.currentX * 4.2).toFixed(2)} ${hudCenter.x} ${hudCenter.y}) ${scaleAround(hudCenter.x, hudCenter.y, coreScale)}`
+            );
+          }
+
+          if (heroSciFiHalo) {
+            heroSciFiHalo.setAttribute('r', `${(78 + glowPulse * 8 + motion.currentIntensity * 10 + motion.pulse * 12).toFixed(2)}`);
+            heroSciFiHalo.style.opacity = (0.12 + glowPulse * 0.1 + motion.currentIntensity * 0.08 + motion.pulse * 0.14).toFixed(3);
+          }
+
+          if (heroSciFiOuter) {
+            heroSciFiOuter.style.opacity = (0.4 + glowPulse * 0.14 + motion.currentIntensity * 0.1).toFixed(3);
+          }
+
+          if (heroSciFiOuterTicks) {
+            heroSciFiOuterTicks.setAttribute(
+              'transform',
+              `rotate(${(-time * 18 - motion.pulse * 30).toFixed(2)} ${hudCenter.x} ${hudCenter.y})`
+            );
+            heroSciFiOuterTicks.style.opacity = (0.54 + glowPulse * 0.18 + motion.currentIntensity * 0.12).toFixed(3);
+          }
+
+          if (heroSciFiRotorPrimary) {
+            heroSciFiRotorPrimary.setAttribute(
+              'transform',
+              `rotate(${(time * 34 + motion.currentX * 14 + motion.pulse * 26).toFixed(2)} ${hudCenter.x} ${hudCenter.y})`
+            );
+          }
+
+          if (heroSciFiRotorSecondary) {
+            heroSciFiRotorSecondary.setAttribute(
+              'transform',
+              `rotate(${(-time * 46 - motion.currentY * 14 - motion.pulse * 30).toFixed(2)} ${hudCenter.x} ${hudCenter.y})`
+            );
+          }
+
+          if (heroSciFiHex) {
+            heroSciFiHex.style.opacity = (0.34 + glowPulse * 0.12 + motion.currentIntensity * 0.08 + motion.pulse * 0.12).toFixed(3);
+          }
+
+          if (heroSciFiScanLine) {
+            const scanY = 84 + ((Math.sin(time * 3.4) + 1) * 0.5) * 8 + motion.pulse * 1.8;
+            heroSciFiScanLine.setAttribute('y', scanY.toFixed(2));
+            heroSciFiScanLine.style.opacity = (0.42 + glowPulse * 0.16 + motion.pulse * 0.14).toFixed(3);
+          }
+
+          if (heroSciFiScanGlow) {
+            const glowY = 76 + ((Math.sin(time * 3.4) + 1) * 0.5) * 8 + motion.pulse * 1.8;
+            heroSciFiScanGlow.setAttribute('y', glowY.toFixed(2));
+            heroSciFiScanGlow.style.opacity = (0.16 + glowPulse * 0.12 + motion.pulse * 0.12).toFixed(3);
+          }
+
+          heroNamePrimarySweeps.forEach((sweep, sweepIndex) => {
+            const isRightSide = sweep.dataset.sweepSide === 'right';
+            const sweepPhase = (time * 0.14 + motion.currentIntensity * 0.04 + (isRightSide ? 0.12 : 0)) % 1;
+            const sweepX = isRightSide
+              ? lerp(300, 772, sweepPhase)
+              : lerp(-228, 248, sweepPhase);
+            const sweepY = 8 + Math.sin(time * 0.92 + (isRightSide ? 0.45 : 0)) * 3 - motion.currentY * 3;
+            const sweepWidth = currentVariant === 'scifi'
+              ? 170 + glowPulse * 18 + motion.pulse * 16
+              : currentVariant === 'circular'
+                ? 134 + glowPulse * 14 + motion.pulse * 10
+                : 146 + glowPulse * 16 + motion.pulse * 12;
+            const sweepRotate = (Math.sin(time * 0.52 + sweepIndex * 0.4) * 2.6 + motion.currentX * (isRightSide ? 4.2 : -4.2)).toFixed(2);
+            sweep.setAttribute('x', sweepX.toFixed(2));
+            sweep.setAttribute('y', sweepY.toFixed(2));
+            sweep.setAttribute('width', sweepWidth.toFixed(2));
+            sweep.setAttribute('transform', `rotate(${sweepRotate} ${hudCenter.x} ${hudCenter.y})`);
+            const sweepOpacity = currentVariant === 'scifi'
+              ? 0.18 + glowPulse * 0.1 + motion.currentIntensity * 0.08
+              : currentVariant === 'circular'
+                ? 0.09 + glowPulse * 0.06 + motion.currentIntensity * 0.04
+                : 0.13 + glowPulse * 0.08 + motion.currentIntensity * 0.06;
+            sweep.style.opacity = sweepOpacity.toFixed(3);
           });
 
-          letterItems.forEach((letter, index) => {
-            const driftPhase = time * letter.speed + letter.phase;
-            const baseWaveX = Math.sin(driftPhase) * (2.6 + letter.depthBias * 0.35);
-            const baseWaveY = Math.cos(driftPhase * 1.14) * (1.85 + letter.heightBias * 0.25);
-            const parallaxX = motion.currentX * (9 + Math.abs(letter.anchorBias) * 3.5) + letter.anchorBias * 3.4;
-            const parallaxY = motion.currentY * 6.2;
-            const distance = Math.hypot(letter.centerX - motion.shockwaveX, letter.centerY - motion.shockwaveY);
-            const shockRing = Math.exp(-Math.pow(distance - motion.shockwaveRadius, 2) / 610) * shockPulse;
-            const shockDirectionX = distance > 0 ? (letter.centerX - motion.shockwaveX) / distance : 0;
-            const shockDirectionY = distance > 0 ? (letter.centerY - motion.shockwaveY) / distance : -0.15;
-            const shockX = shockDirectionX * shockRing * 16;
-            const shockY = shockDirectionY * shockRing * 8 - shockRing * 3.2;
-            const depthLift = Math.sin(driftPhase * 0.82) * 0.06 + shockRing * 0.13 + motion.currentIntensity * 0.04;
-            const scale = 1 + depthLift;
-            const opacity = Math.min(0.82, 0.12 + coreVisibility * 0.26 + travelVisibility * 0.42 + shockRing * 0.32 + auraPulse * 0.08);
-            const blur = Math.max(0, 0.45 + Math.abs(letter.anchorBias) * 0.22 - shockRing * 0.42 + (index % 2) * 0.07);
-            letter.element.setAttribute(
-              'transform',
-              `translate(${(baseWaveX + parallaxX + shockX).toFixed(2)} ${(baseWaveY + parallaxY + shockY).toFixed(2)}) scale(${scale.toFixed(3)})`
-            );
-            letter.element.style.opacity = opacity.toFixed(3);
-            letter.element.style.filter = `blur(${blur.toFixed(2)}px) drop-shadow(0 0 ${(4 + shockRing * 10 + motion.currentIntensity * 6).toFixed(2)}px rgba(170, 239, 255, ${(0.12 + shockRing * 0.28).toFixed(3)}))`;
+          heroNameSecondarySweeps.forEach((sweep, sweepIndex) => {
+            const isRightSide = sweep.dataset.sweepSide === 'right';
+            const sweepPhase = (time * 0.18 + 0.24 + motion.currentIntensity * 0.03 + (isRightSide ? 0.16 : 0)) % 1;
+            const sweepX = isRightSide
+              ? lerp(332, 804, sweepPhase)
+              : lerp(-276, 204, sweepPhase);
+            const sweepY = -6 + Math.cos(time * 0.74 + (isRightSide ? 0.3 : 0)) * 4.5 + motion.currentY * 2;
+            const sweepWidth = currentVariant === 'scifi'
+              ? 138 + glowPulse * 16 + motion.pulse * 14
+              : currentVariant === 'circular'
+                ? 108 + glowPulse * 10 + motion.pulse * 8
+                : 118 + glowPulse * 12 + motion.pulse * 10;
+            const sweepRotate = (-4 + Math.sin(time * 0.66 + sweepIndex * 0.3) * 3 - motion.currentY * (isRightSide ? 3.2 : -3.2)).toFixed(2);
+            sweep.setAttribute('x', sweepX.toFixed(2));
+            sweep.setAttribute('y', sweepY.toFixed(2));
+            sweep.setAttribute('width', sweepWidth.toFixed(2));
+            sweep.setAttribute('transform', `rotate(${sweepRotate} ${hudCenter.x} ${hudCenter.y})`);
+            const sweepOpacity = currentVariant === 'scifi'
+              ? 0.12 + glowPulse * 0.06 + motion.pulse * 0.08
+              : currentVariant === 'circular'
+                ? 0.05 + glowPulse * 0.04 + motion.pulse * 0.04
+                : 0.08 + glowPulse * 0.05 + motion.pulse * 0.06;
+            sweep.style.opacity = sweepOpacity.toFixed(3);
           });
 
-          heroNameSolid.style.opacity = coreVisibility.toFixed(3);
-          heroNameSolid.style.filter = `drop-shadow(0 0 ${(10 + auraPulse * 8 + motion.currentIntensity * 12 + shockPulse * 12).toFixed(2)}px rgba(186, 241, 255, ${(0.18 + motion.currentIntensity * 0.18 + shockPulse * 0.16).toFixed(3)}))`;
-          if (heroNameHighlight) {
-            const reflectX = motion.currentX * 10 + Math.sin(time * 1.38) * 4.4 + shockPulse * 7;
-            const reflectY = motion.currentY * 6 + Math.cos(time * 1.7) * 1.8 - 1.2 - shockPulse * 2.8;
-            const reflectOpacity = Math.max(0.16, coreVisibility * 0.48 + travelVisibility + auraPulse * 0.06 + motion.currentIntensity * 0.12 + shockPulse * 0.18);
-            heroNameHighlight.setAttribute('transform', `translate(${reflectX.toFixed(2)} ${reflectY.toFixed(2)})`);
-            heroNameHighlight.style.opacity = reflectOpacity.toFixed(3);
-          }
+          heroNamePrimarySignals.forEach(signal => {
+            const isRightSide = signal.dataset.signalSide === 'right';
+            const signalShiftX = (Math.sin(time * 0.6 + (isRightSide ? 0.24 : 0)) * 6) + motion.currentX * (isRightSide ? 6 : -6);
+            const signalShiftY = motion.currentY * 1.3;
+            signal.setAttribute('transform', `translate(${signalShiftX.toFixed(2)} ${signalShiftY.toFixed(2)})`);
+            const signalOpacity = currentVariant === 'scifi'
+              ? 0.28 + glowPulse * 0.1 + motion.currentIntensity * 0.08
+              : currentVariant === 'circular'
+                ? 0.1 + glowPulse * 0.06 + motion.currentIntensity * 0.03
+                : 0.18 + glowPulse * 0.08 + motion.currentIntensity * 0.05;
+            signal.style.opacity = signalOpacity.toFixed(3);
+          });
 
-          requestAnimationFrame(animateHeroGlass);
+          heroNameSecondarySignals.forEach(signal => {
+            const isRightSide = signal.dataset.signalSide === 'right';
+            const signalShiftX = (-Math.sin(time * 0.52 + (isRightSide ? 0.2 : 0)) * 4.5) - motion.currentX * (isRightSide ? 4.2 : -4.2);
+            const signalShiftY = -motion.currentY * 1.1;
+            signal.setAttribute('transform', `translate(${signalShiftX.toFixed(2)} ${signalShiftY.toFixed(2)})`);
+            const signalOpacity = currentVariant === 'scifi'
+              ? 0.2 + glowPulse * 0.08 + motion.currentIntensity * 0.06
+              : currentVariant === 'circular'
+                ? 0.06 + glowPulse * 0.04 + motion.currentIntensity * 0.03
+                : 0.12 + glowPulse * 0.06 + motion.currentIntensity * 0.04;
+            signal.style.opacity = signalOpacity.toFixed(3);
+          });
+
+          const textGlowBlur = currentVariant === 'scifi'
+            ? 9 + glowPulse * 5 + motion.currentIntensity * 6 + motion.pulse * 7
+            : currentVariant === 'circular'
+              ? 6 + glowPulse * 3 + motion.currentIntensity * 4 + motion.pulse * 5
+              : 7 + glowPulse * 4 + motion.currentIntensity * 4 + motion.pulse * 5;
+          const textGlowOpacity = currentVariant === 'scifi'
+            ? 0.14 + motion.currentIntensity * 0.08 + motion.pulse * 0.1
+            : currentVariant === 'circular'
+              ? 0.08 + motion.currentIntensity * 0.06 + motion.pulse * 0.08
+              : 0.1 + motion.currentIntensity * 0.06 + motion.pulse * 0.08;
+          heroNameSolidParts.forEach(part => {
+            part.style.opacity = '1';
+            part.style.filter = `drop-shadow(0 0 ${textGlowBlur.toFixed(2)}px rgba(177, 242, 255, ${textGlowOpacity.toFixed(3)}))`;
+          });
+          heroNameHighlightParts.forEach(part => {
+            const sideDirection = part.dataset.nameSide === 'right' ? 1 : -1;
+            const reflectX = sideDirection * (1.8 + motion.currentX * 3) + Math.sin(time * 1.08 + (sideDirection > 0 ? 0.35 : 0)) * 2;
+            const reflectY = motion.currentY * 2.2 + Math.cos(time * 1.26 + (sideDirection > 0 ? 0.2 : 0)) * 0.8 - 0.8;
+            const reflectOpacity = currentVariant === 'scifi'
+              ? 0.12 + glowPulse * 0.06 + motion.currentIntensity * 0.04 + motion.pulse * 0.06
+              : currentVariant === 'circular'
+                ? 0.06 + glowPulse * 0.04 + motion.currentIntensity * 0.03 + motion.pulse * 0.05
+                : 0.08 + glowPulse * 0.05 + motion.currentIntensity * 0.03 + motion.pulse * 0.05;
+            part.setAttribute('transform', `translate(${reflectX.toFixed(2)} ${reflectY.toFixed(2)})`);
+            part.style.opacity = reflectOpacity.toFixed(3);
+          });
+
+          requestAnimationFrame(animateHeroHud);
         };
 
         heroName.addEventListener('pointerenter', event => {
-          triggerShockwave(event);
+          triggerPulse();
           handlePointer(event);
         });
         heroName.addEventListener('pointermove', handlePointer);
         heroName.addEventListener('pointerleave', resetPointer);
-        requestAnimationFrame(animateHeroGlass);
-      } else if (heroGlassDisplace) {
-        heroGlassDisplace.setAttribute('scale', '3.4');
-        if (heroNameSolid) {
-          heroNameSolid.style.opacity = '1';
+        requestAnimationFrame(animateHeroHud);
+      } else {
+        heroNameSolidParts.forEach(part => {
+          part.style.opacity = '1';
+        });
+        heroNameHighlightParts.forEach(part => {
+          part.style.opacity = '0.16';
+        });
+        if (heroCenterScanLine) {
+          heroCenterScanLine.setAttribute('y', '88');
         }
+      }
       }
 
       const heroTileTargets = Array.from(document.querySelectorAll('.hero-greeting, .hero-role, .hero-summary'));

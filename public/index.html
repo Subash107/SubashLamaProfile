@@ -13,9 +13,27 @@
   <script src="assets/js/site.js" defer></script>
   <link rel="stylesheet" href="assets/css/motion.css" />
   <link rel="stylesheet" href="assets/css/index.css" />
+  <noscript>
+    <style>
+      body.loader-active {
+        overflow: auto !important;
+      }
+
+      .portfolio-loader {
+        display: none !important;
+      }
+
+      .content {
+        opacity: 1 !important;
+        filter: none !important;
+        transform: none !important;
+        pointer-events: auto !important;
+      }
+    </style>
+  </noscript>
 </head>
 
-<body>
+<body class="loader-active">
 
   <!-- Background ocean sound (manual toggle in JS) -->
   <audio id="bg-audio" data-bg-audio loop preload="none">
@@ -31,65 +49,371 @@
 
   <div id="overlay"></div>
 
+  <div class="portfolio-loader" data-loader data-loader-style="boot" aria-live="polite" aria-hidden="false">
+    <div class="portfolio-loader__backdrop" aria-hidden="true">
+      <span class="loader-grid"></span>
+      <span class="loader-scanlines"></span>
+      <span class="loader-glow loader-glow-a"></span>
+      <span class="loader-glow loader-glow-b"></span>
+    </div>
+    <div class="portfolio-loader__shell">
+      <div class="portfolio-loader__meta">
+        <span class="loader-tag">Parrot-inspired loader study</span>
+        <span class="loader-style-indicator" data-loader-indicator>Cyber Screenshot Boot</span>
+      </div>
+
+      <div class="loader-variants">
+        <section class="loader-variant loader-variant-boot" data-loader-panel="boot" aria-label="Cyber Screenshot Boot">
+          <div class="loader-boot-layout">
+            <div class="loader-copy">
+              <p class="loader-overline">Cyber Screenshot Boot</p>
+              <h2>Secure desktop snapshot assembling</h2>
+              <p class="loader-caption">Frozen interface cards, cyan telemetry, and a fast boot pass that feels technical without overwhelming the portfolio.</p>
+              <div class="loader-chip-row">
+                <span class="loader-chip">CI/CD</span>
+                <span class="loader-chip">Cloud Ops</span>
+                <span class="loader-chip">Security</span>
+              </div>
+            </div>
+
+            <div class="loader-boot-scene" aria-hidden="true">
+              <article class="loader-shot loader-shot-main">
+                <header class="loader-shot-bar">
+                  <span class="loader-shot-dot"></span>
+                  <span class="loader-shot-dot"></span>
+                  <span class="loader-shot-dot"></span>
+                  <span class="loader-shot-title">stack://portfolio/overview</span>
+                </header>
+                <div class="loader-shot-screen">
+                  <span class="loader-shot-row loader-shot-row-wide"></span>
+                  <span class="loader-shot-row"></span>
+                  <span class="loader-shot-row"></span>
+                  <span class="loader-shot-row loader-shot-row-short"></span>
+                  <div class="loader-shot-scope">
+                    <span class="loader-shot-scope-ring"></span>
+                    <span class="loader-shot-scope-ring loader-shot-scope-ring-inner"></span>
+                    <span class="loader-shot-scope-core"></span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="loader-shot loader-shot-side">
+                <header class="loader-shot-bar">
+                  <span class="loader-shot-title">telemetry://security</span>
+                </header>
+                <div class="loader-shot-screen">
+                  <span class="loader-shot-row"></span>
+                  <span class="loader-shot-row loader-shot-row-short"></span>
+                  <span class="loader-shot-row"></span>
+                </div>
+              </article>
+
+              <article class="loader-shot loader-shot-bottom">
+                <header class="loader-shot-bar">
+                  <span class="loader-shot-title">workflow://release-pipeline</span>
+                </header>
+                <div class="loader-shot-screen loader-shot-screen-grid">
+                  <span class="loader-shot-cell"></span>
+                  <span class="loader-shot-cell"></span>
+                  <span class="loader-shot-cell"></span>
+                  <span class="loader-shot-cell"></span>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="loader-variant loader-variant-hud" data-loader-panel="hud" aria-label="Terminal and HUD Loader">
+          <div class="loader-hud-layout">
+            <div class="loader-terminal">
+              <p class="loader-overline">Terminal + HUD Loader</p>
+              <h2>Command surface synchronizing</h2>
+              <div class="loader-terminal-window" aria-hidden="true">
+                <span class="loader-terminal-line">bootctl --profile portfolio --secure</span>
+                <span class="loader-terminal-line">loading workflow modules...</span>
+                <span class="loader-terminal-line">binding observability channels...</span>
+                <span class="loader-terminal-line">verifying runtime hardening...</span>
+                <span class="loader-terminal-line">session online_ ready</span>
+              </div>
+            </div>
+
+            <div class="loader-radar" aria-hidden="true">
+              <span class="loader-radar-ring loader-radar-ring-outer"></span>
+              <span class="loader-radar-ring loader-radar-ring-mid"></span>
+              <span class="loader-radar-ring loader-radar-ring-inner"></span>
+              <span class="loader-radar-sweep"></span>
+              <span class="loader-radar-crosshair"></span>
+              <span class="loader-radar-core"></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="loader-variant loader-variant-reveal" data-loader-panel="reveal" aria-label="Name Scan Reveal">
+          <div class="loader-reveal-layout">
+            <p class="loader-overline">Name Scan Reveal</p>
+            <h2>Identity signature locking in</h2>
+            <div class="loader-name-stage" aria-hidden="true">
+              <span class="loader-name-outline">Subash Lama</span>
+              <span class="loader-name-solid">Subash Lama</span>
+              <span class="loader-name-scan"></span>
+              <span class="loader-name-halo"></span>
+            </div>
+            <p class="loader-caption">The cleanest option: a focused scanline reveal around your name with a restrained premium glow.</p>
+          </div>
+        </section>
+      </div>
+
+      <div class="portfolio-loader__footer">
+        <div class="loader-progress-track" aria-hidden="true">
+          <span class="loader-progress-bar" data-loader-progress-bar></span>
+        </div>
+        <p class="loader-status" data-loader-status>Initializing portfolio workspace...</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="loader-lab" data-loader-lab aria-label="Loader style controls">
+    <span class="loader-lab__label">Loader Lab</span>
+    <div class="loader-lab__actions">
+      <button type="button" class="loader-lab__button" data-loader-select="boot">Cyber Boot</button>
+      <button type="button" class="loader-lab__button" data-loader-select="hud">Terminal HUD</button>
+      <button type="button" class="loader-lab__button" data-loader-select="reveal">Name Reveal</button>
+      <button type="button" class="loader-lab__button loader-lab__button--ghost" data-loader-replay>Replay Current</button>
+    </div>
+  </div>
+
   <div class="content">
     <div class="hero-section">
       <div class="hero-content">
-        <h1 class="hero-name">
-          <svg id="heroNameSvg" class="hero-name-svg" viewBox="0 0 760 170" role="img" aria-label="Subash Lama">
+        <h1 class="hero-name" data-hero-variant="circular" aria-label="Subash Lama">
+          <span class="hero-name-display hero-name-terminal" aria-hidden="true">
+            <span class="hero-name-prompt">&gt;</span>
+            <span class="hero-name-typed" data-terminal-name data-terminal-full="Subash Lama">Subash Lama</span>
+            <span class="hero-name-cursor" data-terminal-cursor></span>
+          </span>
+          <svg id="heroNameSvg" class="hero-name-svg" viewBox="0 0 760 220" role="img" aria-label="Subash Lama">
             <defs id="heroNameDefs">
               <linearGradient id="heroNameFill" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#f6fdff" />
-                <stop offset="55%" stop-color="#d6f4ff" />
+                <stop offset="0%" stop-color="#fbffff" />
+                <stop offset="40%" stop-color="#e4fbff" />
+                <stop offset="74%" stop-color="#9fefff" />
                 <stop offset="100%" stop-color="#ffffff" />
               </linearGradient>
               <radialGradient id="heroNameAuraGradient" cx="50%" cy="50%" r="62%">
-                <stop offset="0%" stop-color="#dff8ff" stop-opacity="0.96" />
-                <stop offset="38%" stop-color="#9ce8ff" stop-opacity="0.42" />
-                <stop offset="100%" stop-color="#dff8ff" stop-opacity="0" />
+                <stop offset="0%" stop-color="#72efff" stop-opacity="0.4" />
+                <stop offset="56%" stop-color="#30d3ea" stop-opacity="0.12" />
+                <stop offset="100%" stop-color="#72efff" stop-opacity="0" />
               </radialGradient>
+              <linearGradient id="heroNameBandGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
+                <stop offset="24%" stop-color="#5be8ff" stop-opacity="0.035" />
+                <stop offset="50%" stop-color="#7cefff" stop-opacity="0.06" />
+                <stop offset="76%" stop-color="#5be8ff" stop-opacity="0.035" />
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+              </linearGradient>
+              <linearGradient id="heroTechLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
+                <stop offset="22%" stop-color="#74f2ff" stop-opacity="0.28" />
+                <stop offset="50%" stop-color="#ffffff" stop-opacity="0.98" />
+                <stop offset="78%" stop-color="#74f2ff" stop-opacity="0.28" />
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+              </linearGradient>
+              <linearGradient id="heroBracketGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#60ebff" stop-opacity="0.32" />
+                <stop offset="56%" stop-color="#ffffff" stop-opacity="0.94" />
+                <stop offset="100%" stop-color="#3ad2e8" stop-opacity="0.36" />
+              </linearGradient>
+              <linearGradient id="heroCenterRingGradient" x1="10%" y1="0%" x2="90%" y2="100%">
+                <stop offset="0%" stop-color="#15bed8" stop-opacity="0.18" />
+                <stop offset="32%" stop-color="#7bf2ff" stop-opacity="0.96" />
+                <stop offset="60%" stop-color="#ffffff" stop-opacity="0.98" />
+                <stop offset="100%" stop-color="#15bed8" stop-opacity="0.34" />
+              </linearGradient>
+              <radialGradient id="heroCenterHaloGradient" cx="50%" cy="50%" r="70%">
+                <stop offset="0%" stop-color="#7bf2ff" stop-opacity="0.38" />
+                <stop offset="56%" stop-color="#36d4ea" stop-opacity="0.14" />
+                <stop offset="100%" stop-color="#7bf2ff" stop-opacity="0" />
+              </linearGradient>
+              <radialGradient id="heroCenterCoreGradient" cx="50%" cy="50%" r="62%">
+                <stop offset="0%" stop-color="#fcffff" stop-opacity="0.98" />
+                <stop offset="40%" stop-color="#b8f7ff" stop-opacity="0.86" />
+                <stop offset="100%" stop-color="#29bfd6" stop-opacity="0.2" />
+              </radialGradient>
+              <linearGradient id="heroCenterScanGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
+                <stop offset="34%" stop-color="#ffffff" stop-opacity="0.88" />
+                <stop offset="68%" stop-color="#7ef1ff" stop-opacity="0.3" />
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+              </linearGradient>
               <linearGradient id="heroNameSweepGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
-                <stop offset="36%" stop-color="#dcf8ff" stop-opacity="0.08" />
+                <stop offset="36%" stop-color="#c8f8ff" stop-opacity="0.1" />
                 <stop offset="50%" stop-color="#ffffff" stop-opacity="0.94" />
-                <stop offset="62%" stop-color="#9de9ff" stop-opacity="0.24" />
+                <stop offset="64%" stop-color="#66ebff" stop-opacity="0.22" />
                 <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
               </linearGradient>
               <linearGradient id="heroNameCausticGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
-                <stop offset="18%" stop-color="#caf5ff" stop-opacity="0.14" />
-                <stop offset="38%" stop-color="#f6feff" stop-opacity="0.86" />
-                <stop offset="52%" stop-color="#8ddfff" stop-opacity="0.28" />
-                <stop offset="76%" stop-color="#ffffff" stop-opacity="0.1" />
+                <stop offset="24%" stop-color="#7cefff" stop-opacity="0.1" />
+                <stop offset="42%" stop-color="#ffffff" stop-opacity="0.7" />
+                <stop offset="58%" stop-color="#46d4eb" stop-opacity="0.2" />
                 <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
               </linearGradient>
-              <clipPath id="heroNameTextClip" clipPathUnits="userSpaceOnUse">
-                <text x="380" y="86" text-anchor="middle" dominant-baseline="middle" font-family="Segoe UI, system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="96" font-weight="800" letter-spacing="1.5">Subash Lama</text>
+              <linearGradient id="heroNameSignalGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
+                <stop offset="24%" stop-color="#69efff" stop-opacity="0.28" />
+                <stop offset="50%" stop-color="#ffffff" stop-opacity="0.96" />
+                <stop offset="76%" stop-color="#69efff" stop-opacity="0.28" />
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+              </linearGradient>
+              <clipPath id="heroNameLeftClip" clipPathUnits="userSpaceOnUse">
+                <text x="301" y="108" text-anchor="end" dominant-baseline="middle" font-family="Segoe UI, system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="84" font-weight="800" letter-spacing="1.1">Subash</text>
               </clipPath>
-              <filter id="heroGlassFilter" x="-30%" y="-70%" width="160%" height="240%" color-interpolation-filters="sRGB">
-                <feTurbulence id="heroGlassNoise" type="fractalNoise" baseFrequency="0.012 0.085" numOctaves="2" seed="8" stitchTiles="stitch" result="noise" />
-                <feDisplacementMap id="heroGlassDisplace" in="SourceGraphic" in2="noise" scale="7" xChannelSelector="R" yChannelSelector="G" result="displaced" />
-                <feSpecularLighting in="noise" surfaceScale="4.2" specularConstant="0.9" specularExponent="24" lighting-color="#d5f4ff" result="spec">
-                  <fePointLight id="heroGlassLight" x="380" y="72" z="150" />
-                </feSpecularLighting>
-                <feComposite in="spec" in2="displaced" operator="in" result="specOnText" />
-                <feBlend in="displaced" in2="specOnText" mode="screen" result="glassMix" />
-                <feGaussianBlur in="glassMix" stdDeviation="0.15" result="glassSoft" />
-                <feMerge>
-                  <feMergeNode in="glassSoft" />
-                </feMerge>
-              </filter>
+              <clipPath id="heroNameRightClip" clipPathUnits="userSpaceOnUse">
+                <text x="467" y="108" text-anchor="start" dominant-baseline="middle" font-family="Segoe UI, system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="84" font-weight="800" letter-spacing="1.1">Lama</text>
+              </clipPath>
+              <clipPath id="heroCenterClip" clipPathUnits="userSpaceOnUse">
+                <circle cx="380" cy="108" r="24" />
+              </clipPath>
             </defs>
-            <ellipse id="heroNameAura" class="hero-name-aura" cx="380" cy="84" rx="272" ry="64" />
-            <g filter="url(#heroGlassFilter)">
-              <text id="heroNameSolid" class="hero-name-text hero-name-text-core hero-name-text-solid" x="380" y="86">Subash Lama</text>
-              <g id="heroNameShards" class="hero-name-shards"></g>
+            <ellipse id="heroNameAura" class="hero-name-aura" cx="380" cy="108" rx="286" ry="46" />
+            <g id="heroNameHud" class="hero-name-hud" aria-hidden="true">
+              <g id="heroVariantCircular" class="hero-variant hero-variant-circular">
+                <ellipse id="heroCircularBand" class="hero-circular-band" cx="380" cy="108" rx="278" ry="42" />
+                <g id="heroCircularRails" class="hero-circular-rails">
+                  <path class="hero-circular-line hero-circular-line-main" d="M124 108 H270" />
+                  <path class="hero-circular-line hero-circular-line-main" d="M490 108 H636" />
+                  <path class="hero-circular-line hero-circular-line-soft" d="M152 90 H282" />
+                  <path class="hero-circular-line hero-circular-line-soft" d="M478 90 H608" />
+                  <path class="hero-circular-line hero-circular-line-soft" d="M152 126 H282" />
+                  <path class="hero-circular-line hero-circular-line-soft" d="M478 126 H608" />
+                </g>
+                <g id="heroCircularFrame" class="hero-circular-frame">
+                  <path class="hero-circular-bracket" d="M118 84 h32 M118 84 v48 M118 132 h32" />
+                  <path class="hero-circular-bracket" d="M642 84 h-32 M642 84 v48 M642 132 h-32" />
+                </g>
+                <g id="heroCircularHud" class="hero-circular-hud">
+                  <circle id="heroCircularHalo" class="hero-circular-halo" cx="380" cy="108" r="96" />
+                  <circle id="heroCircularOuterDots" class="hero-circular-ring hero-circular-ring-dots" cx="380" cy="108" r="86" />
+                  <circle id="heroCircularOuterRing" class="hero-circular-ring hero-circular-ring-outer" cx="380" cy="108" r="78" />
+                  <g id="heroCircularRotorOuter" class="hero-circular-rotor">
+                    <circle class="hero-circular-ring hero-circular-ring-arc hero-circular-ring-arc-primary" cx="380" cy="108" r="68" />
+                    <circle class="hero-circular-ring hero-circular-ring-arc hero-circular-ring-arc-secondary" cx="380" cy="108" r="56" />
+                  </g>
+                  <g id="heroCircularRotorInner" class="hero-circular-rotor">
+                    <circle class="hero-circular-ring hero-circular-ring-inner" cx="380" cy="108" r="44" />
+                    <circle class="hero-circular-ring hero-circular-ring-inner hero-circular-ring-inner-alt" cx="380" cy="108" r="34" />
+                  </g>
+                  <circle id="heroCircularCore" class="hero-circular-core" cx="380" cy="108" r="20" />
+                  <circle id="heroCircularCoreOutline" class="hero-circular-core-outline" cx="380" cy="108" r="20" />
+                  <circle class="hero-circular-core-dot" cx="380" cy="108" r="3.6" />
+                  <g clip-path="url(#heroCenterClip)">
+                    <rect id="heroCircularScanLine" class="hero-circular-scan-line" x="352" y="82" width="56" height="12" />
+                    <rect id="heroCircularScanGlow" class="hero-circular-scan-glow" x="346" y="74" width="68" height="26" />
+                  </g>
+                </g>
+              </g>
+              <g id="heroVariantPremium" class="hero-variant hero-variant-premium">
+                <rect id="heroNameLightBand" class="hero-name-light-band" x="128" y="76" width="504" height="64" rx="32" />
+                <g id="heroNameRails" class="hero-name-rails">
+                  <path class="hero-tech-line hero-tech-line-primary" d="M126 108 H304" />
+                  <path class="hero-tech-line hero-tech-line-primary" d="M456 108 H634" />
+                  <path class="hero-tech-line hero-tech-line-secondary" d="M162 90 H314" />
+                  <path class="hero-tech-line hero-tech-line-secondary" d="M446 90 H598" />
+                  <path class="hero-tech-line hero-tech-line-secondary" d="M162 126 H314" />
+                  <path class="hero-tech-line hero-tech-line-secondary" d="M446 126 H598" />
+                  <circle class="hero-tech-node" cx="304" cy="108" r="3.6" />
+                  <circle class="hero-tech-node" cx="456" cy="108" r="3.6" />
+                </g>
+                <g id="heroNameFrame" class="hero-name-frame">
+                  <path class="hero-tech-bracket" d="M118 82 h40 M118 82 v52 M118 134 h40" />
+                  <path class="hero-tech-bracket" d="M642 82 h-40 M642 82 v52 M642 134 h-40" />
+                  <path class="hero-tech-bracket hero-tech-bracket-soft" d="M150 72 h28 M582 72 h28 M150 144 h28 M582 144 h28" />
+                </g>
+                <g id="heroCenterHud" class="hero-center-hud">
+                  <circle id="heroCenterHalo" class="hero-center-halo" cx="380" cy="108" r="76" />
+                  <circle id="heroCenterOuter" class="hero-center-ring hero-center-ring-outer" cx="380" cy="108" r="62" />
+                  <circle id="heroCenterTicks" class="hero-center-ring hero-center-ring-dots" cx="380" cy="108" r="62" />
+                  <g id="heroCenterRotorPrimary" class="hero-center-rotor">
+                    <circle class="hero-center-ring hero-center-ring-arc hero-center-ring-arc-primary" cx="380" cy="108" r="52" />
+                    <circle class="hero-center-ring hero-center-ring-arc hero-center-ring-arc-secondary" cx="380" cy="108" r="42" />
+                  </g>
+                  <g id="heroCenterRotorSecondary" class="hero-center-rotor">
+                    <circle class="hero-center-ring hero-center-ring-inner" cx="380" cy="108" r="34" />
+                    <path class="hero-center-crosshair" d="M380 64 v12 M380 140 v12 M336 108 h12 M412 108 h12" />
+                  </g>
+                  <circle id="heroCenterCore" class="hero-center-core" cx="380" cy="108" r="22" />
+                  <circle id="heroCenterCoreOutline" class="hero-center-core-outline" cx="380" cy="108" r="22" />
+                  <circle class="hero-center-core-dot" cx="380" cy="108" r="4" />
+                  <g clip-path="url(#heroCenterClip)">
+                    <rect id="heroCenterScanLine" class="hero-center-scan-line" x="354" y="82" width="52" height="12" />
+                    <rect id="heroCenterScanGlow" class="hero-center-scan-glow" x="348" y="74" width="64" height="26" />
+                  </g>
+                </g>
+              </g>
+              <g id="heroVariantSciFi" class="hero-variant hero-variant-scifi">
+                <rect id="heroSciFiBand" class="hero-scifi-band" x="118" y="72" width="524" height="72" rx="36" />
+                <g id="heroSciFiRails" class="hero-scifi-rails">
+                  <path class="hero-scifi-line hero-scifi-line-main" d="M130 108 H286" />
+                  <path class="hero-scifi-line hero-scifi-line-main" d="M474 108 H630" />
+                  <path class="hero-scifi-line hero-scifi-line-dash" d="M148 90 H280" />
+                  <path class="hero-scifi-line hero-scifi-line-dash" d="M480 90 H612" />
+                  <path class="hero-scifi-line hero-scifi-line-dash" d="M148 126 H280" />
+                  <path class="hero-scifi-line hero-scifi-line-dash" d="M480 126 H612" />
+                  <path class="hero-scifi-trace" d="M136 84 H226 L260 72 H330" />
+                  <path class="hero-scifi-trace" d="M624 84 H534 L500 72 H430" />
+                  <path class="hero-scifi-trace" d="M136 132 H226 L260 144 H330" />
+                  <path class="hero-scifi-trace" d="M624 132 H534 L500 144 H430" />
+                </g>
+                <g id="heroSciFiFrame" class="hero-scifi-frame">
+                  <path class="hero-scifi-bracket" d="M118 84 h34 l14 14 l-14 14 h-34" />
+                  <path class="hero-scifi-bracket" d="M642 84 h-34 l-14 14 l14 14 h34" />
+                  <path class="hero-scifi-bracket hero-scifi-bracket-soft" d="M152 72 h34 l12 12 M608 72 h-34 l-12 12 M152 144 h34 l12 -12 M608 144 h-34 l-12 -12" />
+                </g>
+                <g id="heroSciFiCore" class="hero-scifi-core">
+                  <circle id="heroSciFiHalo" class="hero-scifi-halo" cx="380" cy="108" r="78" />
+                  <circle id="heroSciFiOuter" class="hero-scifi-ring hero-scifi-ring-outer" cx="380" cy="108" r="64" />
+                  <circle id="heroSciFiOuterTicks" class="hero-scifi-ring hero-scifi-ring-ticks" cx="380" cy="108" r="64" />
+                  <g id="heroSciFiRotorPrimary" class="hero-scifi-rotor">
+                    <circle class="hero-scifi-ring hero-scifi-ring-arc hero-scifi-ring-arc-primary" cx="380" cy="108" r="54" />
+                    <circle class="hero-scifi-ring hero-scifi-ring-arc hero-scifi-ring-arc-secondary" cx="380" cy="108" r="44" />
+                  </g>
+                  <g id="heroSciFiRotorSecondary" class="hero-scifi-rotor">
+                    <circle class="hero-scifi-ring hero-scifi-ring-inner" cx="380" cy="108" r="34" />
+                    <path class="hero-scifi-crosshair" d="M380 60 v14 M380 142 v14 M332 108 h14 M414 108 h14" />
+                  </g>
+                  <polygon id="heroSciFiHex" class="hero-scifi-hex" points="380,84 398,94 398,122 380,132 362,122 362,94" />
+                  <circle id="heroSciFiCoreDot" class="hero-scifi-core-dot" cx="380" cy="108" r="4" />
+                  <g clip-path="url(#heroCenterClip)">
+                    <rect id="heroSciFiScanLine" class="hero-scifi-scan-line" x="352" y="84" width="56" height="10" />
+                    <rect id="heroSciFiScanGlow" class="hero-scifi-scan-glow" x="346" y="76" width="68" height="24" />
+                  </g>
+                </g>
+              </g>
             </g>
-            <g id="heroNameLetterGhosts" class="hero-name-letter-ghosts"></g>
-            <rect id="heroNameSweep" class="hero-name-sweep" x="-260" y="-20" width="220" height="210" clip-path="url(#heroNameTextClip)"></rect>
-            <rect id="heroNameSweepSecondary" class="hero-name-sweep hero-name-sweep-secondary" x="-320" y="-30" width="164" height="220" clip-path="url(#heroNameTextClip)"></rect>
-            <text id="heroNameHighlight" class="hero-name-text hero-name-text-reflect" x="380" y="86">Subash Lama</text>
+            <text id="heroNameLeftSolid" class="hero-name-text hero-name-text-left hero-name-text-core hero-name-text-solid" data-hero-name-solid data-name-side="left" x="301" y="108">Subash</text>
+            <text id="heroNameRightSolid" class="hero-name-text hero-name-text-right hero-name-text-core hero-name-text-solid" data-hero-name-solid data-name-side="right" x="467" y="108">Lama</text>
+            <rect id="heroNameSweepLeft" class="hero-name-sweep" data-hero-name-sweep="primary" data-sweep-side="left" x="-200" y="-14" width="180" height="244" clip-path="url(#heroNameLeftClip)"></rect>
+            <rect id="heroNameSweepRight" class="hero-name-sweep" data-hero-name-sweep="primary" data-sweep-side="right" x="320" y="-14" width="180" height="244" clip-path="url(#heroNameRightClip)"></rect>
+            <rect id="heroNameSweepSecondaryLeft" class="hero-name-sweep hero-name-sweep-secondary" data-hero-name-sweep="secondary" data-sweep-side="left" x="-250" y="-24" width="140" height="244" clip-path="url(#heroNameLeftClip)"></rect>
+            <rect id="heroNameSweepSecondaryRight" class="hero-name-sweep hero-name-sweep-secondary" data-hero-name-sweep="secondary" data-sweep-side="right" x="360" y="-24" width="140" height="244" clip-path="url(#heroNameRightClip)"></rect>
+            <g id="heroNameSignalLeft" clip-path="url(#heroNameLeftClip)">
+              <path id="heroNameSignalPrimaryLeft" class="hero-name-signal" data-hero-name-signal="primary" data-signal-side="left" d="M70 98 H292" />
+              <path id="heroNameSignalSecondaryLeft" class="hero-name-signal hero-name-signal-secondary" data-hero-name-signal="secondary" data-signal-side="left" d="M78 118 H286" />
+            </g>
+            <g id="heroNameSignalRight" clip-path="url(#heroNameRightClip)">
+              <path id="heroNameSignalPrimaryRight" class="hero-name-signal" data-hero-name-signal="primary" data-signal-side="right" d="M468 98 H690" />
+              <path id="heroNameSignalSecondaryRight" class="hero-name-signal hero-name-signal-secondary" data-hero-name-signal="secondary" data-signal-side="right" d="M474 118 H682" />
+            </g>
+            <text id="heroNameLeftHighlight" class="hero-name-text hero-name-text-left hero-name-text-reflect" data-hero-name-highlight data-name-side="left" x="301" y="108">Subash</text>
+            <text id="heroNameRightHighlight" class="hero-name-text hero-name-text-right hero-name-text-reflect" data-hero-name-highlight data-name-side="right" x="467" y="108">Lama</text>
           </svg>
         </h1>
+        <div class="hero-variant-switcher" aria-label="Hero name style preview">
+          <button type="button" class="hero-variant-button" data-hero-variant-value="circular" aria-pressed="true">Circular</button>
+          <button type="button" class="hero-variant-button" data-hero-variant-value="premium" aria-pressed="false">Premium</button>
+          <button type="button" class="hero-variant-button" data-hero-variant-value="scifi" aria-pressed="false">Sci-Fi</button>
+        </div>
         <p class="hero-greeting">DevOps, Platform Engineering, DevSecOps, CI/CD, Kubernetes, Cloud Automation</p>
         <p class="hero-role">GitHub Actions, Docker, Linux, Terraform, Helm, Bash, PowerShell, Python</p>
         <p class="hero-summary">AWS, Azure, Prometheus, Grafana, OpenTelemetry, Security Hardening, SIEM/SOC</p>
