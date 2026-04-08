@@ -1,5 +1,5 @@
 param(
-  [string]$SourceDir = "assets/cv",
+  [string]$SourceDir = "content/resume",
   [string]$PublicDir = "public/assets/docs/cv",
   [string]$PublishedName = "latest-resume.pdf"
 )

@@ -30,9 +30,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const loaderReplayButton = document.querySelector('[data-loader-replay]');
       const heroTerminalName = document.querySelector('[data-terminal-name]');
       const heroTerminalCursor = document.querySelector('[data-terminal-cursor]');
+      const heroTerminalShell = heroTerminalName ? heroTerminalName.closest('.hero-name-typed') : null;
+      const heroTerminalWordShells = Array.from(document.querySelectorAll('[data-terminal-word-shell]'));
+      const heroTerminalWordTexts = Array.from(document.querySelectorAll('[data-terminal-word-text]'));
       const heroTerminalFullName = heroTerminalName
         ? (heroTerminalName.dataset.terminalFull || heroTerminalName.textContent || '').trim()
         : '';
+      const heroTerminalFullWords = heroTerminalFullName ? heroTerminalFullName.split(/\s+/) : [];
       const reducedLoaderMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const loaderStyleStorageKey = 'portfolio_loader_style_preview';
       const loaderStyleQueryParam = 'loaderStyle';
@@ -102,6 +106,43 @@ document.addEventListener('DOMContentLoaded', () => {
         heroTerminalTimerHandles = [];
       };
 
+      const setHeroTerminalText = text => {
+        if (!heroTerminalName) {
+          return;
+        }
+
+        heroTerminalName.textContent = text;
+        heroTerminalName.dataset.terminalRendered = text;
+
+        const currentWords = text.split(' ');
+        const hasSecondWordGap = text.includes(' ');
+
+        heroTerminalWordShells.forEach((shell, index) => {
+          const fullWord = heroTerminalFullWords[index] || '';
+          const currentWord = currentWords[index] || '';
+          const wordText = heroTerminalWordTexts[index];
+          const progress = fullWord ? Math.min(1, currentWord.length / fullWord.length) : 0;
+
+          if (wordText) {
+            wordText.textContent = currentWord;
+            wordText.dataset.terminalRendered = currentWord;
+          }
+
+          shell.style.setProperty('--hero-word-reveal', progress.toFixed(3));
+          shell.dataset.wordEmpty = currentWord ? 'false' : 'true';
+
+          if (index > 0) {
+            shell.style.setProperty('--hero-word-gap', hasSecondWordGap ? '0.18em' : '0em');
+          }
+        });
+
+        if (heroTerminalShell) {
+          const fullLength = Math.max(1, Array.from(heroTerminalFullName).length);
+          const progress = Math.max(0.06, Math.min(1, Array.from(text).length / fullLength));
+          heroTerminalShell.style.setProperty('--hero-name-reveal', progress.toFixed(3));
+        }
+      };
+
       const startHeroTerminalTyping = () => {
         if (!heroTerminalName) {
           return;
@@ -113,12 +154,12 @@ document.addEventListener('DOMContentLoaded', () => {
         clearHeroTerminalTimers();
 
         if (reducedLoaderMotion || !heroTerminalFullName) {
-          heroTerminalName.textContent = heroTerminalFullName;
+          setHeroTerminalText(heroTerminalFullName);
           return;
         }
 
         const characters = Array.from(heroTerminalFullName);
-        heroTerminalName.textContent = '';
+        setHeroTerminalText('');
 
         characters.forEach((_, index) => {
           heroTerminalTimerHandles.push(window.setTimeout(() => {
@@ -126,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
               return;
             }
 
-            heroTerminalName.textContent = characters.slice(0, index + 1).join('');
+            setHeroTerminalText(characters.slice(0, index + 1).join(''));
           }, 40 + index * 52));
         });
       };
@@ -955,7 +996,12 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       const flipCards = Array.from(document.querySelectorAll('[data-flip-card]'));
+      const glassSections = Array.from(document.querySelectorAll('section.glass-card'));
       const isCompactViewport = () => window.matchMedia('(max-width: 768px)').matches;
+      const getOuterSpacing = element => {
+        const styles = window.getComputedStyle(element);
+        return parseFloat(styles.marginTop) + parseFloat(styles.marginBottom);
+      };
 
       const measureFaceHeight = face => {
         const sectionContent = face.querySelector('.section-content');
@@ -965,27 +1011,87 @@ document.addEventListener('DOMContentLoaded', () => {
         return Math.ceil(baseHeight + paddingY + 12);
       };
 
+      const clearUniformSectionSizing = () => {
+        glassSections.forEach(section => {
+          section.style.height = '';
+        });
+
+        flipCards.forEach(card => {
+          const inner = card.querySelector('.book-card-inner');
+          card.style.height = '';
+          card.dataset.requiredHeight = '';
+          if (inner) {
+            inner.style.height = '';
+          }
+        });
+      };
+
       const syncFlipCardHeight = card => {
         const inner = card.querySelector('.book-card-inner');
         if (!inner) {
-          return;
+          return 0;
         }
         if (isCompactViewport()) {
           card.style.height = '';
           inner.style.height = '';
-          return;
+          card.dataset.requiredHeight = '';
+          return 0;
         }
         const faces = Array.from(inner.querySelectorAll('.book-card-face'));
         if (!faces.length) {
-          return;
+          return 0;
         }
         const targetHeight = Math.max(...faces.map(measureFaceHeight), 420);
+        card.dataset.requiredHeight = String(targetHeight);
         card.style.height = `${targetHeight}px`;
         inner.style.height = `${targetHeight}px`;
+        return targetHeight;
+      };
+
+      const syncUniformSectionHeights = () => {
+        if (isCompactViewport()) {
+          glassSections.forEach(section => {
+            section.style.height = '';
+          });
+          return;
+        }
+
+        glassSections.forEach(section => {
+          section.style.height = '';
+        });
+
+        const targetSectionHeight = Math.max(
+          ...glassSections.map(section => Math.ceil(section.scrollHeight)),
+          520
+        );
+
+        glassSections.forEach(section => {
+          section.style.height = `${targetSectionHeight}px`;
+        });
+
+        flipCards.forEach(card => {
+          const section = card.closest('section.glass-card');
+          const inner = card.querySelector('.book-card-inner');
+          if (!section || !inner) {
+            return;
+          }
+
+          const sectionStyles = window.getComputedStyle(section);
+          const paddingY = parseFloat(sectionStyles.paddingTop) + parseFloat(sectionStyles.paddingBottom);
+          const controlRow = section.querySelector('.card-control-row');
+          const controlHeight = controlRow ? Math.ceil(controlRow.offsetHeight + getOuterSpacing(controlRow)) : 0;
+          const requiredHeight = Math.max(parseFloat(card.dataset.requiredHeight || '0'), 420);
+          const availableHeight = Math.max(requiredHeight, Math.floor(targetSectionHeight - paddingY - controlHeight));
+
+          card.style.height = `${availableHeight}px`;
+          inner.style.height = `${availableHeight}px`;
+        });
       };
 
       const syncAllFlipCardHeights = () => {
+        clearUniformSectionSizing();
         flipCards.forEach(syncFlipCardHeight);
+        syncUniformSectionHeights();
       };
 
       syncAllFlipCardHeights();
@@ -1040,4 +1146,6 @@ document.addEventListener('DOMContentLoaded', () => {
           } catch {}
         });
       });
+
+      syncAllFlipCardHeights();
     });
