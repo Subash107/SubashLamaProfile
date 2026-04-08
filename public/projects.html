@@ -6,7 +6,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests" />
   <meta name="referrer" content="no-referrer" />
   <meta name="theme-color" content="#07111c" />
-  <title>Projects | Subash Lama</title>
+  <title>Projects | Subash Lama - DevOps &amp; DevSecOps Engineer</title>
   <link href="assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet" />
   <script src="assets/js/site.js" defer></script>
   <script src="assets/vendor/bootstrap/bootstrap.bundle.min.js" defer></script>
@@ -49,7 +49,7 @@
   <div class="content">
     <h1>Projects and Case Studies</h1>
     <p style="max-width: 900px; color: rgba(255,255,255,0.88); line-height: 1.7;">
-      Each project follows a practical structure: Problem, implementation, and measurable impact, with emphasis on CI/CD, IaC, and reliability.
+      Each project is framed around the problem, the implementation, and the outcome, with emphasis on delivery automation, infrastructure reliability, and practical cyber security operations.
     </p>
 
     <div class="project-category" id="featured">
@@ -57,33 +57,46 @@
 
       <article class="project-card" id="virtual-lab-automation">
         <div class="project-meta">
-          <h3>Virtual Lab Automation</h3>
+          <h3>Secure Virtual Lab Automation</h3>
           <div class="project-links">
-            <a href="https://github.com/Subash107/virtual-lab-automation" target="_blank" rel="noopener noreferrer">GitHub Repo</a>
+            <a href="https://github.com/Subash107?tab=repositories" target="_blank" rel="noopener noreferrer">GitHub Profile</a>
           </div>
         </div>
-        <p><strong>Problem:</strong> Lab setup was manual, slow, and inconsistent across developer machines.</p>
-        <p><strong>What I built:</strong> Reusable Docker templates, bootstrap scripts, and CI validation for predictable environment provisioning.</p>
-        <p><strong>Impact:</strong> Reduced setup time by about 70% and improved onboarding consistency.</p>
+        <p><strong>Problem:</strong> Lab setup was manual, slow, inconsistent across machines, and missing a strong baseline for repeatable onboarding.</p>
+        <p><strong>What I built:</strong> Reusable Docker templates, bootstrap scripts, and CI validation to standardize local environments and reduce setup drift.</p>
+        <p><strong>Impact:</strong> Reduced setup time by about 70% and improved onboarding consistency with safer defaults.</p>
         <p class="project-tech"><strong>Tech:</strong> Docker, Docker Compose, GitHub Actions, Linux, Bash/PowerShell</p>
       </article>
 
       <article class="project-card" id="cloud-migration-suite">
         <div class="project-meta">
-          <h3>Cloud Migration Suite</h3>
+          <h3>Cloud Migration &amp; Governance Suite</h3>
           <div class="project-links">
-            <a href="https://github.com/Subash107/cloud-migration-suite" target="_blank" rel="noopener noreferrer">GitHub Repo</a>
+            <a href="https://github.com/Subash107?tab=repositories" target="_blank" rel="noopener noreferrer">GitHub Profile</a>
           </div>
         </div>
-        <p><strong>Problem:</strong> Migration work needed safer rollout checks, less config drift, and clearer change visibility.</p>
-        <p><strong>What I built:</strong> Terraform-driven environments with GitHub Actions validation, plan review gates, and deployment checks.</p>
-        <p><strong>Impact:</strong> Enabled more repeatable cloud cutovers with stronger pre-deploy confidence.</p>
+        <p><strong>Problem:</strong> Migration work needed stronger rollout checks, less configuration drift, and clearer visibility into infrastructure changes.</p>
+        <p><strong>What I built:</strong> Terraform-driven environments with GitHub Actions validation, plan review gates, and deployment checks for auditable releases.</p>
+        <p><strong>Impact:</strong> Enabled more repeatable cloud cutovers with stronger pre-deploy confidence and cleaner governance.</p>
         <p class="project-tech"><strong>Tech:</strong> Terraform, GitHub Actions, Azure, Linux</p>
       </article>
     </div>
 
     <div class="project-category" id="more">
-      <h2>Learning Projects (In Progress)</h2>
+      <h2>Security &amp; Observability Labs</h2>
+
+      <article class="project-card" id="soc-lab">
+        <div class="project-meta">
+          <h3>Personal SOC Lab (Wazuh, Suricata, Sysmon)</h3>
+          <div class="project-links">
+            <a href="https://github.com/Subash107?tab=repositories" target="_blank" rel="noopener noreferrer">GitHub Profile</a>
+          </div>
+        </div>
+        <p><strong>Problem:</strong> Security operations learning needed realistic host and network telemetry, alerting, and log analysis beyond theory-only exercises.</p>
+        <p><strong>What I built:</strong> A personal SOC lab using Wazuh, Suricata, and Sysmon to practice event collection, host telemetry, network visibility, detection workflows, and log triage.</p>
+        <p><strong>Impact:</strong> Strengthened hands-on security analysis skills and improved how I think about DevSecOps, monitoring, incident visibility, and detection coverage.</p>
+        <p class="project-tech"><strong>Tech:</strong> Wazuh, Suricata, Sysmon, Linux, SIEM/SOC</p>
+      </article>
 
       <article class="project-card" id="observability-stack">
         <div class="project-meta">
@@ -92,9 +105,9 @@
             <a href="index.html#skills">Related skills</a>
           </div>
         </div>
-        <p><strong>Problem:</strong> Service troubleshooting is slow without consistent metrics, traces, and actionable alerts.</p>
-        <p><strong>What I built:</strong> Dashboards, baseline alert rules, and initial telemetry patterns to improve runtime visibility.</p>
-        <p><strong>Impact:</strong> Faster issue triage and clearer service health signals while expanding observability depth.</p>
+        <p><strong>Problem:</strong> Service troubleshooting slows down when metrics, logs, and traces are inconsistent or missing altogether.</p>
+        <p><strong>What I built:</strong> Dashboards, baseline alert rules, and early telemetry patterns to improve runtime visibility and support future tracing workflows.</p>
+        <p><strong>Impact:</strong> Stronger service insight and a better foundation for alerting, incident response, and ongoing observability maturity.</p>
         <p class="project-tech"><strong>Tech:</strong> Prometheus, Grafana, OpenTelemetry, Linux, Docker</p>
       </article>
     </div>

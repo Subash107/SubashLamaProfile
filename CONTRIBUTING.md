@@ -7,7 +7,7 @@ Thanks for contributing to this portfolio site.
 2. Create a focused branch for your change.
 3. Make updates in the correct source folder:
    - `public/` for the live static site.
-   - `assets/cv/` for source resume PDFs.
+   - `content/resume/` for source resume PDFs.
    - `.github/` for automation, CI, and maintenance settings.
 4. Preview the site locally before opening a pull request.
 5. Open a pull request with a clear summary and testing notes.

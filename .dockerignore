@@ -1,7 +1,8 @@
 *
 !.dockerignore
 !Dockerfile
-!nginx/
-!nginx/**
+!config/
+!config/nginx/
+!config/nginx/**
 !public/
 !public/**

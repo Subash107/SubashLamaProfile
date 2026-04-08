@@ -2,7 +2,7 @@
 
 This folder is generated from the newest PDF in:
 
-`assets/cv/`
+`content/resume/`
 
 The portfolio download button always points to:
 
@@ -10,5 +10,5 @@ The portfolio download button always points to:
 
 `resume-manifest.json` stores the current download filename and cache-busting version.
 
-The source resume should be kept in `assets/cv/` with a professional filename such as
+The source resume should be kept in `content/resume/` with a professional filename such as
 `Subash-Lama-Resume.pdf`.

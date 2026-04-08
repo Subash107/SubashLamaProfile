@@ -6,13 +6,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests" />
   <meta name="referrer" content="no-referrer" />
-  <meta name="description" content="Subash Lama &ndash; DevOps Engineer specializing in CI/CD, Docker, cloud automation, and reliable infrastructure.">
+  <meta name="description" content="Subash Lama &ndash; DevOps &amp; DevSecOps Engineer focused on CI/CD, Docker, Terraform, cloud infrastructure, observability, and security-minded automation.">
   <meta name="theme-color" content="#07111c" />
-  <title>Subash Lama &ndash; DevOps Engineer | Automation & CI/CD</title>
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Subash Lama &ndash; DevOps &amp; DevSecOps Engineer" />
+  <meta property="og:description" content="Building secure CI/CD systems, cloud infrastructure, and threat-aware monitoring workflows across Docker, Terraform, AWS, and modern observability stacks." />
+  <meta property="og:image" content="assets/images/bg-poster.jpg" />
+  <meta property="og:url" content="https://subash107.github.io/" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Subash Lama &ndash; DevOps &amp; DevSecOps Engineer" />
+  <meta name="twitter:description" content="Building secure CI/CD systems, cloud infrastructure, and threat-aware monitoring workflows across Docker, Terraform, AWS, and modern observability stacks." />
+  <meta name="twitter:image" content="assets/images/bg-poster.jpg" />
+  <title>Subash Lama &ndash; DevOps &amp; DevSecOps Engineer | CI/CD, Cloud &amp; Security</title>
   <link href="assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet" />
   <script src="assets/js/site.js" defer></script>
   <link rel="stylesheet" href="assets/css/motion.css" />
   <link rel="stylesheet" href="assets/css/index.css" />
+  <link rel="stylesheet" href="assets/css/parrot-fx.css" />
   <noscript>
     <style>
       body.loader-active {
@@ -48,6 +58,9 @@
   </video>
 
   <div id="overlay"></div>
+
+  <!-- Matrix rain canvas — Parrot-OS background effect -->
+  <canvas id="parrot-rain" aria-hidden="true"></canvas>
 
   <div class="portfolio-loader" data-loader data-loader-style="boot" aria-live="polite" aria-hidden="false">
     <div class="portfolio-loader__backdrop" aria-hidden="true">
@@ -172,23 +185,27 @@
     </div>
   </div>
 
-  <div class="loader-lab" data-loader-lab aria-label="Loader style controls">
-    <span class="loader-lab__label">Loader Lab</span>
-    <div class="loader-lab__actions">
-      <button type="button" class="loader-lab__button" data-loader-select="boot">Cyber Boot</button>
-      <button type="button" class="loader-lab__button" data-loader-select="hud">Terminal HUD</button>
-      <button type="button" class="loader-lab__button" data-loader-select="reveal">Name Reveal</button>
-      <button type="button" class="loader-lab__button loader-lab__button--ghost" data-loader-replay>Replay Current</button>
-    </div>
-  </div>
-
   <div class="content">
     <div class="hero-section">
       <div class="hero-content">
         <h1 class="hero-name" data-hero-variant="circular" aria-label="Subash Lama">
           <span class="hero-name-display hero-name-terminal" aria-hidden="true">
             <span class="hero-name-prompt">&gt;</span>
-            <span class="hero-name-typed" data-terminal-name data-terminal-full="Subash Lama">Subash Lama</span>
+            <span class="hero-name-typed">
+              <span class="hero-name-typed-source" data-terminal-name data-terminal-full="Subash Lama" data-terminal-rendered="Subash Lama">Subash Lama</span>
+              <span class="hero-name-word hero-name-word-left" data-terminal-word-shell data-terminal-word-index="0" data-word-empty="false">
+                <span class="hero-name-word-field" aria-hidden="true"></span>
+                <span class="hero-name-word-frame" aria-hidden="true"></span>
+                <span class="hero-name-word-text" data-terminal-word-text data-terminal-rendered="Subash">Subash</span>
+                <span class="hero-name-word-scan" aria-hidden="true"></span>
+              </span>
+              <span class="hero-name-word hero-name-word-right" data-terminal-word-shell data-terminal-word-index="1" data-word-empty="false">
+                <span class="hero-name-word-field" aria-hidden="true"></span>
+                <span class="hero-name-word-frame" aria-hidden="true"></span>
+                <span class="hero-name-word-text" data-terminal-word-text data-terminal-rendered="Lama">Lama</span>
+                <span class="hero-name-word-scan" aria-hidden="true"></span>
+              </span>
+            </span>
             <span class="hero-name-cursor" data-terminal-cursor></span>
           </span>
           <svg id="heroNameSvg" class="hero-name-svg" viewBox="0 0 760 220" role="img" aria-label="Subash Lama">
@@ -409,17 +426,11 @@
             <text id="heroNameRightHighlight" class="hero-name-text hero-name-text-right hero-name-text-reflect" data-hero-name-highlight data-name-side="right" x="467" y="108">Lama</text>
           </svg>
         </h1>
-        <div class="hero-variant-switcher" aria-label="Hero name style preview">
-          <button type="button" class="hero-variant-button" data-hero-variant-value="circular" aria-pressed="true">Circular</button>
-          <button type="button" class="hero-variant-button" data-hero-variant-value="premium" aria-pressed="false">Premium</button>
-          <button type="button" class="hero-variant-button" data-hero-variant-value="scifi" aria-pressed="false">Sci-Fi</button>
-        </div>
-        <p class="hero-greeting">DevOps, Platform Engineering, DevSecOps, CI/CD, Kubernetes, Cloud Automation</p>
-        <p class="hero-role">GitHub Actions, Docker, Linux, Terraform, Helm, Bash, PowerShell, Python</p>
-        <p class="hero-summary">AWS, Azure, Prometheus, Grafana, OpenTelemetry, Security Hardening, SIEM/SOC</p>
+        <p class="hero-tagline">DevOps &amp; DevSecOps Engineer focused on secure CI/CD, cloud infrastructure, security monitoring, and threat-aware operations across modern delivery environments.</p>
+        <p class="hero-stack">GitHub Actions &middot; Docker &middot; Terraform &middot; AWS &middot; Wazuh &middot; Suricata &middot; Sysmon &middot; OpenTelemetry</p>
       </div>
       <div class="hero-badges">
-        <span class="role-badge">Open to DevOps / DevSecOps roles</span>
+        <span class="role-badge">Open to DevOps / DevSecOps / Platform roles</span>
         <span class="role-badge secondary">UTC+5:45</span>
       </div>
       <div class="cta-group">
@@ -431,8 +442,6 @@
         <a href="projects.html" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light">Projects</a>
         <a href="#skills" class="btn btn-outline-light">Skills</a>
         <a href="#contact" class="btn btn-outline-light">Contact</a>
-        <a href="record-producer.html" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light">Record Producer</a>
-        <button type="button" class="btn btn-outline-light" data-audio-toggle data-audio-storage-key="portfolio_audio_enabled" data-audio-label-on="Sound: On" data-audio-label-off="Sound: Off" aria-pressed="false">Sound: Off</button>
       </div>
     </div>
 
@@ -443,17 +452,21 @@
             <div class="section-inner">
               <div class="section-content about-panel">
                 <h2>About Me</h2>
-                <p>I design and operate DevOps platforms that improve release speed, reliability, and security across cloud-native environments.</p>
-                <p>Hands-on strengths include GitHub Actions pipeline architecture, Docker and Kubernetes operations, Linux administration, and Terraform-based infrastructure automation.</p>
-                <p>Current study focus includes Kubernetes security controls, SOC and SIEM workflows, threat-aware monitoring, and deeper OpenTelemetry instrumentation.</p>
+                <p>I am a DevOps &amp; DevSecOps engineer focused on building reliable delivery systems, containerized workloads, and cloud infrastructure with security built in from the start.</p>
+                <p>My hands-on work includes GitHub Actions pipelines, Docker and Docker Compose environments, Terraform automation, Linux administration, AWS foundations, observability with Prometheus and Grafana, and secure operational workflows that reduce manual risk.</p>
+                <p>I also built a personal SOC lab using Wazuh, Suricata, and Sysmon for host visibility, network telemetry, log collection, and real-time detection practice, while continuing to deepen my research in Kubernetes security, SIEM workflows, incident triage, and OpenTelemetry instrumentation.</p>
+                <div class="card-note">
+                  <strong>What I deliver:</strong> Secure release workflows, security-minded infrastructure changes, practical monitoring baselines, and documentation teams can operate with confidence.
+                  <br>Built on hands-on infrastructure operations experience across servers, virtualization, backups, firewall configuration, and enterprise troubleshooting.
+                </div>
               </div>
             </div>
           </article>
-          <article class="book-card-face book-card-back">
+          <article class="book-card-face book-card-back" aria-hidden="true">
             <div class="section-content">
               <h3>What I Deliver</h3>
-              <p>Secure-by-default delivery systems with reusable workflows, quality gates, traceable deployments, and clean handoff documentation.</p>
-              <p><strong>Open to collaborations</strong> in DevOps, platform engineering, cloud security, and automation modernization.</p>
+              <p>I build secure delivery workflows, observable systems, and infrastructure changes teams can review and operate with confidence.</p>
+              <p><strong>Best fit for</strong> DevOps, DevSecOps, platform engineering, and cloud operations.</p>
             </div>
           </article>
         </div>
@@ -470,35 +483,46 @@
                 <div class="project-list">
                   <div class="project-card">
                     <h4>Secure Virtual Lab Automation</h4>
-                    <p class="project-purpose"><strong>Problem:</strong> Local lab setup was manual, inconsistent, and lacked baseline security controls.</p>
-                    <p class="project-purpose"><strong>Built:</strong> Reusable Docker templates, bootstrap scripts, and CI checks for predictable and hardened environment provisioning.</p>
-                    <p class="project-purpose"><strong>Impact:</strong> Cut setup time by ~70% and improved onboarding consistency with safer defaults.</p>
-                    <p class="project-tech"><strong>Tech Used:</strong> Docker, Docker Compose, GitHub Actions, Linux, Bash/PowerShell</p>
+                    <p class="project-purpose"><strong>Problem:</strong> Manual lab setup slowed onboarding and caused inconsistency.</p>
+                    <p class="project-purpose"><strong>Built:</strong> Docker templates, bootstrap scripts, and CI checks.</p>
+                    <p class="project-purpose"><strong>Impact:</strong> Cut setup time by about 70% with safer defaults.</p>
+                    <p class="project-tech"><strong>Stack:</strong> Docker &middot; Compose &middot; GitHub Actions &middot; Linux</p>
                     <div class="project-links">
-                    <a href="https://github.com/Subash107?tab=repositories" target="_blank" rel="noopener noreferrer">GitHub</a>
-                    <a href="projects.html" target="_blank" rel="noopener noreferrer">Case Study</a>
+                      <a href="https://github.com/Subash107/Static-Website-CI-CD-with-GitHub-Actions-and-Ubuntu-LTS" target="_blank" rel="noopener noreferrer">GitHub &rarr;</a>
+                      <a href="projects.html" target="_blank" rel="noopener noreferrer">Case Study &rarr;</a>
                     </div>
                   </div>
                   <div class="project-card">
-                    <h4>Cloud Migration & Governance Suite</h4>
-                    <p class="project-purpose"><strong>Problem:</strong> Migration rollouts required stronger governance, less configuration drift, and better security visibility.</p>
-                    <p class="project-purpose"><strong>Built:</strong> Terraform-driven environments with GitHub Actions validation, plan approvals, and policy/security checks before deploy.</p>
-                    <p class="project-purpose"><strong>Impact:</strong> Improved cutover reliability and confidence through repeatable, auditable release workflows.</p>
-                    <p class="project-tech"><strong>Tech Used:</strong> Terraform, GitHub Actions, Azure, Linux</p>
+                    <h4>Cloud Migration &amp; Governance Suite</h4>
+                    <p class="project-purpose"><strong>Problem:</strong> Cloud rollouts needed clearer controls and less drift.</p>
+                    <p class="project-purpose"><strong>Built:</strong> Terraform environments with plan checks and release gates.</p>
+                    <p class="project-purpose"><strong>Impact:</strong> Improved pre-deploy confidence and repeatability.</p>
+                    <p class="project-tech"><strong>Stack:</strong> Terraform &middot; GitHub Actions &middot; Azure &middot; Linux</p>
                     <div class="project-links">
-                      <a href="https://github.com/Subash107" target="_blank" rel="noopener noreferrer">GitHub</a>
-                      <a href="projects.html#cloud-migration-suite" target="_blank" rel="noopener noreferrer">Case Study</a>
+                      <a href="https://github.com/Subash107?tab=repositories" target="_blank" rel="noopener noreferrer">GitHub &rarr;</a>
+                      <a href="projects.html#cloud-migration-suite" target="_blank" rel="noopener noreferrer">Case Study &rarr;</a>
+                    </div>
+                  </div>
+                  <div class="project-card">
+                    <h4>Personal SOC Monitoring Lab</h4>
+                    <p class="project-purpose"><strong>Problem:</strong> Security learning needed real telemetry and alert visibility.</p>
+                    <p class="project-purpose"><strong>Built:</strong> A SOC lab with Wazuh, Suricata, and Sysmon.</p>
+                    <p class="project-purpose"><strong>Impact:</strong> Improved log analysis, detection, and monitoring skills.</p>
+                    <p class="project-tech"><strong>Stack:</strong> Wazuh &middot; Suricata &middot; Sysmon &middot; Linux &middot; SIEM / SOC</p>
+                    <div class="project-links">
+                      <a href="https://github.com/Subash107?tab=repositories" target="_blank" rel="noopener noreferrer">GitHub &rarr;</a>
+                      <a href="projects.html#soc-lab" target="_blank" rel="noopener noreferrer">Case Study &rarr;</a>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </article>
-          <article class="book-card-face book-card-back">
+          <article class="book-card-face book-card-back" aria-hidden="true">
             <div class="section-content">
               <h3>Delivery Notes</h3>
-            <p>Projects are built with automation-first release design, versioned infrastructure, and practical controls that balance velocity with governance.</p>
-            <p>Current research includes Kubernetes runtime security, SIEM signal engineering, and observability strategy with Prometheus, Grafana, and OpenTelemetry.</p>
+            <p>My projects focus on reviewable automation, traceable infrastructure changes, and monitoring that supports faster troubleshooting.</p>
+            <p>Current research is centered on Kubernetes security, SOC workflows, and practical observability with Prometheus, Grafana, and OpenTelemetry.</p>
             </div>
           </article>
         </div>
@@ -514,36 +538,54 @@
                   <h2>Skills</h2>
                   <div class="skill-groups">
                     <div class="skill-group">
-                      <h4>Cloud, Containers & Platform</h4>
-                      <ul>
-                        <li>Docker containerization, image optimization, and Compose workflows</li>
-                        <li>Kubernetes workloads, Helm-based packaging, and cluster operations fundamentals</li>
-                        <li>AWS and Azure foundations across compute, networking, and IAM basics</li>
-                      </ul>
+                      <h4>Platform &amp; Cloud</h4>
+                      <div class="skill-pills">
+                        <span class="skill-pill">Docker</span>
+                        <span class="skill-pill">Docker Compose</span>
+                        <span class="skill-pill">Linux</span>
+                        <span class="skill-pill">AWS</span>
+                        <span class="skill-pill">Azure</span>
+                        <span class="skill-pill">Kubernetes</span>
+                      </div>
                     </div>
                     <div class="skill-group">
-                      <h4>CI/CD & Release Engineering</h4>
-                      <ul>
-                        <li>GitHub Actions workflows for build, test, deploy, and environment promotion</li>
-                        <li>Quality gates, artifact lifecycle controls, and rollback-friendly release patterns</li>
-                        <li>Reusable pipeline templates for consistent team-wide automation</li>
-                      </ul>
+                      <h4>CI/CD &amp; Automation</h4>
+                      <div class="skill-pills">
+                        <span class="skill-pill">GitHub Actions</span>
+                        <span class="skill-pill">Jenkins</span>
+                        <span class="skill-pill">Reusable Workflows</span>
+                        <span class="skill-pill">Quality Gates</span>
+                        <span class="skill-pill">Deployment Validation</span>
+                        <span class="skill-pill">Rollback Planning</span>
+                      </div>
                     </div>
                     <div class="skill-group">
-                      <h4>IaC & Automation</h4>
-                      <ul>
-                        <li>Terraform provisioning with structured modules, variables, and remote-state workflows</li>
-                        <li>Bash, PowerShell, and Python for operations automation and tooling integration</li>
-                        <li>Configuration consistency through repeatable scripts and policy-aware provisioning</li>
-                      </ul>
+                      <h4>IaC &amp; Automation</h4>
+                      <div class="skill-pills">
+                        <span class="skill-pill">Terraform</span>
+                        <span class="skill-pill">Bash</span>
+                        <span class="skill-pill">PowerShell</span>
+                        <span class="skill-pill">Python</span>
+                        <span class="skill-pill">Remote State</span>
+                        <span class="skill-pill">Bootstrap Automation</span>
+                      </div>
                     </div>
                     <div class="skill-group">
-                      <h4>Security & Observability</h4>
-                      <ul>
-                        <li>DevSecOps controls: secrets hygiene, dependency/image checks, and IaC scanning practices</li>
-                        <li>SIEM/SOC learning track: alert triage, log correlation, and incident response workflows</li>
-                        <li>Prometheus, Grafana, and OpenTelemetry for metrics, tracing, dashboards, and alerting</li>
-                      </ul>
+                      <h4>Cyber Security &amp; Detection</h4>
+                      <div class="skill-pills">
+                        <span class="skill-pill">Wazuh</span>
+                        <span class="skill-pill">Suricata</span>
+                        <span class="skill-pill">Sysmon</span>
+                        <span class="skill-pill">Threat Detection</span>
+                        <span class="skill-pill">Incident Triage</span>
+                        <span class="skill-pill">Log Analysis</span>
+                        <span class="skill-pill">Prometheus</span>
+                        <span class="skill-pill">Grafana</span>
+                        <span class="skill-pill">OpenTelemetry</span>
+                        <span class="skill-pill">SIEM / SOC</span>
+                        <span class="skill-pill">Secrets Hygiene</span>
+                        <span class="skill-pill">Secure Configuration</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -552,8 +594,8 @@
           <article class="book-card-face book-card-back">
             <div class="section-content">
               <h3>Depth</h3>
-              <p>Core depth is in secure delivery engineering, infrastructure automation, and reliability-focused operations.</p>
-              <p>I build systems that are easy to operate, easy to audit, and easy to hand over to teams.</p>
+              <p>Core depth is in secure delivery engineering, Linux operations, infrastructure automation, and monitoring-led troubleshooting.</p>
+              <p>I keep systems maintainable, visible, and easier for teams to hand over.</p>
             </div>
           </article>
         </div>
@@ -568,11 +610,11 @@
                 <div class="section-content">
                   <h2>Why Hire Me</h2>
                   <ul class="why-hire-list">
-                    <li>Builds secure CI/CD pipelines with practical controls and predictable release behavior</li>
-                    <li>Balances engineering speed with governance using IaC, policy checks, and change traceability</li>
-                    <li>Strong in Linux and container debugging, incident triage, and root-cause analysis</li>
-                    <li>Creates clear runbooks, architecture notes, and handoff documentation for teams</li>
-                    <li>Actively advancing in DevSecOps, SIEM/SOC workflows, Kubernetes security, and observability</li>
+                    <li>Combines hands-on infrastructure operations experience with modern CI/CD, infrastructure-as-code, and security-first delivery practices</li>
+                    <li>Builds secure workflows with validation gates, traceable changes, secrets awareness, and practical rollback thinking</li>
+                    <li>Comfortable with Linux administration, Docker-based environments, monitoring, and incident troubleshooting</li>
+                    <li>Brings hands-on cyber security lab experience with Wazuh, Suricata, and Sysmon for detection and log analysis</li>
+                    <li>Documents systems clearly so teams can operate, audit, secure, and extend them with confidence</li>
                   </ul>
                 </div>
               </div>
@@ -580,8 +622,8 @@
             <article class="book-card-face book-card-back">
               <div class="section-content">
                 <h3>Dependable partner</h3>
-                <p>I communicate clearly, ship incremental value, and keep delivery decisions aligned with reliability and security goals.</p>
-                <p>Structured collaboration and transparent documentation help teams move faster with confidence.</p>
+                <p>I communicate clearly, document carefully, and focus on improvements teams can maintain after handoff.</p>
+                <p>I do my best work where automation, reliability, and security need to improve together.</p>
               </div>
             </article>
           </div>
@@ -595,22 +637,23 @@
               <div class="section-inner">
                 <div class="section-content">
                   <h2>Contact</h2>
-                  <h3 class="contact-cta">Let&rsquo;s Work Together</h3>
+                  <h3 class="contact-cta">Let&rsquo;s Build Reliable Delivery</h3>
                   <div class="contact-details">
                     <p>Email: <a href="mailto:lamasubash107@gmail.com">lamasubash107@gmail.com</a></p>
-                    <p>GitHub: <a href="https://github.com/Subash107" target="_blank" rel="noopener noreferrer">https://github.com/Subash107</a></p>
-                    <p>LinkedIn: <a href="https://www.linkedin.com/in/subash-lama-b319a016b/?skipRedirect=true" target="_blank" rel="noopener noreferrer">https://www.linkedin.com/in/subash-lama-b319a016b/?skipRedirect=true</a></p>
-                    <p>Call: <a href="mailto:lamasubash107@gmail.com?subject=DevOps%20Call%20-%20Subash%20Lama%20Portfolio&body=Hi%20Subash%2C%0A%0AI%27d%20like%20to%20schedule%20a%20quick%20call.%0A%0AMy%20availability%20(UTC%2B5%3A45)%3A%20%5Badd%20times%5D%0A%0AThanks%2C%0A%5BYour%20Name%5D">Request a call (UTC+5:45)</a></p>
+                    <p>GitHub: <a href="https://github.com/Subash107" target="_blank" rel="noopener noreferrer">github.com/Subash107</a></p>
+                    <p>LinkedIn: <a href="https://www.linkedin.com/in/subash-lama-b319a016b/" target="_blank" rel="noopener noreferrer">linkedin.com/in/subash-lama-b319a016b</a></p>
+                    <p>Location: Kathmandu, Nepal</p>
+                    <p>Timezone: UTC+5:45 &mdash; <a href="mailto:lamasubash107@gmail.com?subject=DevOps%20Call%20-%20Subash%20Lama%20Portfolio&body=Hi%20Subash%2C%0A%0AI%27d%20like%20to%20schedule%20a%20quick%20call.%0A%0AMy%20availability%20(UTC%2B5%3A45)%3A%20%5Badd%20times%5D%0A%0AProject%20context%3A%20%5Badd%20details%5D%0A%0AThanks%2C%0A%5BYour%20Name%5D">request a call</a></p>
                   </div>
-                  <p>Open to DevOps, Platform Engineering, DevSecOps, SRE-track roles, and cloud security consulting.</p>
+                  <p>Open to DevOps, DevSecOps, platform engineering, cloud infrastructure, SRE-track, and cyber security-focused operations roles.</p>
                 </div>
               </div>
             </article>
           <article class="book-card-face book-card-back">
               <div class="section-content">
               <h3>Stay in Touch</h3>
-              <p>Share your goals around CI/CD, Kubernetes, Terraform, DevSecOps, or observability and I will reply with practical next steps.</p>
-              <p>For a quick call, send 2-3 time options in UTC+5:45 with your project context.</p>
+              <p>Share your goals around CI/CD, cloud operations, DevSecOps, or observability and I will reply with practical next steps.</p>
+              <p>For a quick call, send 2-3 time options in UTC+5:45 with a short project note.</p>
             </div>
           </article>
         </div>
@@ -618,9 +661,18 @@
     </section>
 
   <div class="footer">
-      &copy; 2026 Subash Lama. All rights reserved.
+      <div class="footer-links">
+        <a href="https://github.com/Subash107" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <span class="footer-sep">&middot;</span>
+        <a href="https://www.linkedin.com/in/subash-lama-b319a016b/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <span class="footer-sep">&middot;</span>
+        <a href="assets/docs/cv/latest-resume.pdf" download="Subash-Lama-Resume.pdf">Resume</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 Subash Lama. All rights reserved.</p>
     </div>
   </div>
+  <button type="button" class="audio-corner-toggle" data-audio-toggle data-audio-storage-key="portfolio_audio_enabled" data-audio-label-on="&#9834;" data-audio-label-off="&#9834;" aria-pressed="false" aria-label="Toggle ambient sound" title="Toggle ambient sound">&#9834;</button>
   <script src="assets/js/index.js" defer></script>
+  <script src="assets/js/parrot-fx.js" defer></script>
 </body>
 </html>

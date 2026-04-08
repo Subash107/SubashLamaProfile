@@ -9,11 +9,21 @@ This repository hosts Subash Lama's multimedia-rich portfolio as a static site, 
 - Security hardening for GitHub Pages output, Docker/nginx serving, and workflow execution.
 
 ## Repository Layout
+- Top-level structure:
+```text
+.
+|-- .github/
+|-- archive/
+|-- config/nginx/
+|-- content/resume/
+|-- public/
+`-- scripts/
+```
 - `public/` contains the deployed static site.
 - `public/assets/` contains runtime CSS, JS, media, and the published resume output.
-- `assets/cv/` contains the source resume PDFs that feed the published download file.
+- `content/resume/` contains the source resume PDFs that feed the published download file.
 - `scripts/` contains local automation, including resume syncing.
-- `nginx/` contains the Docker/nginx runtime config.
+- `config/nginx/` contains the Docker/nginx runtime config.
 - `.github/workflows/` contains CI, Pages deploy, and security scanning workflows.
 - `archive/` contains legacy template files, unused raw media, and old local artifacts that are not part of the live site.
 
@@ -39,8 +49,11 @@ Then open `http://localhost:8080/` (Docker) or your chosen server URL.
 If `pwsh` is not installed on your machine, use:
 `powershell -ExecutionPolicy Bypass -File .\scripts\sync-resume.ps1`
 
+For a one-command local Docker launch, use:
+`pwsh ./scripts/deploy-local.ps1`
+
 ## Resume Updates
-- Put your current resume PDF in `assets/cv/`.
+- Put your current resume PDF in `content/resume/`.
 - Use a professional source filename such as `Subash-Lama-Resume.pdf`.
 - The newest PDF in that folder is automatically copied to `public/assets/docs/cv/latest-resume.pdf` during local deploy and GitHub Actions.
 - If you keep multiple PDFs there, the most recently modified one becomes the download target.
