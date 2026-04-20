@@ -35,7 +35,7 @@ jobs:
       # If you later add a build step (npm run build, etc.), we will add it here.
 
       - name: Upload static files for GitHub Pages
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           # If your built site lives in another folder (e.g. dist/ or public/),
           # change this path to that folder.
