@@ -2679,3 +2679,156 @@
         transform: none;
       }
     }
+
+    /* ── Content-heavy sections: disable 3D flip, let content flow ── */
+    #projects.glass-card,
+    #experience.glass-card,
+    #certifications.glass-card {
+      overflow: visible;
+      min-height: auto;
+    }
+    #projects .book-card-inner,
+    #experience .book-card-inner,
+    #certifications .book-card-inner {
+      height: auto;
+      transform: none !important;
+      transition: none;
+    }
+    #projects .book-card-face,
+    #experience .book-card-face,
+    #certifications .book-card-face {
+      position: relative;
+      inset: auto;
+    }
+    #projects .book-card-back,
+    #experience .book-card-back,
+    #certifications .book-card-back {
+      display: none;
+    }
+    #projects .section-content,
+    #experience .section-content,
+    #certifications .section-content {
+      text-align: left;
+      align-items: flex-start;
+      min-height: auto;
+    }
+
+    /* ── Certification cards ── */
+    .cert-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: clamp(0.75rem, 1.5vw, 1.25rem);
+      width: 100%;
+      max-width: 900px;
+      margin: 0.5rem auto 0;
+      align-items: start;
+    }
+    .cert-card {
+      background: linear-gradient(160deg, rgba(20, 30, 55, 0.92), rgba(10, 14, 28, 0.96));
+      border: 1px solid rgba(114, 239, 255, 0.18);
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.38);
+      transition: border-color 0.22s, box-shadow 0.22s;
+    }
+    .cert-card:hover {
+      border-color: rgba(114, 239, 255, 0.42);
+      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.52);
+    }
+    .cert-issuer {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(114, 239, 255, 0.82);
+    }
+    .cert-card h4 {
+      margin: 0;
+      font-size: 0.97rem;
+      font-weight: 600;
+      color: #fff;
+      line-height: 1.35;
+    }
+    .cert-date {
+      font-size: 0.78rem;
+      color: rgba(255, 255, 255, 0.5);
+      margin-top: 0.1rem;
+    }
+
+    /* ── Experience cards ── */
+    .exp-list {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.75rem, 1.5vw, 1rem);
+      width: 100%;
+      max-width: 900px;
+      margin: 0.5rem auto 0;
+    }
+    .exp-card {
+      background: linear-gradient(160deg, rgba(20, 30, 55, 0.88), rgba(10, 14, 28, 0.94));
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-left: 3px solid rgba(114, 239, 255, 0.55);
+      border-radius: 10px;
+      padding: 0.9rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.32);
+      transition: border-color 0.22s, box-shadow 0.22s;
+    }
+    .exp-card:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      border-left-color: rgba(114, 239, 255, 0.85);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.48);
+    }
+    .exp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+    }
+    .exp-card h4 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+    }
+    .exp-duration {
+      font-size: 0.78rem;
+      color: rgba(114, 239, 255, 0.75);
+      white-space: nowrap;
+    }
+    .exp-company {
+      margin: 0;
+      font-size: 0.88rem;
+      color: rgba(255, 255, 255, 0.65);
+    }
+    .exp-card .project-tech {
+      margin-top: 0.25rem;
+      font-size: 0.82rem;
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    /* ── Max-width override for experience & certifications sections ── */
+    #experience.glass-card,
+    #certifications.glass-card {
+      max-width: 920px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    @media (max-width: 768px) {
+      .cert-list {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      }
+      .exp-header {
+        flex-direction: column;
+      }
+      .exp-duration {
+        white-space: normal;
+      }
+    }
