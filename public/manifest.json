@@ -1,0 +1,17 @@
+{
+  "name": "Subash Lama — Cybersecurity Analyst",
+  "short_name": "Subash Lama",
+  "description": "Portfolio of Subash Lama, Cybersecurity Analyst with 10+ years in IT.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07111c",
+  "theme_color": "#07111c",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

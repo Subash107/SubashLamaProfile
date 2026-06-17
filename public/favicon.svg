@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="7" fill="#07111c"/>
+  <rect width="32" height="32" rx="7" fill="none" stroke="rgba(138,232,255,0.35)" stroke-width="1"/>
+  <text x="16" y="22" text-anchor="middle"
+        font-family="Segoe UI, system-ui, -apple-system, sans-serif"
+        font-size="14" font-weight="800" fill="#8ae8ff" letter-spacing="0.5">SL</text>
+</svg>

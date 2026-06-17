@@ -62,7 +62,7 @@
 }
 
 .motion-ok .glass-card {
-  animation: readingFloat 22s ease-in-out infinite;
+  animation: none;
   transition:
     transform 700ms var(--motion-ease-out),
     box-shadow 700ms var(--motion-ease-out),
@@ -70,13 +70,11 @@
 }
 
 .motion-ok section.glass-card:nth-of-type(2n) {
-  animation-duration: 25s;
-  animation-delay: -5s;
+  animation: none;
 }
 
 .motion-ok section.glass-card:nth-of-type(3n) {
-  animation-duration: 28s;
-  animation-delay: -11s;
+  animation: none;
 }
 
 .motion-ok .glass-card::before {

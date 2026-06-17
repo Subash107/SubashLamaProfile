@@ -11,13 +11,37 @@
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Subash Lama &ndash; Cybersecurity Analyst | SOC &middot; GRC &middot; IAM" />
   <meta property="og:description" content="Cybersecurity Analyst with 10+ years in IT transitioning into SOC operations, detection engineering, GRC, and IAM across modern enterprise environments." />
-  <meta property="og:image" content="assets/images/bg-poster.jpg" />
+  <meta property="og:image" content="https://subash107.github.io/assets/images/bg-poster.jpg" />
   <meta property="og:url" content="https://subash107.github.io/" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Subash Lama &ndash; Cybersecurity Analyst | SOC &middot; GRC &middot; IAM" />
   <meta name="twitter:description" content="Cybersecurity Analyst with 10+ years in IT transitioning into SOC operations, detection engineering, GRC, and IAM across modern enterprise environments." />
-  <meta name="twitter:image" content="assets/images/bg-poster.jpg" />
+  <meta name="twitter:image" content="https://subash107.github.io/assets/images/bg-poster.jpg" />
   <title>Subash Lama &ndash; Cybersecurity Analyst | SOC &middot; GRC &middot; IAM &middot; Security Operations</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="canonical" href="https://subash107.github.io/" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Subash Lama",
+    "jobTitle": "Cybersecurity Analyst",
+    "description": "Cybersecurity Analyst with 10+ years in IT focused on SOC operations, detection engineering, GRC, and IAM.",
+    "url": "https://subash107.github.io/",
+    "email": "lamasubash107@gmail.com",
+    "sameAs": [
+      "https://github.com/Subash107",
+      "https://www.linkedin.com/in/subash-lama-b319a016b/"
+    ],
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Kathmandu",
+      "addressCountry": "NP"
+    },
+    "knowsAbout": ["SOC Operations", "GRC", "IAM", "Detection Engineering", "Wazuh", "Suricata", "SIEM", "Network Security"]
+  }
+  </script>
   <link href="assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet" />
   <script src="assets/js/site.js" defer></script>
   <link rel="stylesheet" href="assets/css/motion.css" />
@@ -45,6 +69,21 @@
 
 <body class="loader-active">
 
+  <a href="#about" class="skip-to-content">Skip to content</a>
+
+  <!-- Scroll progress bar -->
+  <div id="scrollProgress" aria-hidden="true"></div>
+
+  <!-- Sticky top nav (appears after hero scrolls out) -->
+  <nav id="stickyNav" aria-label="Section navigation">
+    <a href="#about">About</a>
+    <a href="#experience">Experience</a>
+    <a href="projects.html" target="_blank" rel="noopener noreferrer">Projects ↗</a>
+    <a href="#skills">Skills</a>
+    <a href="#certifications">Certs</a>
+    <a href="#contact">Contact</a>
+  </nav>
+
   <!-- Background ocean sound (manual toggle in JS) -->
   <audio id="bg-audio" data-bg-audio loop preload="none">
     <source data-src="assets/media/audio/ocean-waves-250310.mp3" type="audio/mpeg">
@@ -61,6 +100,35 @@
 
   <!-- Matrix rain canvas — Parrot-OS background effect -->
   <canvas id="parrot-rain" aria-hidden="true"></canvas>
+  <canvas id="particleNet" aria-hidden="true"></canvas>
+  <canvas id="konamiRain" aria-hidden="true"></canvas>
+  <canvas id="circuitBoard" aria-hidden="true"></canvas>
+  <canvas id="filmGrain" aria-hidden="true"></canvas>
+  <div id="hueShiftLayer" aria-hidden="true"></div>
+  <div id="customCursor" aria-hidden="true">
+    <svg viewBox="0 0 40 40" width="40" height="40">
+      <circle cx="20" cy="20" r="14" class="cur-ring"/>
+      <circle cx="20" cy="20" r="2" class="cur-dot"/>
+      <line x1="20" y1="2"  x2="20" y2="10"  class="cur-line"/>
+      <line x1="20" y1="30" x2="20" y2="38"  class="cur-line"/>
+      <line x1="2"  y1="20" x2="10" y2="20"  class="cur-line"/>
+      <line x1="30" y1="20" x2="38" y2="20"  class="cur-line"/>
+    </svg>
+  </div>
+  <div class="bg-orb bg-orb-1" aria-hidden="true"></div>
+  <div class="bg-orb bg-orb-2" aria-hidden="true"></div>
+  <div class="bg-orb bg-orb-3" aria-hidden="true"></div>
+  <div id="spotlight" aria-hidden="true"></div>
+  <div id="achieveToast" aria-live="assertive" aria-atomic="true" hidden></div>
+  <nav id="sideNavDots" aria-label="Jump to section">
+    <a href="#about"          class="snd" data-snd="about"          title="About"></a>
+    <a href="#experience"     class="snd" data-snd="experience"     title="Experience"></a>
+    <a href="#projects"       class="snd" data-snd="projects"       title="Projects"></a>
+    <a href="#skills"         class="snd" data-snd="skills"         title="Skills"></a>
+    <a href="#certifications" class="snd" data-snd="certifications" title="Certifications"></a>
+    <a href="#contact"        class="snd" data-snd="contact"        title="Contact"></a>
+  </nav>
+  <div id="cursorTrailCanvas" aria-hidden="true"></div>
 
   <div class="portfolio-loader" data-loader data-loader-style="boot" aria-live="polite" aria-hidden="false">
     <div class="portfolio-loader__backdrop" aria-hidden="true">
@@ -188,6 +256,25 @@
   <div class="content">
     <div class="hero-section">
       <div class="hero-content">
+        <div class="hero-avatar" aria-label="Subash Lama">
+          <svg viewBox="0 0 96 96" role="img" aria-label="SL initials" focusable="false">
+            <defs>
+              <radialGradient id="avatarBg" cx="40%" cy="35%" r="65%">
+                <stop offset="0%" stop-color="rgba(114,239,255,0.22)"/>
+                <stop offset="100%" stop-color="rgba(7,17,28,0.96)"/>
+              </radialGradient>
+              <radialGradient id="avatarGlow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="rgba(114,239,255,0.18)"/>
+                <stop offset="100%" stop-color="rgba(114,239,255,0)"/>
+              </radialGradient>
+            </defs>
+            <circle cx="48" cy="48" r="47" fill="url(#avatarGlow)"/>
+            <circle cx="48" cy="48" r="43" fill="url(#avatarBg)" stroke="rgba(114,239,255,0.45)" stroke-width="1.5"/>
+            <text x="48" y="56" text-anchor="middle"
+                  font-family="Segoe UI, system-ui, -apple-system, sans-serif"
+                  font-size="28" font-weight="800" fill="#8ae8ff" letter-spacing="2">SL</text>
+          </svg>
+        </div>
         <h1 class="hero-name" data-hero-variant="circular" aria-label="Subash Lama">
           <span class="hero-name-display hero-name-terminal" aria-hidden="true">
             <span class="hero-name-prompt">&gt;</span>
@@ -426,16 +513,59 @@
             <text id="heroNameRightHighlight" class="hero-name-text hero-name-text-right hero-name-text-reflect" data-hero-name-highlight data-name-side="right" x="467" y="108">Lama</text>
           </svg>
         </h1>
-        <p class="hero-tagline">Cybersecurity Analyst with 10+ years in IT &mdash; focused on SOC operations, detection engineering, GRC, and IAM across modern enterprise environments.</p>
+        <p class="hero-tagline"><span id="typingRoles" class="typing-roles">Cybersecurity Analyst</span> with <span class="count-up" data-target="10" data-suffix="+">10+</span> years in IT &mdash; focused on SOC operations, detection engineering, GRC, and IAM across modern enterprise environments.</p>
         <p class="hero-stack">SOC &middot; GRC &middot; IAM &middot; CTI &middot; Wazuh &middot; Suricata &middot; Sysmon &middot; Docker &middot; IaC &middot; Cisco</p>
       </div>
+      <!-- Neon SVG Signature -->
+      <svg id="neonSig" class="neon-sig" viewBox="0 0 260 48" aria-label="Subash Lama signature" role="img">
+        <path id="neonSigPath" class="neon-sig-path" d="M8,36 C14,12 24,8 30,18 C36,28 28,40 22,36 C16,32 20,20 28,16 C38,10 50,30 58,24 C64,20 60,12 68,10 C76,8 80,20 86,24 C90,28 94,30 100,26 C106,22 104,14 112,12 C120,10 126,24 130,28 C134,32 136,38 142,36 C148,34 150,28 156,24 C160,20 162,16 170,14 C178,12 182,26 188,30 C192,34 196,36 202,34 C208,32 210,24 218,22 C224,20 228,24 234,28 C238,31 242,36 248,34" fill="none"/>
+      </svg>
+
       <div class="hero-badges">
+        <span class="role-badge available-badge"><span class="available-dot" aria-hidden="true"></span>Available for roles</span>
         <span class="role-badge">Open to Cybersecurity / SOC / GRC / IAM roles</span>
-        <span class="role-badge secondary">UTC+5:45</span>
+        <span class="role-badge secondary" aria-live="polite"><span id="nepalTimeLive">--:--</span>&thinsp;NPT</span>
+        <span class="role-badge visitor-badge" id="visitorBadge" aria-live="polite" title="Page views"></span>
+        <button type="button" id="copyProfileUrl" class="role-badge copy-url-badge" title="Copy profile link">&#128279; Copy Link</button>
       </div>
+      <div class="hero-stats" aria-label="Quick stats">
+        <div class="hero-stat"><span class="hero-stat-num">10+</span><span class="hero-stat-lbl">Years IT</span></div>
+        <div class="hero-stat"><span class="hero-stat-num">5</span><span class="hero-stat-lbl">Certs</span></div>
+        <div class="hero-stat"><span class="hero-stat-num">3</span><span class="hero-stat-lbl">Labs Built</span></div>
+        <div class="hero-stat"><span class="hero-stat-num">150+</span><span class="hero-stat-lbl">Endpoints</span></div>
+      </div>
+      <div class="profile-strength" aria-label="Profile strength">
+        <span class="ps-label">Profile Strength</span>
+        <div class="ps-bar-track"><div class="ps-bar-fill" id="psBarFill"></div></div>
+        <span class="ps-pct" id="psPct">0%</span>
+      </div>
+      <div class="studying-widget" aria-label="Currently studying">
+        <span class="sw-icon">&#128218;</span>
+        <div class="sw-info">
+          <span class="sw-label">Currently Studying</span>
+          <span class="sw-text" id="studyingText">MITRE ATT&amp;CK Framework</span>
+          <div class="sw-bar-track"><div class="sw-bar" id="studyingBar" style="width:65%"></div></div>
+        </div>
+      </div>
+      <!-- Live stats ticker -->
+      <div class="stats-ticker" aria-label="Live statistics">
+        <div class="st-item"><span class="st-num" data-target="847" id="stLogs">0</span><span class="st-lbl">Log Entries Analyzed</span></div>
+        <div class="st-sep"></div>
+        <div class="st-item"><span class="st-num" data-target="24" id="stScripts">0</span><span class="st-lbl">Scripts Written</span></div>
+        <div class="st-sep"></div>
+        <div class="st-item"><span class="st-num" data-target="3" id="stLabs">0</span><span class="st-lbl">Labs Built</span></div>
+        <div class="st-sep"></div>
+        <div class="st-item"><span class="st-num" data-target="150" id="stEndpoints">0</span><span class="st-lbl">Endpoints Secured</span></div>
+      </div>
+
+      <div class="threat-feed" aria-live="polite" aria-label="Live threat feed">
+        <span class="tf-badge">LIVE</span>
+        <span id="threatFeedText" class="tf-text">SOC monitor active</span>
+      </div>
+      <button type="button" id="pitchBtn" class="btn btn-outline-light pitch-btn" title="Hear my 30-second pitch">&#9654; 30-sec Pitch</button>
       <div class="cta-group">
         <a href="assets/docs/cv/latest-resume.pdf" class="btn btn-outline-light btn-resume" data-resume-download data-resume-manifest="assets/docs/cv/resume-manifest.json" download="Subash-Lama-Resume.pdf">Download Resume</a>
-        <a href="mailto:lamasubash107@gmail.com?subject=Cybersecurity%20Call%20-%20Subash%20Lama%20Portfolio&body=Hi%20Subash%2C%0A%0AI%27d%20like%20to%20schedule%20a%20quick%20call%20to%20discuss%20a%20cybersecurity%20opportunity.%0A%0AMy%20availability%3A%20%5Badd%20times%5D%0A%0AThanks%2C%0A%5BYour%20Name%5D" class="btn btn-outline-light">Book a Call</a>
+        <a href="https://mail.google.com/mail/?view=cm&to=lamasubash107%40gmail.com&su=Cybersecurity%20Call%20-%20Subash%20Lama%20Portfolio&body=Hi%20Subash%2C%0A%0AI%27d%20like%20to%20schedule%20a%20quick%20call%20to%20discuss%20a%20cybersecurity%20opportunity.%0A%0AMy%20availability%3A%20%5Badd%20times%5D%0A%0AThanks%2C%0A%5BYour%20Name%5D" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light btn-cta-secondary">Book a Call</a>
       </div>
       <div class="button-group">
         <a href="#about" class="btn btn-outline-light">About</a>
@@ -446,13 +576,33 @@
       </div>
     </div>
 
+    <!-- Hero wave divider -->
+    <div class="hero-wave" aria-hidden="true">
+      <svg viewBox="0 0 1440 70" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path class="wave-path wave-back"  d="M0,35 C360,70 1080,0 1440,35 L1440,70 L0,70 Z"/>
+        <path class="wave-path wave-front" d="M0,45 C480,5  960,65 1440,45 L1440,70 L0,70 Z"/>
+      </svg>
+    </div>
+
+    <!-- Skills marquee ticker -->
+    <div class="skill-marquee" aria-hidden="true">
+      <div class="skill-marquee-inner">
+        <div class="skill-marquee-track">
+          <span>SOC Operations</span><span class="mq-dot">◆</span><span>Wazuh</span><span class="mq-dot">◆</span><span>Suricata</span><span class="mq-dot">◆</span><span>Sysmon</span><span class="mq-dot">◆</span><span>SIEM</span><span class="mq-dot">◆</span><span>GRC</span><span class="mq-dot">◆</span><span>IAM</span><span class="mq-dot">◆</span><span>Cisco</span><span class="mq-dot">◆</span><span>Ethical Hacking</span><span class="mq-dot">◆</span><span>Endpoint Security</span><span class="mq-dot">◆</span><span>Docker</span><span class="mq-dot">◆</span><span>GitHub Actions</span><span class="mq-dot">◆</span><span>Terraform</span><span class="mq-dot">◆</span><span>Linux</span><span class="mq-dot">◆</span><span>Active Directory</span><span class="mq-dot">◆</span><span>Python</span><span class="mq-dot">◆</span>
+        </div>
+        <div class="skill-marquee-track" aria-hidden="true">
+          <span>SOC Operations</span><span class="mq-dot">◆</span><span>Wazuh</span><span class="mq-dot">◆</span><span>Suricata</span><span class="mq-dot">◆</span><span>Sysmon</span><span class="mq-dot">◆</span><span>SIEM</span><span class="mq-dot">◆</span><span>GRC</span><span class="mq-dot">◆</span><span>IAM</span><span class="mq-dot">◆</span><span>Cisco</span><span class="mq-dot">◆</span><span>Ethical Hacking</span><span class="mq-dot">◆</span><span>Endpoint Security</span><span class="mq-dot">◆</span><span>Docker</span><span class="mq-dot">◆</span><span>GitHub Actions</span><span class="mq-dot">◆</span><span>Terraform</span><span class="mq-dot">◆</span><span>Linux</span><span class="mq-dot">◆</span><span>Active Directory</span><span class="mq-dot">◆</span><span>Python</span><span class="mq-dot">◆</span>
+        </div>
+      </div>
+    </div>
+
     <section id="about" class="glass-card">
       <div class="book-card" data-flip-card tabindex="0">
         <div class="book-card-inner">
           <article class="book-card-face book-card-front">
             <div class="section-inner">
               <div class="section-content about-panel">
-                <h2>About Me</h2>
+                <h2 data-scramble>About Me</h2>
                 <p>I am a System Administrator with 10+ years in IT and a business degree, now transitioning into cybersecurity &mdash; with a focus on security operations, detection engineering, and GRC.</p>
                 <p>My enterprise IT background spans system administration at Primuson Pvt. Ltd., IT specialist work at State Bank of India, network support engineering at Green IT Solutions, and IT consulting for Unilever. This gives me a deep operational foundation for understanding how attackers move through real infrastructure.</p>
                 <p>I built a personal SOC lab using Wazuh, Suricata, and Sysmon for host visibility, network telemetry, log collection, and real-time detection practice &mdash; while earning Cisco certifications in Ethical Hacking and Endpoint Security, and IBM credentials in Cybersecurity Fundamentals and Python for Data Science.</p>
@@ -479,14 +629,25 @@
           <article class="book-card-face book-card-front">
             <div class="section-inner">
               <div class="section-content">
-                <h2>Experience</h2>
-                <div class="exp-list">
+                <h2 data-scramble>Experience</h2>
+                <div class="exp-view-toggle" role="group" aria-label="View mode">
+                  <button type="button" class="cvt-btn cvt-active" data-expview="list">&#9776; List</button>
+                  <button type="button" class="cvt-btn" data-expview="horizontal">&#8644; Timeline</button>
+                </div>
+                <div id="expHorizontal" class="exp-horizontal" hidden aria-label="Career timeline"></div>
+                <div class="exp-list exp-timeline" id="expList">
                   <div class="exp-card">
                     <div class="exp-header">
                       <h4>Information Technology System Administrator</h4>
                       <span class="exp-duration">Jan 2020 &ndash; Feb 2025 &middot; 5 yrs 2 mos</span>
                     </div>
                     <p class="exp-company"><strong>Primuson Pvt. Ltd.</strong> &middot; Full-time &middot; Lazimpat, Kathmandu &middot; On-site</p>
+                    <ul class="exp-achievements">
+                      <li>Managed 150+ endpoints and multi-site infrastructure across 3 office locations</li>
+                      <li>Deployed IDS/network monitoring stack, reducing security visibility gaps across the environment</li>
+                      <li>Standardised patch management cycle, cutting unplanned downtime by ~40%</li>
+                      <li>Led ethical hacking exercises to identify and remediate internal vulnerabilities</li>
+                    </ul>
                     <p class="project-tech">Ethical Hacking &middot; Network Monitoring &middot; System Administration &middot; IDS &middot; Infrastructure Security</p>
                   </div>
                   <div class="exp-card">
@@ -495,6 +656,11 @@
                       <span class="exp-duration">Mar 2018 &ndash; Apr 2019 &middot; 1 yr 2 mos</span>
                     </div>
                     <p class="exp-company"><strong>State Bank of India</strong> &middot; Full-time &middot; Kathmandu &middot; Hybrid</p>
+                    <ul class="exp-achievements">
+                      <li>Administered Active Directory for 200+ banking staff across Kathmandu branches</li>
+                      <li>Configured and hardened proxy server routing all outbound banking traffic</li>
+                      <li>Enforced endpoint security policies across 80+ workstations meeting banking compliance standards</li>
+                    </ul>
                     <p class="project-tech">Proxy Server &middot; Active Directory &middot; Identity Management &middot; Endpoint Security</p>
                   </div>
                   <div class="exp-card">
@@ -503,6 +669,11 @@
                       <span class="exp-duration">Mar 2016 &ndash; Apr 2019 &middot; 3 yrs 2 mos</span>
                     </div>
                     <p class="exp-company"><strong>Green IT Solutions Pvt. Ltd.</strong> &middot; Full-time &middot; Kathmandu</p>
+                    <ul class="exp-achievements">
+                      <li>Delivered network and infrastructure support across 20+ client organisations</li>
+                      <li>Managed SAN/storage virtualisation deployments for enterprise clients</li>
+                      <li>Maintained Linux server environments achieving 99%+ uptime across client engagements</li>
+                    </ul>
                     <p class="project-tech">Storage Virtualization &middot; Proxy Server &middot; Network Support &middot; Linux Administration</p>
                   </div>
                   <div class="exp-card">
@@ -511,6 +682,11 @@
                       <span class="exp-duration">Jan 2017 &ndash; Dec 2017 &middot; 1 yr</span>
                     </div>
                     <p class="exp-company"><strong>Unilever</strong> &middot; Contract &middot; Nepal &middot; Hybrid</p>
+                    <ul class="exp-achievements">
+                      <li>Consulted on IT governance and infrastructure for FMCG operations across Nepal</li>
+                      <li>Designed and documented Cisco network topology for distribution facilities</li>
+                      <li>Supported Active Directory migration aligned with Unilever global IT standards</li>
+                    </ul>
                     <p class="project-tech">Cisco Networking &middot; Active Directory &middot; IT Governance &middot; Infrastructure Consulting</p>
                   </div>
                   <div class="exp-card">
@@ -519,6 +695,10 @@
                       <span class="exp-duration">Mar 2014 &ndash; May 2016 &middot; 2 yrs 3 mos</span>
                     </div>
                     <p class="exp-company"><strong>Platinum Hotel &amp; SPA</strong> &middot; Full-time &middot; Soltemode &middot; On-site</p>
+                    <ul class="exp-achievements">
+                      <li>Provided end-to-end IT support for 100+ hospitality staff across hotel operations</li>
+                      <li>Managed POS system integration and network connectivity for hotel services</li>
+                    </ul>
                     <p class="project-tech">IT Support &middot; Networking &middot; Systems Troubleshooting</p>
                   </div>
                 </div>
@@ -542,7 +722,32 @@
           <article class="book-card-face book-card-front">
             <div class="section-inner">
               <div class="section-content">
-                <h2>Projects</h2>
+                <h2 data-scramble>Projects</h2>
+                <!-- SOC Dashboard Widget -->
+                <div class="soc-dashboard" aria-label="Live SOC metrics">
+                  <div class="soc-d-title">&#128737; SOC Dashboard <span class="soc-live-dot"></span></div>
+                  <div class="soc-d-grid">
+                    <div class="soc-d-stat"><span class="soc-d-val" id="socUptime">99.9%</span><span class="soc-d-lbl">Uptime</span></div>
+                    <div class="soc-d-stat"><span class="soc-d-val" id="socAlerts">0</span><span class="soc-d-lbl">Alerts Blocked</span></div>
+                    <div class="soc-d-stat"><span class="soc-d-val" id="socThreats">0</span><span class="soc-d-lbl">Threats Detected</span></div>
+                    <div class="soc-d-stat"><span class="soc-d-val" id="socMTTR">2.4m</span><span class="soc-d-lbl">Avg MTTR</span></div>
+                  </div>
+                </div>
+
+                <!-- GitHub Activity Feed -->
+                <div class="gh-feed" aria-label="GitHub activity feed">
+                  <div class="gh-feed-title">&#128336; Recent Activity</div>
+                  <ul class="gh-feed-list" id="ghFeedList"></ul>
+                </div>
+
+                <div class="project-tag-filters" role="group" aria-label="Filter by technology">
+                  <span class="ptf-label">Filter:</span>
+                  <button type="button" class="ptf-btn ptf-active" data-tag="all">All</button>
+                  <button type="button" class="ptf-btn" data-tag="Docker">Docker</button>
+                  <button type="button" class="ptf-btn" data-tag="Terraform">Terraform</button>
+                  <button type="button" class="ptf-btn" data-tag="Wazuh">Wazuh</button>
+                  <button type="button" class="ptf-btn" data-tag="GitHub Actions">CI/CD</button>
+                </div>
                 <div class="project-list">
                   <div class="project-card">
                     <h4>Secure Virtual Lab Automation</h4>
@@ -598,59 +803,241 @@
             <article class="book-card-face book-card-front">
               <div class="section-inner">
                 <div class="section-content">
-                  <h2>Skills</h2>
+                  <h2 data-scramble>Skills</h2>
+                  <div class="skill-bars" role="list" aria-label="Core skill proficiency">
+                    <div class="skill-bar-item" role="listitem">
+                      <div class="skill-bar-meta"><span class="skill-bar-label">Endpoint Security &amp; IAM</span><span class="skill-bar-pct">90%</span></div>
+                      <div class="skill-bar-track" aria-hidden="true"><div class="skill-bar-fill" data-pct="90"></div></div>
+                    </div>
+                    <div class="skill-bar-item" role="listitem">
+                      <div class="skill-bar-meta"><span class="skill-bar-label">Network &amp; Infrastructure</span><span class="skill-bar-pct">88%</span></div>
+                      <div class="skill-bar-track" aria-hidden="true"><div class="skill-bar-fill" data-pct="88"></div></div>
+                    </div>
+                    <div class="skill-bar-item" role="listitem">
+                      <div class="skill-bar-meta"><span class="skill-bar-label">Security Operations (SOC / SIEM)</span><span class="skill-bar-pct">75%</span></div>
+                      <div class="skill-bar-track" aria-hidden="true"><div class="skill-bar-fill" data-pct="75"></div></div>
+                    </div>
+                    <div class="skill-bar-item" role="listitem">
+                      <div class="skill-bar-meta"><span class="skill-bar-label">Scripting &amp; Automation</span><span class="skill-bar-pct">72%</span></div>
+                      <div class="skill-bar-track" aria-hidden="true"><div class="skill-bar-fill" data-pct="72"></div></div>
+                    </div>
+                    <div class="skill-bar-item" role="listitem">
+                      <div class="skill-bar-meta"><span class="skill-bar-label">GRC &amp; Detection Engineering</span><span class="skill-bar-pct">65%</span></div>
+                      <div class="skill-bar-track" aria-hidden="true"><div class="skill-bar-fill" data-pct="65"></div></div>
+                    </div>
+                  </div>
+                  <div class="skills-visual-row">
+                    <canvas id="skillRadar" width="220" height="190" aria-label="Skill radar chart" role="img"></canvas>
+                    <div class="security-ring-wrap" aria-hidden="true">
+                      <svg viewBox="0 0 120 120" width="120" height="120" class="sec-ring-svg">
+                        <circle class="sec-ring-bg" cx="60" cy="60" r="48"/>
+                        <circle class="sec-ring-fill" id="secRingFill" cx="60" cy="60" r="48"/>
+                      </svg>
+                      <div class="sec-ring-label">
+                        <span class="sec-ring-pct" id="secRingPct">0%</span>
+                        <span class="sec-ring-sub">Security<br>Readiness</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="skill-tier-legend" aria-label="Proficiency legend">
+                    <span class="tier-key" data-tier="core">Core</span>
+                    <span class="tier-key" data-tier="skilled">Skilled</span>
+                    <span class="tier-key" data-tier="growing">Growing</span>
+                  </div>
                   <div class="skill-groups">
                     <div class="skill-group">
                       <h4>Security Operations &amp; GRC</h4>
                       <div class="skill-pills">
-                        <span class="skill-pill">SOC Operations</span>
-                        <span class="skill-pill">GRC</span>
-                        <span class="skill-pill">IAM</span>
-                        <span class="skill-pill">Cyber Threat Intelligence</span>
-                        <span class="skill-pill">Detection Engineering</span>
-                        <span class="skill-pill">Incident Response</span>
-                        <span class="skill-pill">SIEM</span>
-                        <span class="skill-pill">Log Analysis</span>
+                        <span class="skill-pill" data-tier="skilled">SOC Operations</span>
+                        <span class="skill-pill" data-tier="growing">GRC</span>
+                        <span class="skill-pill" data-tier="skilled">IAM</span>
+                        <span class="skill-pill" data-tier="growing">Cyber Threat Intelligence</span>
+                        <span class="skill-pill" data-tier="growing">Detection Engineering</span>
+                        <span class="skill-pill" data-tier="growing">Incident Response</span>
+                        <span class="skill-pill" data-tier="skilled">SIEM</span>
+                        <span class="skill-pill" data-tier="skilled">Log Analysis</span>
                       </div>
                     </div>
                     <div class="skill-group">
                       <h4>Security Tools &amp; Monitoring</h4>
                       <div class="skill-pills">
-                        <span class="skill-pill">Wazuh</span>
-                        <span class="skill-pill">Suricata</span>
-                        <span class="skill-pill">Sysmon</span>
-                        <span class="skill-pill">IDS / IPS</span>
-                        <span class="skill-pill">Endpoint Security</span>
-                        <span class="skill-pill">Threat Detection</span>
-                        <span class="skill-pill">Network Monitoring</span>
-                        <span class="skill-pill">Ethical Hacking</span>
+                        <span class="skill-pill" data-tier="skilled">Wazuh</span>
+                        <span class="skill-pill" data-tier="skilled">Suricata</span>
+                        <span class="skill-pill" data-tier="skilled">Sysmon</span>
+                        <span class="skill-pill" data-tier="skilled">IDS / IPS</span>
+                        <span class="skill-pill" data-tier="core">Endpoint Security</span>
+                        <span class="skill-pill" data-tier="growing">Threat Detection</span>
+                        <span class="skill-pill" data-tier="core">Network Monitoring</span>
+                        <span class="skill-pill" data-tier="skilled">Ethical Hacking</span>
                       </div>
                     </div>
                     <div class="skill-group">
                       <h4>Networking &amp; Infrastructure</h4>
                       <div class="skill-pills">
-                        <span class="skill-pill">Cisco Networking</span>
-                        <span class="skill-pill">Active Directory</span>
-                        <span class="skill-pill">DNS</span>
-                        <span class="skill-pill">Proxy Server</span>
-                        <span class="skill-pill">Storage Virtualization</span>
-                        <span class="skill-pill">Linux Administration</span>
-                        <span class="skill-pill">Windows Server</span>
-                        <span class="skill-pill">Docker</span>
+                        <span class="skill-pill" data-tier="core">Cisco Networking</span>
+                        <span class="skill-pill" data-tier="core">Active Directory</span>
+                        <span class="skill-pill" data-tier="core">DNS</span>
+                        <span class="skill-pill" data-tier="core">Proxy Server</span>
+                        <span class="skill-pill" data-tier="core">Storage Virtualization</span>
+                        <span class="skill-pill" data-tier="core">Linux Administration</span>
+                        <span class="skill-pill" data-tier="core">Windows Server</span>
+                        <span class="skill-pill" data-tier="skilled">Docker</span>
                       </div>
                     </div>
                     <div class="skill-group">
                       <h4>Scripting &amp; Automation</h4>
                       <div class="skill-pills">
-                        <span class="skill-pill">Python</span>
-                        <span class="skill-pill">Bash</span>
-                        <span class="skill-pill">PowerShell</span>
-                        <span class="skill-pill">GitHub Actions</span>
-                        <span class="skill-pill">Terraform / IaC</span>
-                        <span class="skill-pill">Data Analysis</span>
+                        <span class="skill-pill" data-tier="skilled">Python</span>
+                        <span class="skill-pill" data-tier="core">Bash</span>
+                        <span class="skill-pill" data-tier="core">PowerShell</span>
+                        <span class="skill-pill" data-tier="skilled">GitHub Actions</span>
+                        <span class="skill-pill" data-tier="growing">Terraform / IaC</span>
+                        <span class="skill-pill" data-tier="growing">Data Analysis</span>
                       </div>
                     </div>
                   </div>
+                  <div class="tech-stack-grid" aria-label="Core tools">
+                    <div class="tsg-item"><span class="tsg-mono" style="background:rgba(138,232,255,0.15);color:#8ae8ff">WZ</span><span class="tsg-name">Wazuh</span></div>
+                    <div class="tsg-item"><span class="tsg-mono" style="background:rgba(255,136,68,0.15);color:#ff8844">SR</span><span class="tsg-name">Suricata</span></div>
+                    <div class="tsg-item"><span class="tsg-mono" style="background:rgba(80,250,123,0.15);color:#50fa7b">SM</span><span class="tsg-name">Sysmon</span></div>
+                    <div class="tsg-item"><span class="tsg-mono" style="background:rgba(13,183,237,0.15);color:#0db7ed">DK</span><span class="tsg-name">Docker</span></div>
+                    <div class="tsg-item"><span class="tsg-mono" style="background:rgba(189,147,249,0.15);color:#bd93f9">GH</span><span class="tsg-name">GitHub</span></div>
+                    <div class="tsg-item"><span class="tsg-mono" style="background:rgba(255,212,59,0.15);color:#ffd43b">PY</span><span class="tsg-name">Python</span></div>
+                    <div class="tsg-item"><span class="tsg-mono" style="background:rgba(100,76,228,0.15);color:#7b5fb8">TF</span><span class="tsg-name">Terraform</span></div>
+                    <div class="tsg-item"><span class="tsg-mono" style="background:rgba(27,159,215,0.15);color:#1b9fd7">CN</span><span class="tsg-name">Cisco</span></div>
+                    <div class="tsg-item"><span class="tsg-mono" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.6)">LX</span><span class="tsg-name">Linux</span></div>
+                    <div class="tsg-item"><span class="tsg-mono" style="background:rgba(0,114,198,0.15);color:#0072c6">AD</span><span class="tsg-name">Active Directory</span></div>
+                  </div>
+                  <!-- Homelab Network Diagram -->
+                  <div class="homelab-section">
+                    <h4 class="homelab-title">&#128268; Homelab Topology</h4>
+                    <svg id="homelabSvg" viewBox="0 0 540 200" aria-label="Homelab network diagram" role="img">
+                      <!-- Connections -->
+                      <line class="hl-line" x1="90" y1="100" x2="180" y2="60"/>
+                      <line class="hl-line" x1="90" y1="100" x2="180" y2="140"/>
+                      <line class="hl-line" x1="180" y1="60"  x2="270" y2="100"/>
+                      <line class="hl-line" x1="180" y1="140" x2="270" y2="100"/>
+                      <line class="hl-line" x1="270" y1="100" x2="360" y2="60"/>
+                      <line class="hl-line" x1="270" y1="100" x2="360" y2="140"/>
+                      <line class="hl-line" x1="360" y1="60"  x2="450" y2="100"/>
+                      <line class="hl-line" x1="360" y1="140" x2="450" y2="100"/>
+                      <!-- Nodes -->
+                      <g class="hl-node" data-tip="Internet Gateway — pfSense firewall" transform="translate(90,100)">
+                        <circle r="22" class="hl-circle hl-c-red"/>
+                        <text class="hl-label" dy="4">FW</text>
+                        <text class="hl-sub" dy="34">pfSense</text>
+                      </g>
+                      <g class="hl-node" data-tip="Suricata — Network IDS/IPS monitoring traffic" transform="translate(180,60)">
+                        <circle r="22" class="hl-circle hl-c-orange"/>
+                        <text class="hl-label" dy="4">IDS</text>
+                        <text class="hl-sub" dy="34">Suricata</text>
+                      </g>
+                      <g class="hl-node" data-tip="Sysmon — Windows endpoint telemetry" transform="translate(180,140)">
+                        <circle r="22" class="hl-circle hl-c-blue"/>
+                        <text class="hl-label" dy="4">SYS</text>
+                        <text class="hl-sub" dy="34">Sysmon</text>
+                      </g>
+                      <g class="hl-node" data-tip="Wazuh SIEM — Central log collection &amp; alerting" transform="translate(270,100)">
+                        <circle r="26" class="hl-circle hl-c-green hl-core"/>
+                        <text class="hl-label" dy="4">SIEM</text>
+                        <text class="hl-sub" dy="38">Wazuh</text>
+                      </g>
+                      <g class="hl-node" data-tip="Docker — Containerised lab services" transform="translate(360,60)">
+                        <circle r="22" class="hl-circle hl-c-cyan"/>
+                        <text class="hl-label" dy="4">CTR</text>
+                        <text class="hl-sub" dy="34">Docker</text>
+                      </g>
+                      <g class="hl-node" data-tip="Kali Linux — Penetration testing &amp; red-team tools" transform="translate(360,140)">
+                        <circle r="22" class="hl-circle hl-c-purple"/>
+                        <text class="hl-label" dy="4">KALI</text>
+                        <text class="hl-sub" dy="34">Kali</text>
+                      </g>
+                      <g class="hl-node" data-tip="SOC Analyst — You! Monitoring &amp; responding to alerts" transform="translate(450,100)">
+                        <circle r="22" class="hl-circle hl-c-green"/>
+                        <text class="hl-label" dy="4">SOC</text>
+                        <text class="hl-sub" dy="34">Analyst</text>
+                      </g>
+                      <!-- Tooltip -->
+                      <g id="hlTooltip" style="display:none">
+                        <rect class="hl-tip-bg" rx="6" ry="6"/>
+                        <text class="hl-tip-text" id="hlTipText"></text>
+                      </g>
+                    </svg>
+                  </div>
+
+                  <!-- Dark Web Scan -->
+                  <div class="darkweb-scan" id="darkwebScan">
+                    <button type="button" id="dwScanBtn" class="dw-btn">&#128269; Run Dark Web Scan</button>
+                    <div class="dw-result" id="dwResult" hidden>
+                      <div class="dw-log" id="dwLog"></div>
+                      <div class="dw-verdict" id="dwVerdict" hidden>
+                        <span class="dw-icon">&#10003;</span>
+                        <span class="dw-text">0 credentials exposed &mdash; Systems secured</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- RPG Skill Tree -->
+                  <div class="skill-tree-section">
+                    <h4 class="homelab-title">&#127918; Career Skill Tree</h4>
+                    <svg id="skillTreeSvg" viewBox="0 0 540 170" aria-label="Career skill progression tree">
+                      <line class="st-edge" x1="54" y1="85" x2="135" y2="45"/>
+                      <line class="st-edge" x1="54" y1="85" x2="135" y2="125"/>
+                      <line class="st-edge" x1="135" y1="45" x2="216" y2="85"/>
+                      <line class="st-edge" x1="135" y1="125" x2="216" y2="85"/>
+                      <line class="st-edge" x1="216" y1="85" x2="297" y2="45"/>
+                      <line class="st-edge" x1="216" y1="85" x2="297" y2="125"/>
+                      <line class="st-edge" x1="297" y1="45" x2="378" y2="85"/>
+                      <line class="st-edge" x1="297" y1="125" x2="378" y2="85"/>
+                      <line class="st-edge" x1="378" y1="85" x2="459" y2="85"/>
+                      <g class="st-node st-unlocked" data-tip="IT Foundations — 10+ years enterprise IT">
+                        <circle cx="54" cy="85" r="20" class="st-circle"/>
+                        <text x="54" y="89" class="st-lbl">IT</text>
+                        <text x="54" y="115" class="st-sub">Foundations</text>
+                      </g>
+                      <g class="st-node st-unlocked" data-tip="Networking — TCP/IP, Cisco, pfSense">
+                        <circle cx="135" cy="45" r="20" class="st-circle"/>
+                        <text x="135" y="49" class="st-lbl">NET</text>
+                        <text x="135" y="75" class="st-sub">Networking</text>
+                      </g>
+                      <g class="st-node st-unlocked" data-tip="Linux — Parrot OS, Ubuntu, Kali administration">
+                        <circle cx="135" cy="125" r="20" class="st-circle"/>
+                        <text x="135" y="129" class="st-lbl">LNX</text>
+                        <text x="135" y="155" class="st-sub">Linux</text>
+                      </g>
+                      <g class="st-node st-unlocked" data-tip="CompTIA Security+ — Certified 2024">
+                        <circle cx="216" cy="85" r="22" class="st-circle st-circle-gold"/>
+                        <text x="216" y="89" class="st-lbl">SEC+</text>
+                        <text x="216" y="117" class="st-sub">Security+</text>
+                      </g>
+                      <g class="st-node st-unlocked" data-tip="SOC Operations — Alert triage, incident response">
+                        <circle cx="297" cy="45" r="20" class="st-circle"/>
+                        <text x="297" y="49" class="st-lbl">SOC</text>
+                        <text x="297" y="75" class="st-sub">SOC Ops</text>
+                      </g>
+                      <g class="st-node st-unlocked" data-tip="Wazuh SIEM — Rules, decoders, dashboards">
+                        <circle cx="297" cy="125" r="20" class="st-circle"/>
+                        <text x="297" y="129" class="st-lbl">WZ</text>
+                        <text x="297" y="155" class="st-sub">Wazuh</text>
+                      </g>
+                      <g class="st-node st-unlocked" data-tip="Threat Hunting — MITRE ATT&amp;CK, detection engineering">
+                        <circle cx="378" cy="85" r="22" class="st-circle st-circle-cyan"/>
+                        <text x="378" y="89" class="st-lbl">HUNT</text>
+                        <text x="378" y="117" class="st-sub">Threat Hunt</text>
+                      </g>
+                      <g class="st-node st-locked" data-tip="GRC — Governance, Risk &amp; Compliance (In Progress)">
+                        <circle cx="459" cy="85" r="20" class="st-circle st-locked-c"/>
+                        <text x="459" y="89" class="st-lbl">GRC</text>
+                        <text x="459" y="115" class="st-sub">GRC</text>
+                      </g>
+                      <!-- Skill tree tooltip -->
+                      <g id="stTooltip" style="display:none">
+                        <rect class="hl-tip-bg" rx="6" ry="6"/>
+                        <text class="hl-tip-text" id="stTipText"></text>
+                      </g>
+                    </svg>
+                  </div>
+
                 </div>
               </div>
             </article>
@@ -671,37 +1058,55 @@
           <article class="book-card-face book-card-front">
             <div class="section-inner">
               <div class="section-content">
-                <h2>Certifications</h2>
-                <div class="cert-list">
-                  <div class="cert-card">
+                <h2 data-scramble>Certifications</h2>
+                <div class="cert-view-toggle" role="group" aria-label="View mode">
+                  <button type="button" class="cvt-btn cvt-active" data-view="grid">&#9783; Grid</button>
+                  <button type="button" class="cvt-btn" data-view="timeline">&#9776; Timeline</button>
+                </div>
+                <!-- Update each cert-verify href with your personal Credly badge URL -->
+                <div class="cert-list" id="certList">
+                  <div class="cert-card" data-issuer="cisco">
                     <span class="cert-issuer">Cisco</span>
                     <h4>Endpoint Security</h4>
                     <span class="cert-date">Issued Jun 2026</span>
+                    <a href="https://www.credly.com/org/cisco" target="_blank" rel="noopener noreferrer" class="cert-verify">Verify &#8599;</a>
                   </div>
-                  <div class="cert-card">
+                  <div class="cert-card" data-issuer="cisco">
                     <span class="cert-issuer">Cisco</span>
                     <h4>Ethical Hacker</h4>
                     <span class="cert-date">Issued Apr 2026</span>
+                    <a href="https://www.credly.com/org/cisco" target="_blank" rel="noopener noreferrer" class="cert-verify">Verify &#8599;</a>
                   </div>
-                  <div class="cert-card">
+                  <div class="cert-card" data-issuer="cisco">
                     <span class="cert-issuer">Cisco</span>
                     <h4>Introduction to Cybersecurity</h4>
                     <span class="cert-date">Issued Mar 2026</span>
+                    <a href="https://www.credly.com/org/cisco" target="_blank" rel="noopener noreferrer" class="cert-verify">Verify &#8599;</a>
                   </div>
-                  <div class="cert-card">
+                  <div class="cert-card" data-issuer="ibm">
                     <span class="cert-issuer">IBM</span>
                     <h4>Cybersecurity Fundamentals</h4>
                     <span class="cert-date">Issued Mar 2026</span>
+                    <a href="https://www.credly.com/org/ibm" target="_blank" rel="noopener noreferrer" class="cert-verify">Verify &#8599;</a>
                   </div>
-                  <div class="cert-card">
+                  <div class="cert-card" data-issuer="ibm">
                     <span class="cert-issuer">IBM</span>
                     <h4>Python for Data Science</h4>
                     <span class="cert-date">Issued Mar 2026</span>
+                    <a href="https://www.credly.com/org/ibm" target="_blank" rel="noopener noreferrer" class="cert-verify">Verify &#8599;</a>
                   </div>
-                  <div class="cert-card">
+                  <div class="cert-card" data-issuer="ibm">
                     <span class="cert-issuer">IBM SkillsBuild</span>
                     <h4>Data Analysis with Python</h4>
                     <span class="cert-date">Issued Mar 2026</span>
+                    <a href="https://www.credly.com/org/ibm" target="_blank" rel="noopener noreferrer" class="cert-verify">Verify &#8599;</a>
+                  </div>
+                  <div class="cert-card" data-issuer="google">
+                    <span class="cert-issuer">Google Skillshop</span>
+                    <h4>Google Ads Video Certification</h4>
+                    <span class="cert-date">Issued May 2026 &middot; Expires May 2027</span>
+                    <span class="cert-id">ID&thinsp;182626545</span>
+                    <a href="https://skillshop.credential.net/182626545" target="_blank" rel="noopener noreferrer" class="cert-verify">Verify &#8599;</a>
                   </div>
                 </div>
               </div>
@@ -717,6 +1122,70 @@
         </div>
       </div>
     </section>
+
+      <section id="education" class="glass-card">
+        <div class="book-card" tabindex="0">
+          <div class="book-card-inner">
+            <article class="book-card-face book-card-front">
+              <div class="section-inner">
+                <div class="section-content">
+                  <h2 data-scramble>Education</h2>
+                  <div class="exp-list exp-timeline">
+                    <div class="exp-card">
+                      <div class="exp-header">
+                        <h4>Bachelor of Business Administration (BBA)</h4>
+                        <span class="exp-duration">2010 &ndash; 2014</span>
+                      </div>
+                      <p class="exp-company"><strong>Tribhuvan University</strong> &middot; Kathmandu, Nepal</p>
+                      <ul class="exp-achievements">
+                        <li>Business management, financial analysis, and organizational governance fundamentals</li>
+                        <li>Developed analytical and communication skills applied throughout IT and security career</li>
+                      </ul>
+                    </div>
+                    <div class="exp-card">
+                      <div class="exp-header">
+                        <h4>Cisco Certified — Ethical Hacking &amp; Endpoint Security</h4>
+                        <span class="exp-duration">2026</span>
+                      </div>
+                      <p class="exp-company"><strong>Cisco Networking Academy</strong> &middot; Online</p>
+                      <ul class="exp-achievements">
+                        <li>Ethical hacking techniques, penetration testing fundamentals, and network vulnerability assessment</li>
+                        <li>Endpoint hardening, threat detection, and security monitoring principles</li>
+                      </ul>
+                    </div>
+                    <div class="exp-card">
+                      <div class="exp-header">
+                        <h4>IBM Cybersecurity Fundamentals &amp; Python for Data Science</h4>
+                        <span class="exp-duration">2026</span>
+                      </div>
+                      <p class="exp-company"><strong>IBM SkillsBuild</strong> &middot; Online</p>
+                      <ul class="exp-achievements">
+                        <li>Core cybersecurity concepts, threat intelligence, and security operations fundamentals</li>
+                        <li>Python scripting for data analysis and security automation workflows</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="working-on" class="glass-card working-on-section">
+        <div class="section-inner">
+          <div class="section-content">
+            <h2>Currently Working On</h2>
+            <ul class="working-list">
+              <li>Expanding the personal SOC lab with Kubernetes security monitoring and container telemetry</li>
+              <li>Studying MITRE ATT&amp;CK framework to sharpen detection engineering and threat-hunting practice</li>
+              <li>Exploring Elastic Stack and OpenTelemetry for observability and log correlation</li>
+              <li>Preparing for CompTIA Security+ to formalise foundational security knowledge</li>
+            </ul>
+            <p class="working-note">Last updated Jun 2026 &mdash; <a href="https://mail.google.com/mail/?view=cm&to=lamasubash107%40gmail.com&su=What%27s%20new%3F" target="_blank" rel="noopener noreferrer">ask me what&rsquo;s new</a></p>
+          </div>
+        </div>
+      </section>
 
       <section id="why-hire" class="glass-card why-hire-section">
         <div class="book-card" data-flip-card tabindex="0">
@@ -747,21 +1216,75 @@
         </div>
       </section>
 
+      <section id="testimonials" class="glass-card testimonials-section">
+        <div class="section-inner">
+          <div class="section-content">
+            <h2>Endorsements</h2>
+            <p class="testimonial-intro">What colleagues say &mdash; sourced from <a href="https://www.linkedin.com/in/subash-lama-b319a016b/" target="_blank" rel="noopener noreferrer">LinkedIn recommendations</a>.</p>
+            <!-- Replace the placeholder text below with your actual LinkedIn recommendations -->
+            <div class="testimonial-list">
+              <blockquote class="testimonial-card">
+                <p class="testimonial-text">&ldquo;Replace this with a recommendation from a former manager or colleague. Visit your LinkedIn profile &rarr; Recommendations to find existing endorsements you can paste here.&rdquo;</p>
+                <footer class="testimonial-meta">
+                  <span class="testimonial-name">Name, Title</span>
+                  <span class="testimonial-rel">Company &middot; Year</span>
+                </footer>
+              </blockquote>
+              <blockquote class="testimonial-card">
+                <p class="testimonial-text">&ldquo;Add a second recommendation here. Even two short quotes significantly strengthen recruiter confidence in your professional reputation.&rdquo;</p>
+                <footer class="testimonial-meta">
+                  <span class="testimonial-name">Name, Title</span>
+                  <span class="testimonial-rel">Company &middot; Year</span>
+                </footer>
+              </blockquote>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="contact" class="glass-card contact-section">
       <div class="book-card" data-flip-card tabindex="0">
         <div class="book-card-inner">
             <article class="book-card-face book-card-front">
               <div class="section-inner">
                 <div class="section-content">
-                  <h2>Contact</h2>
+                  <h2 data-scramble>Contact</h2>
                   <h3 class="contact-cta">Let&rsquo;s Talk Security</h3>
+                  <form class="contact-form" id="contactForm" action="#" novalidate>
+                    <div class="contact-form-row">
+                      <div class="contact-form-field">
+                        <label for="contact-name">Name</label>
+                        <input type="text" id="contact-name" name="name" placeholder="Your name" autocomplete="name" required />
+                      </div>
+                      <div class="contact-form-field">
+                        <label for="contact-email">Email</label>
+                        <input type="email" id="contact-email" name="email" placeholder="your@email.com" autocomplete="email" required />
+                      </div>
+                    </div>
+                    <div class="contact-form-field">
+                      <label for="contact-subject">Subject</label>
+                      <select id="contact-subject" name="subject">
+                        <option value="Job Opportunity">Job Opportunity</option>
+                        <option value="Collaboration">Collaboration</option>
+                        <option value="General Inquiry">General Inquiry</option>
+                      </select>
+                    </div>
+                    <div class="contact-form-field">
+                      <label for="contact-message">Message</label>
+                      <textarea id="contact-message" name="message" rows="4" placeholder="Share your goals around cybersecurity, SOC operations, GRC, or IAM..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-outline-light contact-form-submit">Send Message</button>
+                  </form>
                   <div class="contact-details">
-                    <p>Email: <a href="mailto:lamasubash107@gmail.com">lamasubash107@gmail.com</a></p>
-                    <p>GitHub: <a href="https://github.com/Subash107" target="_blank" rel="noopener noreferrer">github.com/Subash107</a></p>
-                    <p>LinkedIn: <a href="https://www.linkedin.com/in/subash-lama-b319a016b/" target="_blank" rel="noopener noreferrer">linkedin.com/in/subash-lama-b319a016b</a></p>
-                    <p>Location: Kathmandu, Nepal</p>
-                    <p>Timezone: UTC+5:45 &mdash; <a href="mailto:lamasubash107@gmail.com?subject=DevOps%20Call%20-%20Subash%20Lama%20Portfolio&body=Hi%20Subash%2C%0A%0AI%27d%20like%20to%20schedule%20a%20quick%20call.%0A%0AMy%20availability%20(UTC%2B5%3A45)%3A%20%5Badd%20times%5D%0A%0AProject%20context%3A%20%5Badd%20details%5D%0A%0AThanks%2C%0A%5BYour%20Name%5D">request a call</a></p>
+                    <p><svg class="contact-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg><a href="https://mail.google.com/mail/?view=cm&to=lamasubash107%40gmail.com" target="_blank" rel="noopener noreferrer" data-copy-email="lamasubash107@gmail.com" title="Click to copy · opens Gmail">lamasubash107@gmail.com</a></p>
+                    <p><svg class="contact-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg><a href="https://github.com/Subash107" target="_blank" rel="noopener noreferrer">github.com/Subash107</a></p>
+                    <p><svg class="contact-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg><a href="https://www.linkedin.com/in/subash-lama-b319a016b/" target="_blank" rel="noopener noreferrer">linkedin.com/in/subash-lama-b319a016b</a></p>
+                    <p><svg class="contact-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Kathmandu, Nepal &middot; UTC+5:45</p>
                   </div>
+                  <button type="button" id="sigBtn" class="vcard-btn" aria-label="Generate email signature">&#9993; Generate Email Signature</button>
+                  <button type="button" id="vcardBtn" class="vcard-btn" aria-label="Download contact card">
+                    &#128100; Save Contact (vCard)
+                  </button>
                   <p>Open to Cybersecurity Analyst, SOC Analyst, GRC Analyst, IAM Specialist, Security Operations, and related cybersecurity roles &mdash; on-site, hybrid, or remote in Kathmandu.</p>
                 </div>
               </div>
@@ -779,15 +1302,263 @@
 
   <div class="footer">
       <div class="footer-links">
-        <a href="https://github.com/Subash107" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://github.com/Subash107" target="_blank" rel="noopener noreferrer" aria-label="GitHub profile" class="footer-icon-link">
+          <svg class="footer-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+          <span>GitHub</span>
+        </a>
         <span class="footer-sep">&middot;</span>
-        <a href="https://www.linkedin.com/in/subash-lama-b319a016b/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <a href="https://www.linkedin.com/in/subash-lama-b319a016b/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn profile" class="footer-icon-link">
+          <svg class="footer-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          <span>LinkedIn</span>
+        </a>
         <span class="footer-sep">&middot;</span>
-        <a href="assets/docs/cv/latest-resume.pdf" download="Subash-Lama-Resume.pdf">Resume</a>
+        <a href="assets/docs/cv/latest-resume.pdf" download="Subash-Lama-Resume.pdf" class="footer-icon-link">
+          <svg class="footer-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          <span>Resume</span>
+        </a>
       </div>
       <p class="footer-copy">&copy; 2026 Subash Lama. All rights reserved.</p>
     </div>
   </div>
+  <!-- Hacker score HUD -->
+  <div id="hackerScore" aria-live="polite" aria-label="Hacker interaction score">
+    <span class="hs-label">SCORE</span>
+    <span id="hsValue">0</span>
+    <span class="hs-delta" id="hsDelta"></span>
+  </div>
+
+  <!-- Bookmark panel -->
+  <div id="bookmarkPanel" hidden aria-label="Bookmarked sections">
+    <div class="bkm-header">
+      <span class="bkm-title">&#128204; Bookmarks</span>
+      <button type="button" id="bkmClose">&times;</button>
+    </div>
+    <ul id="bkmList" class="bkm-list"></ul>
+    <p class="bkm-empty" id="bkmEmpty">No bookmarks yet — pin a section with 📌</p>
+  </div>
+  <button type="button" id="bkmToggle" aria-label="Toggle bookmarks" title="Bookmarks">&#128204;</button>
+
+  <!-- Confetti canvas -->
+  <canvas id="confettiCanvas" aria-hidden="true"></canvas>
+  <canvas id="screensaverCanvas" aria-hidden="true" hidden></canvas>
+  <canvas id="mouseTrailCanvas" aria-hidden="true"></canvas>
+  <div id="neonSpotlight" aria-hidden="true"></div>
+
+  <!-- Recruiter Score Card -->
+  <div id="recruiterScoreCard" hidden aria-label="Recruiter score card">
+    <button type="button" id="rscClose" class="rsc-close" aria-label="Close">&times;</button>
+    <div class="rsc-header">
+      <span class="rsc-icon">&#128202;</span>
+      <span class="rsc-title">Analyst Score</span>
+    </div>
+    <div class="rsc-dial-wrap">
+      <svg class="rsc-dial" viewBox="0 0 80 80">
+        <circle cx="40" cy="40" r="32" class="rsc-dial-bg"/>
+        <circle cx="40" cy="40" r="32" class="rsc-dial-fill" id="rscDialFill"/>
+      </svg>
+      <span class="rsc-score" id="rscScore">0</span>
+    </div>
+    <p class="rsc-label">vs. typical SOC applicants</p>
+    <ul class="rsc-items">
+      <li class="rsc-item"><span class="rsc-dot rsc-ok"></span>CompTIA Security+ certified</li>
+      <li class="rsc-item"><span class="rsc-dot rsc-ok"></span>Hands-on SIEM (Wazuh)</li>
+      <li class="rsc-item"><span class="rsc-dot rsc-ok"></span>10+ years enterprise IT</li>
+      <li class="rsc-item"><span class="rsc-dot rsc-ok"></span>Homelab + CI/CD pipeline</li>
+      <li class="rsc-item"><span class="rsc-dot rsc-warn"></span>GRC certification in progress</li>
+    </ul>
+  </div>
+
+  <!-- AI Chat Widget -->
+  <div id="chatWidget" aria-label="Ask about Subash">
+    <button type="button" id="chatToggleBtn" class="chat-toggle-btn" aria-label="Open chat">
+      <span class="chat-icon">&#128172;</span>
+      <span class="chat-badge">Ask me!</span>
+    </button>
+    <div class="chat-panel" id="chatPanel" hidden>
+      <div class="chat-header">
+        <span class="chat-avatar">&#129302;</span>
+        <div class="chat-info"><span class="chat-name">SubashBot</span><span class="chat-status">&#9679; Online</span></div>
+        <button type="button" id="chatClose" aria-label="Close chat">&times;</button>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <div class="chat-msg chat-bot">Hi! I'm SubashBot &#128075; Ask me anything about Subash's skills, certs, or experience.</div>
+      </div>
+      <div class="chat-quick" id="chatQuick">
+        <button class="chat-q">What certs?</button>
+        <button class="chat-q">SOC experience?</button>
+        <button class="chat-q">Hire him?</button>
+      </div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="Type a question…" autocomplete="off"/>
+        <button type="button" id="chatSend" aria-label="Send">&#10148;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page load speed badge -->
+  <div id="speedBadge" hidden aria-label="Page load speed"></div>
+
+  <div id="soundToggle" title="Sound OFF — click to enable" aria-label="Toggle sound effects"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 6H1v4h2l4 3V3L3 6z" fill="currentColor"/><path d="M11 5.5a3.5 3.5 0 0 1 0 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" class="snd-wave snd-w1"/><path d="M13 3.5a6 6 0 0 1 0 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" class="snd-wave snd-w2" opacity="0.4"/><line x1="10" y1="5" x2="14" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" class="snd-mute-line"/></svg></div>
+
+  <!-- Search overlay -->
+  <div id="searchOverlay" hidden role="dialog" aria-label="Search portfolio">
+    <div class="so-backdrop" id="soBackdrop"></div>
+    <div class="so-panel">
+      <div class="so-header">
+        <span class="so-icon">&#128269;</span>
+        <input type="search" id="soInput" placeholder="Search — Wazuh, GRC, SOC, Docker…" autocomplete="off" aria-label="Search portfolio" />
+        <button type="button" id="soClose" aria-label="Close search">&times;</button>
+      </div>
+      <div class="so-results" id="soResults"></div>
+    </div>
+  </div>
+
+  <!-- Analytics panel -->
+  <div id="analyticsPanel" hidden role="dialog" aria-label="Portfolio analytics">
+    <div class="ap-backdrop" id="apBackdrop"></div>
+    <div class="ap-panel">
+      <div class="ap-header">
+        <span class="ap-title">&#128202; Portfolio Analytics</span>
+        <button type="button" id="apClose" aria-label="Close">&times;</button>
+      </div>
+      <div class="ap-grid">
+        <div class="ap-stat"><span class="ap-val" id="apTime">0:00</span><span class="ap-lbl">Time on page</span></div>
+        <div class="ap-stat"><span class="ap-val" id="apSections">0</span><span class="ap-lbl">Sections explored</span></div>
+        <div class="ap-stat"><span class="ap-val" id="apScore">0</span><span class="ap-lbl">Hacker score</span></div>
+        <div class="ap-stat"><span class="ap-val" id="apBookmarks">0</span><span class="ap-lbl">Bookmarks</span></div>
+        <div class="ap-stat"><span class="ap-val" id="apViews">0</span><span class="ap-lbl">Total visits</span></div>
+        <div class="ap-stat"><span class="ap-val" id="apInteractions">0</span><span class="ap-lbl">Interactions</span></div>
+      </div>
+      <div class="ap-bar-row">
+        <span class="ap-bar-lbl">Exploration</span>
+        <div class="ap-bar-track"><div class="ap-bar-fill" id="apExplBar"></div></div>
+        <span class="ap-bar-pct" id="apExplPct">0%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tour overlay -->
+  <div id="tourOverlay" hidden aria-live="polite">
+    <div class="to-card">
+      <div class="to-header">
+        <span class="to-step" id="toStep">1 / 7</span>
+        <button type="button" id="toClose" aria-label="Close tour">&times;</button>
+      </div>
+      <span class="to-title" id="toTitle">Welcome</span>
+      <p class="to-tip" id="toTip"></p>
+      <div class="to-footer">
+        <button type="button" id="toPrev" class="to-btn">&#8592; Prev</button>
+        <button type="button" id="toNext" class="to-btn to-btn-primary">Next &#8594;</button>
+        <button type="button" id="toSkip" class="to-btn to-btn-ghost">Skip</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Email signature modal -->
+  <div id="sigModal" hidden role="dialog" aria-label="Email signature generator">
+    <div class="sig-backdrop" id="sigBackdrop"></div>
+    <div class="sig-panel">
+      <div class="sig-header">
+        <span class="sig-title">&#9993; Email Signature</span>
+        <button type="button" id="sigClose" aria-label="Close">&times;</button>
+      </div>
+      <div class="sig-preview" id="sigPreview"></div>
+      <button type="button" id="sigCopy" class="sig-copy-btn">Copy Signature</button>
+      <p class="sig-hint">Paste into Gmail: Settings &#8594; General &#8594; Signature</p>
+    </div>
+  </div>
+
+  <!-- Recruiter cheat sheet -->
+  <div id="recruiterModal" hidden role="dialog" aria-modal="true" aria-label="Recruiter cheat sheet">
+    <div class="rcm-backdrop" id="rcmBackdrop"></div>
+    <div class="rcm-panel">
+      <div class="rcm-header">
+        <span class="rcm-title">&#128269; Recruiter Cheat Sheet</span>
+        <button type="button" id="rcmClose" aria-label="Close">&times;</button>
+      </div>
+      <ul class="rcm-list">
+        <li><span class="rcm-icon">&#9989;</span><strong>10+ years</strong> enterprise IT — banking, FMCG, hospitality, consulting</li>
+        <li><span class="rcm-icon">&#128737;</span><strong>Hands-on SOC lab</strong> — Wazuh · Suricata · Sysmon, real detection engineering</li>
+        <li><span class="rcm-icon">&#127941;</span><strong>5 certifications</strong> — Cisco (Ethical Hacking, Endpoint Security) · IBM · Google</li>
+        <li><span class="rcm-icon">&#127919;</span><strong>Best-fit roles</strong> — SOC Analyst · GRC Analyst · IAM Specialist · Security Engineer</li>
+        <li><span class="rcm-icon">&#128205;</span><strong>Location</strong> — Kathmandu, Nepal · Open to on-site, hybrid, or remote</li>
+      </ul>
+      <div class="rcm-footer">
+        <a href="https://mail.google.com/mail/?view=cm&to=lamasubash107%40gmail.com&su=Cybersecurity%20Opportunity" target="_blank" rel="noopener noreferrer" class="rcm-cta">Email Subash &rarr;</a>
+        <a href="assets/docs/cv/latest-resume.pdf" download="Subash-Lama-Resume.pdf" class="rcm-cta rcm-cta-secondary">Download Resume</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hire me float -->
+  <div id="hireMeFloat" aria-live="polite" aria-label="Available for hire">
+    <span class="hmf-dot" aria-hidden="true"></span>
+    <div class="hmf-body">
+      <span class="hmf-title">Open to Opportunities</span>
+      <span class="hmf-sub">SOC &middot; GRC &middot; IAM &middot; Security Ops</span>
+    </div>
+    <a href="#contact" class="hmf-cta">Contact &rarr;</a>
+  </div>
+
+  <!-- Easter egg terminal -->
+  <div id="easterTerminal" hidden role="dialog" aria-modal="true" aria-label="Terminal Easter egg">
+    <div class="et-backdrop" id="etBackdrop"></div>
+    <div class="et-window">
+      <div class="et-titlebar">
+        <span class="et-dots"><span></span><span></span><span></span></span>
+        <span class="et-title">subash@portfolio:~</span>
+        <button type="button" class="et-close" id="etClose" aria-label="Close terminal">&times;</button>
+      </div>
+      <div class="et-body" id="etBody" role="log" aria-live="polite"></div>
+      <div class="et-input-row">
+        <span class="et-prompt-label">$</span>
+        <input type="text" id="etInput" autocomplete="off" spellcheck="false" aria-label="Terminal command" placeholder="type a command and press Enter…" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Command palette -->
+  <div id="commandPalette" hidden role="dialog" aria-modal="true" aria-label="Keyboard shortcuts">
+    <div class="cmd-backdrop" id="cmdBackdrop" aria-hidden="true"></div>
+    <div class="cmd-panel" tabindex="-1">
+      <div class="cmd-header">
+        <p class="cmd-title">Command Palette</p>
+        <button class="cmd-close" id="cmdClose" aria-label="Close shortcuts panel">&times;</button>
+      </div>
+      <input type="search" id="cmdSearch" class="cmd-search" placeholder="Search sections, actions…" autocomplete="off" aria-label="Search commands" />
+      <ul class="cmd-list" id="cmdList">
+        <li><kbd class="cmd-key">G</kbd><span>Open GitHub</span></li>
+        <li><kbd class="cmd-key">L</kbd><span>Open LinkedIn</span></li>
+        <li><kbd class="cmd-key">R</kbd><span>Download Resume</span></li>
+        <li><kbd class="cmd-key">C</kbd><span>Jump to Contact</span></li>
+        <li><kbd class="cmd-key">`</kbd><span>Open terminal Easter egg</span></li>
+        <li><kbd class="cmd-key">P</kbd><span>Print / save resume</span></li>
+        <li><kbd class="cmd-key">I</kbd><span>Recruiter cheat sheet</span></li>
+        <li><kbd class="cmd-key">V</kbd><span>Download vCard contact</span></li>
+        <li><kbd class="cmd-key">T</kbd><span>Start guided tour</span></li>
+        <li><kbd class="cmd-key">F</kbd><span>Toggle presentation mode</span></li>
+        <li><kbd class="cmd-key">A</kbd><span>Portfolio analytics</span></li>
+        <li><kbd class="cmd-key">/</kbd><span>Search portfolio</span></li>
+        <li><kbd class="cmd-key">?</kbd><span>Toggle this panel</span></li>
+        <li><kbd class="cmd-key">Esc</kbd><span>Close</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="themeSwitcher" class="theme-switcher" aria-label="Switch color theme">
+    <button type="button" class="theme-btn theme-btn-active" data-theme="" title="Parrot OS theme">PA</button>
+    <button type="button" class="theme-btn" data-theme="theme-dracula" title="Dracula theme">DR</button>
+    <button type="button" class="theme-btn" data-theme="theme-matrix" title="Matrix theme">MX</button>
+  </div>
+  <button type="button" id="lightModeToggle" aria-label="Toggle light mode" title="Toggle light / dark">&#9728;</button>
+  <button type="button" id="cmdToggle" aria-label="Keyboard shortcuts (press ?)" title="Press ? for keyboard shortcuts">?</button>
+  <button type="button" id="backToTop" aria-label="Back to top" title="Back to top">
+    <svg class="btt-ring-svg" viewBox="0 0 36 36" aria-hidden="true">
+      <circle class="btt-ring-bg"   cx="18" cy="18" r="14"/>
+      <circle class="btt-ring-fill" cx="18" cy="18" r="14" id="bttRingFill"/>
+    </svg>
+    <span class="btt-arrow" aria-hidden="true">&#8679;</span>
+  </button>
   <button type="button" class="audio-corner-toggle" data-audio-toggle data-audio-storage-key="portfolio_audio_enabled" data-audio-label-on="&#9834;" data-audio-label-off="&#9834;" aria-pressed="false" aria-label="Toggle ambient sound" title="Toggle ambient sound">&#9834;</button>
   <script src="assets/js/index.js" defer></script>
   <script src="assets/js/parrot-fx.js" defer></script>

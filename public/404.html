@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests" />
+  <meta name="referrer" content="no-referrer" />
+  <meta name="theme-color" content="#07111c" />
+  <title>404 &mdash; Page Not Found | Subash Lama</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.json" />
+  <script src="assets/js/site.js" defer></script>
+  <link rel="stylesheet" href="assets/css/motion.css" />
+  <link rel="stylesheet" href="assets/css/index.css" />
+  <link rel="stylesheet" href="assets/css/parrot-fx.css" />
+  <style>
+    .error-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      gap: 1.25rem;
+    }
+    .error-code {
+      font-size: clamp(5rem, 18vw, 10rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, #8ae8ff 0%, #50fa7b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin: 0;
+    }
+    .error-title {
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      margin: 0;
+    }
+    .error-sub {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.52);
+      max-width: 36ch;
+      line-height: 1.6;
+      margin: 0;
+    }
+    .error-links {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+    .error-terminal {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.85rem;
+      color: rgba(138, 232, 255, 0.65);
+      background: rgba(7, 17, 28, 0.6);
+      border: 1px solid rgba(114,239,255,0.15);
+      border-radius: 8px;
+      padding: 0.75rem 1.25rem;
+      letter-spacing: 0.03em;
+    }
+    .error-terminal span { color: rgba(80,250,123,0.85); }
+  </style>
+</head>
+<body>
+  <video autoplay muted loop playsinline id="bg-video" data-bg-video poster="assets/images/bg-poster.jpg" preload="none" aria-hidden="true">
+    <source data-src="assets/media/video/bg-video.mp4" data-src-mobile="assets/media/video/bg-video-mobile.mp4" type="video/mp4" />
+  </video>
+  <div id="overlay"></div>
+  <canvas id="parrot-rain" aria-hidden="true"></canvas>
+
+  <div class="content">
+    <div class="error-page">
+      <p class="error-code" aria-label="Error 404">404</p>
+      <h1 class="error-title">Page Not Found</h1>
+      <p class="error-sub">This path doesn&rsquo;t exist in the portfolio. You may have followed a broken link or mistyped the address.</p>
+      <p class="error-terminal"><span>&gt;</span> route not found &mdash; redirecting to safe zone</p>
+      <nav class="error-links" aria-label="Navigation options">
+        <a href="index.html" class="btn btn-outline-light">Home</a>
+        <a href="projects.html" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light btn-cta-secondary">Projects ↗</a>
+        <a href="index.html#contact" class="btn btn-outline-light btn-cta-secondary">Contact</a>
+      </nav>
+    </div>
+  </div>
+
+  <script src="assets/js/parrot-fx.js" defer></script>
+</body>
+</html>
