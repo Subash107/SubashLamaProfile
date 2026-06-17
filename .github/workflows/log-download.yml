@@ -1,0 +1,49 @@
+name: Log Resume Download
+
+on:
+  repository_dispatch:
+    types: [resume-download]
+
+permissions:
+  contents: write
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Append download entry to log
+        run: |
+          mkdir -p download-logs
+
+          TS="${{ github.event.client_payload.timestamp }}"
+          IP="${{ github.event.client_payload.ip }}"
+          CITY="${{ github.event.client_payload.city }}"
+          COUNTRY="${{ github.event.client_payload.country }}"
+          ORG="${{ github.event.client_payload.org }}"
+          OS="${{ github.event.client_payload.os }}"
+          BROWSER="${{ github.event.client_payload.browser }}"
+          DEVICE="${{ github.event.client_payload.device_type }}"
+          SCREEN="${{ github.event.client_payload.screen }}"
+          LANG="${{ github.event.client_payload.language }}"
+          TZ="${{ github.event.client_payload.timezone }}"
+          REF="${{ github.event.client_payload.referrer }}"
+
+          printf "%-26s| %-17s| %-31s| %-29s| %-13s| %-10s| %-9s| %s\n" \
+            "$TS" "$IP" "$CITY, $COUNTRY" "$ORG" "$OS" "$BROWSER" "$DEVICE" "$REF" \
+            >> download-logs/resume-downloads.txt
+
+      - name: Commit and push log
+        run: |
+          git config user.email "portfolio-bot@users.noreply.github.com"
+          git config user.name "Resume Download Logger"
+          git add download-logs/resume-downloads.txt
+          git diff --staged --quiet && echo "No changes" && exit 0
+          git commit -m "log: resume download [${{ github.event.client_payload.country }}] ${{ github.event.client_payload.timestamp }}"
+          git push

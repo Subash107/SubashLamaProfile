@@ -427,6 +427,14 @@
       const body = `Hi Subash,\n\n${message}\n\nFrom: ${name}\nReply to: ${email}`;
       const gmailUrl = `https://mail.google.com/mail/?view=cm&to=lamasubash107%40gmail.com&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       window.open(gmailUrl, "_blank", "noopener,noreferrer");
+      form.reset();
+      const btn = form.querySelector(".contact-form-submit");
+      if (btn) {
+        const orig = btn.textContent;
+        btn.textContent = "Opening Gmail ✓";
+        btn.disabled = true;
+        setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 3000);
+      }
     });
   }
 
@@ -562,11 +570,12 @@
 
     const cmds = {
       help:    () => "whoami · skills · certs · contact · labs · clear · exit",
-      whoami:  () => "Subash Lama — Cybersecurity Analyst\n10+ years IT · SOC · GRC · IAM · Kathmandu, Nepal",
+      whoami:  () => "Subash Lama — Cybersecurity Analyst\n12+ years IT · SOC · GRC · IAM · Kathmandu, Nepal",
       skills:  () => "Core: Endpoint Security, Active Directory, Linux, Network Monitoring\nSecurity: Wazuh, Suricata, Sysmon, Ethical Hacking, SIEM\nAutomation: Docker, GitHub Actions, Terraform, Python, Bash",
       certs:   () => "Cisco — Endpoint Security (Jun 2026)\nCisco — Ethical Hacker (Apr 2026)\nCisco — Intro to Cybersecurity (Mar 2026)\nIBM   — Cybersecurity Fundamentals (Mar 2026)\nIBM   — Python for Data Science (Mar 2026)\nIBM   — Data Analysis with Python (Mar 2026)",
       contact: () => "Email:    lamasubash107@gmail.com\nGitHub:   github.com/Subash107\nLinkedIn: linkedin.com/in/subash-lama-b319a016b/\nTimezone: UTC+5:45 (Kathmandu, Nepal)",
       labs:    () => "SOC Lab: Wazuh + Suricata + Sysmon\nObs stack: Prometheus + Grafana\nCI/CD lab: Docker + GitHub Actions\nIn progress: Kubernetes security + OpenTelemetry",
+      music:   () => "🎵 You found a secret!\nWhen not hunting threats, Subash produces Post Rock instrumentals.\n→ soundcloud.com/subash-lama-408609351",
       clear:   () => { body.innerHTML = ""; return null; },
       exit:    () => { close(); return null; },
     };
@@ -1197,7 +1206,7 @@
         "URL:https://github.com/Subash107",
         "URL:https://www.linkedin.com/in/subash-lama-b319a016b/",
         "ADR;TYPE=HOME:;;Kathmandu;;;NP",
-        "NOTE:SOC · GRC · IAM · Detection Engineering · 10+ years in IT",
+        "NOTE:SOC · GRC · IAM · Detection Engineering · 12+ years in IT",
         "END:VCARD"
       ].join("\r\n");
       const blob = new Blob([vcf], { type: "text/vcard" });
@@ -1492,10 +1501,10 @@
   /* ── Currently studying widget ── */
   function initCurrentlyStudying() {
     const STUDIES = [
-      { text: "MITRE ATT&CK Framework", pct: 65 },
-      { text: "CompTIA Security+ Prep", pct: 40 },
-      { text: "Elastic Stack (ELK)", pct: 30 },
-      { text: "OpenTelemetry & Tracing", pct: 25 },
+      { text: "MITRE ATT&CK Framework", pct: 68 },
+      { text: "GRC Certification Prep", pct: 45 },
+      { text: "Elastic Stack (ELK)", pct: 35 },
+      { text: "Kubernetes Security", pct: 28 },
     ];
     const textEl = document.getElementById("studyingText");
     const barEl  = document.getElementById("studyingBar");
@@ -1627,7 +1636,7 @@
       const key = "portfolio_views";
       const count = (parseInt(localStorage.getItem(key) || "0", 10)) + 1;
       localStorage.setItem(key, count);
-      el.textContent = `👁 ${count} view${count === 1 ? "" : "s"}`;
+      el.textContent = `👁 ${count} visit${count === 1 ? "" : "s"} on this device`;
     } catch {}
   }
 
@@ -1786,7 +1795,7 @@
 
   /* ── Cyberpunk theme switcher ── */
   function initThemeSwitcher() {
-    const THEMES = ["", "theme-dracula", "theme-matrix"];
+    const THEMES = ["", "theme-dracula", "theme-matrix", "theme-nord"];
     const LS_KEY = "portfolio-theme";
     const saved  = localStorage.getItem(LS_KEY) || "";
     applyTheme(saved);
@@ -1841,26 +1850,76 @@
   function initGithubFeed() {
     const list = document.getElementById("ghFeedList");
     if (!list) return;
-    const EVENTS = [
-      { type: "push",   icon: "&#128190;", msg: "Pushed to <strong>wazuh-soc-lab</strong>", add: "+47", del: "-12", ago: "2m ago" },
-      { type: "pr",     icon: "&#128260;", msg: "Opened PR in <strong>ci-cd-pipeline</strong>", add: "+230", del: "-15", ago: "1h ago" },
-      { type: "issue",  icon: "&#128204;", msg: "Closed issue: Suricata rule false positive", add: "", del: "", ago: "3h ago" },
-      { type: "push",   icon: "&#128190;", msg: "Updated <strong>security-baseline.yml</strong>", add: "+18", del: "-3", ago: "5h ago" },
-      { type: "star",   icon: "&#11088;",  msg: "Starred <strong>SigmaHQ/sigma</strong>", add: "", del: "", ago: "1d ago" },
-      { type: "push",   icon: "&#128190;", msg: "Commit: fix Wazuh decoder regex", add: "+9", del: "-2", ago: "2d ago" },
+
+    const FALLBACK = [
+      { icon: "&#128190;", msg: "Pushed to <strong>wazuh-soc-lab</strong>",            ago: "recently" },
+      { icon: "&#128260;", msg: "Opened PR in <strong>ci-cd-pipeline</strong>",         ago: "recently" },
+      { icon: "&#128204;", msg: "Closed issue: Suricata rule false positive",            ago: "recently" },
+      { icon: "&#11088;",  msg: "Starred <strong>SigmaHQ/sigma</strong>",               ago: "recently" },
+      { icon: "&#128190;", msg: "Commit: fix Wazuh decoder regex",                       ago: "recently" },
     ];
-    const io = new IntersectionObserver(entries => {
-      if (!entries[0].isIntersecting) return;
-      io.disconnect();
-      EVENTS.forEach((ev, i) => setTimeout(() => {
+
+    function timeAgo(dateStr) {
+      const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+      if (diff < 60)   return diff + "s ago";
+      if (diff < 3600) return Math.floor(diff / 60) + "m ago";
+      if (diff < 86400) return Math.floor(diff / 3600) + "h ago";
+      return Math.floor(diff / 86400) + "d ago";
+    }
+
+    function iconFor(type) {
+      return { PushEvent: "&#128190;", PullRequestEvent: "&#128260;",
+               IssuesEvent: "&#128204;", WatchEvent: "&#11088;",
+               CreateEvent: "&#10133;", ForkEvent: "&#127860;" }[type] || "&#128190;";
+    }
+
+    function msgFor(ev) {
+      const repo = `<strong>${ev.repo.name.replace(/^Subash107\//, "")}</strong>`;
+      if (ev.type === "PushEvent")       return `Pushed to ${repo}`;
+      if (ev.type === "PullRequestEvent") return `${ev.payload.action === "opened" ? "Opened PR" : "Updated PR"} in ${repo}`;
+      if (ev.type === "IssuesEvent")     return `${ev.payload.action} issue in ${repo}`;
+      if (ev.type === "WatchEvent")      return `Starred ${repo}`;
+      if (ev.type === "CreateEvent")     return `Created ${ev.payload.ref_type} in ${repo}`;
+      if (ev.type === "ForkEvent")       return `Forked ${repo}`;
+      return `Activity in ${repo}`;
+    }
+
+    function render(events) {
+      events.slice(0, 6).forEach((ev, i) => setTimeout(() => {
         const li = document.createElement("li");
         li.className = "gh-feed-item";
         li.style.animationDelay = (i * 80) + "ms";
         li.innerHTML = `<span class="gh-type">${ev.icon}</span>
-          <span class="gh-msg">${ev.msg}${ev.add ? ` <span class="gh-diff-add">${ev.add}</span>` : ""}${ev.del ? ` <span class="gh-diff-del">${ev.del}</span>` : ""}</span>
+          <span class="gh-msg">${ev.msg}</span>
           <span class="gh-time">${ev.ago}</span>`;
         list.appendChild(li);
       }, i * 150));
+    }
+
+    function showSkeletons() {
+      for (let i = 0; i < 5; i++) {
+        const li = document.createElement("li");
+        li.className = "gh-skeleton";
+        list.appendChild(li);
+      }
+    }
+
+    const io = new IntersectionObserver(entries => {
+      if (!entries[0].isIntersecting) return;
+      io.disconnect();
+      showSkeletons();
+      fetch("https://api.github.com/users/Subash107/events/public", {
+        headers: { Accept: "application/vnd.github+json" }
+      })
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(data => {
+        list.innerHTML = "";
+        const mapped = data.slice(0, 6).map(ev => ({
+          icon: iconFor(ev.type), msg: msgFor(ev), ago: timeAgo(ev.created_at)
+        }));
+        render(mapped);
+      })
+      .catch(() => { list.innerHTML = ""; render(FALLBACK); });
     }, { threshold: 0.3 });
     io.observe(list);
   }
@@ -1893,13 +1952,21 @@
     if (!toggleBtn || !panel) return;
 
     const KB = [
-      { q: ["certs","certifications","certified"],  a: "Subash holds CompTIA Security+, Cisco Endpoint Security, and several cybersecurity courses. He is currently pursuing GRC certifications." },
-      { q: ["soc","experience","work"],             a: "He has 10+ years in enterprise IT with focused SOC experience — alert triage, incident response, SIEM tuning, and threat detection using Wazuh." },
-      { q: ["hire","job","available","contact"],    a: "Yes! Subash is actively available for SOC Analyst, Security Engineer, GRC, or IAM roles. Scroll to the Contact section to reach out." },
-      { q: ["skills","tools","tech"],               a: "Core stack: Wazuh, Suricata, Sysmon, Docker, Terraform, Python, Cisco, Linux, Active Directory, GitHub Actions." },
-      { q: ["salary","rate","location"],            a: "Based in Nepal, open to remote and relocation. Compensation expectations available on request via the contact form." },
-      { q: ["education","degree"],                  a: "Computer science background combined with industry certifications and hands-on homelab experience." },
-      { q: ["wazuh","siem"],                        a: "Subash has deployed Wazuh from scratch — custom rules, decoders, dashboards, and integrations with Suricata and Sysmon." },
+      { q: ["certs","certifications","certified"],  a: "Subash holds Cisco Endpoint Security, Cisco Ethical Hacker, Cisco Intro to Cybersecurity, IBM Cybersecurity Fundamentals, IBM Python for Data Science, and Google Ads Video certifications. He is pursuing GRC certification next." },
+      { q: ["soc","experience","work"],             a: "12+ years in enterprise IT with hands-on SOC experience — alert triage, incident response, SIEM tuning, and threat detection using Wazuh, Suricata, and Sysmon." },
+      { q: ["hire","job","available","contact"],    a: "Yes! Subash is actively available for SOC Analyst, GRC Analyst, IAM Specialist, and Security Operations roles. Scroll to the Contact section or email lamasubash107@gmail.com." },
+      { q: ["skills","tools","tech"],               a: "Core stack: Wazuh · Suricata · Sysmon · Docker · Terraform · Python · Cisco · Linux · Active Directory · GitHub Actions." },
+      { q: ["salary","rate","compensation"],        a: "Compensation expectations are available on request — use the contact form or email directly. Open to discussion based on role and location." },
+      { q: ["location","remote","nepal","kathmandu","relocation"], a: "Based in Kathmandu, Nepal (UTC+5:45). Open to remote, hybrid, or on-site roles — including relocation for the right opportunity." },
+      { q: ["education","degree","bba","university"], a: "Bachelor of Business Administration from Tribhuvan University (2010–2014), combined with Cisco and IBM cybersecurity certifications and extensive hands-on lab work." },
+      { q: ["wazuh","siem","soc lab","homelab","lab"], a: "Subash built a personal SOC lab with Wazuh (SIEM), Suricata (network IDS/IPS), and Sysmon (endpoint telemetry) — custom rules, decoders, dashboards, and live detection workflows." },
+      { q: ["grc","governance","risk","compliance","policy"], a: "GRC experience comes from 12+ years operating inside real environments where governance, risk, and compliance shaped daily IT decisions — banking (SBI), FMCG (Unilever), and enterprise (Primuson)." },
+      { q: ["iam","identity","access","active directory","ad"], a: "Administered Active Directory for 200+ banking staff at SBI, enforced endpoint policies, and managed identity across 150+ endpoints at Primuson. Core skill for IAM analyst roles." },
+      { q: ["resume","cv","download"],              a: "You can download Subash's latest resume directly from the Download Resume button at the top of the page, or press R on your keyboard." },
+      { q: ["github","projects","code","repo"],     a: "Check out the Projects section or visit github.com/Subash107 — featuring the Secure Virtual Lab Automation repo with Docker, GitHub Actions, and CI/CD pipelines." },
+      { q: ["python","scripting","automation"],     a: "IBM-certified in Python for Data Science and Data Analysis. Uses Python for security automation, log parsing, and scripting. Also proficient in Bash and PowerShell." },
+      { q: ["docker","container","devops","cicd","terraform","iac"], a: "Comfortable with Docker, Docker Compose, GitHub Actions CI/CD, and Terraform for IaC. Has a live CI/CD pipeline deploying this portfolio to GitHub Pages." },
+      { q: ["hello","hi","hey","what can you","who are you"], a: "Hi! I'm SubashBot — I can answer questions about Subash's skills, experience, certifications, projects, or how to get in touch. Ask away!" },
       { q: ["github","projects","code"],            a: "Check the Projects section! He maintains repos for lab automation, CI/CD pipelines, and detection rule sets." },
     ];
 
@@ -2590,7 +2657,7 @@
           <td style="padding-left:14px;vertical-align:middle;line-height:1.6;">
             <div>&#128231; <a href="mailto:lamasubash107@gmail.com" style="color:#1a73e8;">lamasubash107@gmail.com</a></div>
             <div>&#128279; <a href="https://www.linkedin.com/in/subash-lama" style="color:#1a73e8;">linkedin.com/in/subash-lama</a></div>
-            <div>&#128296; CompTIA Security+ | SOC | Wazuh | SIEM</div>
+            <div>&#128296; Cisco Certified &bull; SOC &bull; Wazuh &bull; SIEM</div>
           </td>
         </tr>
       </table>`;
@@ -2837,7 +2904,97 @@
     });
   }
 
+  /* ── Resume download tracker ── */
+  /* PAT is stored securely in Cloudflare Worker — never exposed here */
+  function initResumeTracking() {
+    const btn = document.querySelector("[data-resume-download]");
+    if (!btn) return;
+
+    /* After deploying the Cloudflare Worker, replace this URL with your Worker URL */
+    const TRACKER_URL = "https://lingering-surf-6d77.lamasubash107.workers.dev";
+
+    btn.addEventListener("click", () => {
+      if (TRACKER_URL === "YOUR_CLOUDFLARE_WORKER_URL") return;
+
+      const ua = navigator.userAgent;
+      const getOS = () => {
+        if (/Windows NT 1[01]/.test(ua)) return "Windows 11/10";
+        if (/Windows/.test(ua)) return "Windows";
+        if (/Mac OS X/.test(ua)) return "macOS";
+        if (/iPhone/.test(ua)) return "iOS (iPhone)";
+        if (/iPad/.test(ua)) return "iOS (iPad)";
+        if (/Android/.test(ua)) return "Android";
+        if (/Linux/.test(ua)) return "Linux";
+        return "Unknown";
+      };
+      const getBrowser = () => {
+        if (/Edg\//.test(ua)) return "Edge";
+        if (/OPR\//.test(ua)) return "Opera";
+        if (/Chrome\//.test(ua)) return "Chrome";
+        if (/Firefox\//.test(ua)) return "Firefox";
+        if (/Safari\//.test(ua)) return "Safari";
+        return "Unknown";
+      };
+      const payload = {
+        event_type: "resume-download",
+        client_payload: {
+          timestamp:   new Date().toISOString(),
+          os:          getOS(),
+          browser:     getBrowser(),
+          device_type: /Mobi|Android|iPhone|iPad/.test(ua) ? "Mobile" : "Desktop",
+          screen:      `${screen.width}x${screen.height}`,
+          language:    navigator.language || "unknown",
+          timezone:    Intl.DateTimeFormat().resolvedOptions().timeZone || "unknown",
+          referrer:    document.referrer || "direct",
+          ip: "unknown", city: "unknown", country: "unknown", org: "unknown"
+        }
+      };
+
+      const dispatch = () => {
+        fetch(TRACKER_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        }).catch(() => {});
+      };
+
+      fetch("https://ipapi.co/json/", { cache: "no-store" })
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(geo => {
+          payload.client_payload.ip      = geo.ip           || "unknown";
+          payload.client_payload.city    = geo.city         || "unknown";
+          payload.client_payload.country = geo.country_name || "unknown";
+          payload.client_payload.org     = geo.org          || "unknown";
+        })
+        .catch(() => {})
+        .finally(dispatch);
+    });
+  }
+
+  function initDynamicDates() {
+    const startYear = 2014;
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const yearsIT = currentYear - startYear;
+
+    const footerYear = document.getElementById("footerYear");
+    if (footerYear) footerYear.textContent = currentYear;
+
+    const workingDate = document.getElementById("workingOnDate");
+    if (workingDate) {
+      workingDate.textContent = now.toLocaleString("en-US", { month: "long", year: "numeric" });
+    }
+
+    const heroStatYears = document.getElementById("heroStatYears");
+    if (heroStatYears) heroStatYears.textContent = yearsIT + "+";
+
+    const countUp = document.getElementById("itYearsCountUp");
+    if (countUp) countUp.setAttribute("data-target", yearsIT);
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
+    initResumeTracking();
+    initDynamicDates();
     initAudioToggle();
     initScrollReveal();
     initBackToTop();
