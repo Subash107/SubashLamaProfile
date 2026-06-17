@@ -2938,15 +2938,16 @@
       const payload = {
         event_type: "resume-download",
         client_payload: {
-          timestamp:   new Date().toISOString(),
-          os:          getOS(),
-          browser:     getBrowser(),
-          device_type: /Mobi|Android|iPhone|iPad/.test(ua) ? "Mobile" : "Desktop",
-          screen:      `${screen.width}x${screen.height}`,
-          language:    navigator.language || "unknown",
-          timezone:    Intl.DateTimeFormat().resolvedOptions().timeZone || "unknown",
-          referrer:    document.referrer || "direct",
-          ip: "unknown", city: "unknown", country: "unknown", org: "unknown"
+          timestamp: new Date().toISOString(),
+          os:        getOS(),
+          browser:   getBrowser(),
+          device:    /Mobi|Android|iPhone|iPad/.test(ua) ? "Mobile" : "Desktop",
+          referrer:  document.referrer || "direct",
+          ip:        "unknown",
+          location:  "unknown",
+          org:       "unknown",
+          tz:        Intl.DateTimeFormat().resolvedOptions().timeZone || "unknown",
+          lang:      navigator.language || "unknown"
         }
       };
 
@@ -2961,10 +2962,9 @@
       fetch("https://ipapi.co/json/", { cache: "no-store" })
         .then(r => r.ok ? r.json() : Promise.reject())
         .then(geo => {
-          payload.client_payload.ip      = geo.ip           || "unknown";
-          payload.client_payload.city    = geo.city         || "unknown";
-          payload.client_payload.country = geo.country_name || "unknown";
-          payload.client_payload.org     = geo.org          || "unknown";
+          payload.client_payload.ip       = geo.ip                                    || "unknown";
+          payload.client_payload.location = `${geo.city || "?"}, ${geo.country_name || "?"}`;
+          payload.client_payload.org      = geo.org                                  || "unknown";
         })
         .catch(() => {})
         .finally(dispatch);
