@@ -24,19 +24,17 @@ jobs:
 
           TS="${{ github.event.client_payload.timestamp }}"
           IP="${{ github.event.client_payload.ip }}"
-          CITY="${{ github.event.client_payload.city }}"
-          COUNTRY="${{ github.event.client_payload.country }}"
+          LOC="${{ github.event.client_payload.location }}"
           ORG="${{ github.event.client_payload.org }}"
           OS="${{ github.event.client_payload.os }}"
           BROWSER="${{ github.event.client_payload.browser }}"
-          DEVICE="${{ github.event.client_payload.device_type }}"
-          SCREEN="${{ github.event.client_payload.screen }}"
-          LANG="${{ github.event.client_payload.language }}"
-          TZ="${{ github.event.client_payload.timezone }}"
+          DEVICE="${{ github.event.client_payload.device }}"
+          TZ="${{ github.event.client_payload.tz }}"
+          LANG="${{ github.event.client_payload.lang }}"
           REF="${{ github.event.client_payload.referrer }}"
 
           printf "%-26s| %-17s| %-31s| %-29s| %-13s| %-10s| %-9s| %s\n" \
-            "$TS" "$IP" "$CITY, $COUNTRY" "$ORG" "$OS" "$BROWSER" "$DEVICE" "$REF" \
+            "$TS" "$IP" "$LOC" "$ORG" "$OS" "$BROWSER" "$DEVICE" "$REF" \
             >> download-logs/resume-downloads.txt
 
       - name: Commit and push log
