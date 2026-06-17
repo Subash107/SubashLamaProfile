@@ -1,0 +1,18 @@
+/* TEAM */
+Name: Subash Lama
+Role: Cybersecurity Analyst & Developer
+Location: Kathmandu, Nepal
+Contact: lamasubash107[at]gmail[dot]com
+LinkedIn: https://www.linkedin.com/in/subash-lama-b319a016b/
+GitHub: https://github.com/Subash107
+
+/* SITE */
+Last update: 2026/06/17
+Standards: HTML5, CSS3, ES2022
+Components: Bootstrap 5, GoatCounter
+Build: GitHub Actions → GitHub Pages
+Hosted: GitHub Pages
+
+/* THANKS */
+GoatCounter — privacy-friendly analytics
+Bootstrap — responsive CSS framework

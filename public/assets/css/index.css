@@ -1972,13 +1972,29 @@
     .contact-details {
       display: flex;
       flex-direction: column;
-      gap: 0.25rem;
+      gap: 0.55rem;
       font-size: 1.05rem;
+      margin-top: 1rem;
+    }
+    .contact-details p {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin: 0;
+    }
+    .contact-icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      color: rgba(138, 232, 255, 0.7);
     }
     .contact-details a {
       color: #8ae8ff;
       text-decoration: none;
       font-weight: 600;
+    }
+    .contact-details a:hover {
+      text-decoration: underline;
     }
     .contact-details,
     .contact-details p,
@@ -1997,6 +2013,7 @@
       margin-top: 40px;
       color: #ccc;
       font-size: 0.95rem;
+      padding-bottom: 5rem;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -2916,7 +2933,7 @@
       background: rgba(114, 239, 255, 0.1);
     }
     @media (max-width: 480px) {
-      #stickyNav { gap: 0; padding: 0.35rem 0.5rem; }
+      #stickyNav { gap: 0; padding: 0.35rem 0.5rem; flex-wrap: wrap; justify-content: center; }
       #stickyNav a { padding: 0.25rem 0.45rem; font-size: 0.72rem; }
     }
 
@@ -3316,6 +3333,19 @@
       color: rgba(138, 232, 255, 0.75);
       letter-spacing: 0.03em;
     }
+    .testimonial-card-linkedin {
+      border-color: rgba(10, 102, 194, 0.35);
+      background: rgba(10, 102, 194, 0.07);
+    }
+    .testimonial-linkedin-link {
+      color: rgba(138, 232, 255, 0.85);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      transition: color 0.2s;
+    }
+    .testimonial-linkedin-link:hover { color: #8ae8ff; text-decoration: underline; }
 
     /* ── Contact icon links ── */
     .contact-icon-link {
@@ -3350,6 +3380,21 @@
     }
     .footer-icon-link:hover { color: #8ae8ff; }
     .footer-icon-link svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    /* ── Ghost music link — barely visible, only for curious eyes ── */
+    .footer-music-link {
+      opacity: 1;
+      color: #ff5500;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: opacity 0.4s ease, color 0.4s ease;
+      margin-left: 0.25rem;
+      user-select: none;
+    }
+    .footer-music-link:hover {
+      opacity: 0.75;
+      color: #ff5500;
+    }
 
     /* ── Command palette ── */
     #commandPalette {
@@ -3451,8 +3496,50 @@
     }
     body { animation: page-fade-in 0.35s ease both; }
 
+    /* ══════════════════════════════════════════════════════
+       MOBILE FIXES — floating buttons · SVGs · ticker · flip
+       ══════════════════════════════════════════════════════ */
     @media (max-width: 768px) {
-      #cmdToggle { right: 4.5rem; bottom: 1.25rem; }
+      /* Hide keyboard-only controls — useless on touch devices */
+      #cmdToggle { display: none !important; }
+
+      /* Fix audio toggle + backToTop overlap — move audio up */
+      .audio-corner-toggle { bottom: 4rem !important; right: 1.25rem !important; }
+
+      /* Light mode toggle — keep but move slightly */
+      #lightModeToggle { bottom: 7rem !important; right: 1.25rem !important; }
+
+      /* Make SVG network diagram and skill tree horizontally scrollable */
+      .homelab-section,
+      .skill-tree-section { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      #homelabSvg,
+      #skillTreeSvg { min-width: 480px; width: 480px; }
+
+      /* Stats ticker — wrap to 2 columns on narrow screens */
+      .stats-ticker { flex-wrap: wrap; justify-content: center; gap: 0.6rem 1.2rem; }
+      .st-sep { display: none; }
+
+      /* Book card — show subtle tap hint */
+      .book-card[data-flip-card]::after {
+        content: "Tap to flip ↩";
+        display: block;
+        text-align: center;
+        font-size: 0.62rem;
+        color: rgba(138,232,255,0.35);
+        margin-top: 0.4rem;
+        letter-spacing: 0.06em;
+        pointer-events: none;
+      }
+
+      /* Hire me float — compact on mobile */
+      #hireMeFloat { padding: 0.5rem 0.75rem; gap: 0.4rem; }
+      .hmf-sub { display: none; }
+    }
+
+    @media (max-width: 480px) {
+      /* Stats ticker single column on very small screens */
+      .stats-ticker { gap: 0.5rem; }
+      .st-item { min-width: 80px; }
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -4088,6 +4175,31 @@
     body.theme-matrix .hero-avatar::before { border-color: rgba(57,255,20,0.28); }
     body.theme-matrix .hero-avatar::after  { border-color: rgba(0,255,136,0.3); }
     body.theme-matrix #overlay { background: linear-gradient(rgba(0,255,20,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,20,0.018) 1px, transparent 1px), repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px), rgba(0,13,2,0.3) !important; background-size: 52px 52px, 52px 52px, 100% 100%, 100% 100% !important; }
+
+    /* ── 11. Nord theme overrides ── */
+    body.theme-nord { background: radial-gradient(ellipse 120% 90% at 8% 3%, rgba(136,192,208,0.08) 0%, transparent 48%), radial-gradient(ellipse 100% 80% at 90% 95%, rgba(129,161,193,0.07) 0%, transparent 48%), #2e3440; }
+    body.theme-nord .bg-orb-1 { background: radial-gradient(circle, rgba(136,192,208,0.28), transparent 68%); }
+    body.theme-nord .bg-orb-2 { background: radial-gradient(circle, rgba(129,161,193,0.22), transparent 68%); }
+    body.theme-nord .bg-orb-3 { background: radial-gradient(circle, rgba(143,188,187,0.18), transparent 68%); }
+    body.theme-nord .glass-card { border-color: rgba(136,192,208,0.18) !important; }
+    body.theme-nord .glass-card::after { background: conic-gradient(from var(--trace-angle), transparent 0deg, transparent 320deg, rgba(136,192,208,0.7) 340deg, rgba(143,188,187,0.9) 352deg, transparent 360deg); }
+    body.theme-nord .skill-bar-fill { background: linear-gradient(90deg, #88c0d0 0%, #8fbcbb 100%); box-shadow: 0 0 10px rgba(136,192,208,0.45); }
+    body.theme-nord .typing-roles  { color: #88c0d0; }
+    body.theme-nord .hero-stat-num { color: #88c0d0; }
+    body.theme-nord #scrollProgress::after { background: linear-gradient(90deg, #88c0d0, #8fbcbb); }
+    body.theme-nord .btn-resume    { border-color: rgba(136,192,208,0.6) !important; color: rgba(136,192,208,0.95) !important; animation: none !important; }
+    body.theme-nord .mq-dot        { color: #8fbcbb; }
+    body.theme-nord .hero-avatar::before { border-color: rgba(136,192,208,0.28); }
+    body.theme-nord .hero-avatar::after  { border-color: rgba(143,188,187,0.3); }
+    body.theme-nord ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #88c0d0, #8fbcbb); }
+    body.theme-nord * { scrollbar-color: #88c0d0 #2e3440; }
+    body.theme-nord .snd:hover, body.theme-nord .snd.active { background: #88c0d0; box-shadow: 0 0 8px rgba(136,192,208,0.7); }
+    body.theme-nord .sec-ring-fill { stroke: #88c0d0; filter: drop-shadow(0 0 6px rgba(136,192,208,0.5)); }
+    body.theme-nord .sec-ring-pct  { color: #88c0d0; }
+    body.theme-nord .sw-bar        { background: linear-gradient(90deg, #88c0d0, #8fbcbb); }
+    body.theme-nord #hireMeFloat   { border-color: rgba(136,192,208,0.3); }
+    body.theme-nord .hmf-dot       { background: #88c0d0; box-shadow: 0 0 8px rgba(136,192,208,0.7); }
+    body.theme-nord .hmf-cta       { color: #88c0d0; border-color: rgba(136,192,208,0.4); }
 
     @media (max-width: 600px) {
       .theme-switcher { bottom: 1.25rem; left: 0.75rem; }
@@ -5214,7 +5326,7 @@
     .exp-h-co    { font-size: 0.62rem; color: rgba(255,255,255,0.45); text-align: center; }
 
     /* ── 4. Tech stack grid ── */
-    .tech-stack-grid { display: grid; gap: 0.6rem; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); margin-top: 1.25rem; }
+    .tech-stack-grid { display: grid !important; gap: 0.6rem; grid-template-columns: repeat(5, 1fr); margin-top: 1.25rem; }
     .tsg-item {
       display: flex; flex-direction: column; align-items: center; gap: 0.35rem;
       padding: 0.65rem 0.4rem; background: rgba(255,255,255,0.03);
@@ -5365,8 +5477,11 @@
     .exp-md-btn.md-copied { border-color: rgba(80,250,123,0.4); color: #50fa7b; }
     .exp-card-wrap { position: relative; }
 
+    @media (max-width: 768px) {
+      .tech-stack-grid { grid-template-columns: repeat(4, 1fr) !important; }
+    }
     @media (max-width: 576px) {
-      .tech-stack-grid { grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); }
+      .tech-stack-grid { grid-template-columns: repeat(3, 1fr) !important; }
       .ap-grid { grid-template-columns: 1fr 1fr; }
     }
 
@@ -5569,6 +5684,14 @@
     .gh-feed { margin-bottom: 1rem; }
     .gh-feed-title { font-size: 0.7rem; font-weight: 800; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
     .gh-feed-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.3rem; }
+    /* Skeleton loader for GitHub feed */
+    .gh-skeleton {
+      height: 32px; border-radius: 6px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+      background-size: 200% 100%;
+      animation: ghSkeletonShimmer 1.4s infinite;
+    }
+    @keyframes ghSkeletonShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     .gh-feed-item {
       display: flex; align-items: flex-start; gap: 0.5rem;
       padding: 0.4rem 0.6rem;
@@ -5726,6 +5849,54 @@
       display: none;
     }
     section.is-scrolling .sticky-sec-header { display: block; }
+
+    /* ── Print / PDF stylesheet ── */
+    @media print {
+      /* Hide everything that is not content */
+      #bg-video, #overlay, canvas, audio,
+      .portfolio-loader, #stickyNav, #sideNavDots,
+      #scrollProgress, #customCursor, #cursorTrailCanvas,
+      .bg-orb, #spotlight, #hueShiftLayer,
+      #hackerScore, #bookmarkPanel, #bkmToggle,
+      #hireMeFloat, #chatWidget, #speedBadge,
+      #soundToggle, #searchOverlay, #analyticsPanel,
+      #tourOverlay, #sigModal, #recruiterModal,
+      #easterTerminal, #commandPalette, #cmdToggle,
+      #themeSwitcher, #lightModeToggle, #backToTop,
+      .audio-corner-toggle, #neonSpotlight,
+      .hero-wave, .skill-marquee, .stats-ticker,
+      .threat-feed, #pitchBtn, .cta-group, .button-group,
+      .studying-widget, .profile-strength,
+      .darkweb-scan, .skill-tree-section,
+      .soc-dashboard, .gh-feed, .project-tag-filters,
+      .homelab-section, .hero-badges,
+      .exp-view-toggle, .cert-view-toggle,
+      .hero-stat, .footer-links,
+      .neon-sig, #achieveToast,
+      .hero-avatar, #heroNameSvg,
+      #confettiCanvas, #screensaverCanvas, #mouseTrailCanvas,
+      #recruiterScoreCard { display: none !important; }
+
+      /* Reset backgrounds to white */
+      body, html { background: #fff !important; color: #111 !important; font-size: 11pt; }
+      .content { padding: 0 !important; gap: 0 !important; }
+      .glass-card { background: none !important; border: 1px solid #ccc !important; box-shadow: none !important; margin-bottom: 1rem !important; break-inside: avoid; }
+      .book-card, .book-card-inner, .book-card-face { transform: none !important; box-shadow: none !important; }
+      .book-card-back { display: none !important; }
+      h1, h2, h3, h4 { color: #111 !important; }
+      p, li, span { color: #333 !important; }
+      a { color: #0070c0 !important; text-decoration: underline; }
+      .skill-bar-track { background: #e0e0e0 !important; }
+      .skill-bar-fill { background: #0070c0 !important; box-shadow: none !important; }
+      .cert-card { border: 1px solid #ccc !important; background: none !important; }
+      .exp-card { border-left: 3px solid #0070c0 !important; background: none !important; }
+      .hero-name-terminal { display: none !important; }
+      .hero-name-display { display: block !important; font-size: 28pt !important; color: #111 !important; }
+      .hero-tagline { font-size: 12pt !important; color: #333 !important; }
+
+      /* Page layout */
+      @page { margin: 1.5cm 2cm; }
+    }
 
     @media (max-width: 768px) {
       #recruiterScoreCard { width: 180px; bottom: 1rem; left: 0.75rem; }

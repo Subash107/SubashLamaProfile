@@ -1,0 +1,6 @@
+RESUME DOWNLOAD LOG — Subash Lama Portfolio
+Auto-updated by GitHub Actions each time someone downloads the resume.
+Shows: timestamp · IP address · city/country · company or ISP · OS · browser · device · referrer
+=====================================================================================================
+Timestamp (UTC)           | IP Address       | Location                       | Org / Company                | OS           | Browser   | Device   | Referrer
+--------------------------+------------------+--------------------------------+------------------------------+--------------+-----------+----------+---------

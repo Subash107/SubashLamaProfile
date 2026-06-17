@@ -3,9 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self' https://gc.zgo.at; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.goatcounter.com; media-src 'self'; font-src 'self' data:; connect-src 'self' https://*.goatcounter.com; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests" />
   <meta name="referrer" content="no-referrer" />
+  <meta name="author" content="Subash Lama" />
+  <meta name="robots" content="index, follow" />
   <meta name="description" content="Subash Lama's project portfolio — SOC lab, cloud migration governance, secure virtual lab automation, and observability stacks." />
+  <link rel="preconnect" href="https://gc.zgo.at" />
+  <link rel="dns-prefetch" href="https://gc.zgo.at" />
+  <link rel="preload" href="assets/images/bg-poster.jpg" as="image" />
   <meta name="theme-color" content="#07111c" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Projects | Subash Lama &ndash; Cybersecurity Analyst" />
@@ -72,7 +77,7 @@
         <div class="project-meta">
           <h3>Secure Virtual Lab Automation</h3>
           <div class="project-links">
-            <a href="https://github.com/Subash107?tab=repositories" target="_blank" rel="noopener noreferrer">GitHub Profile</a>
+            <a href="https://github.com/Subash107/Static-Website-CI-CD-with-GitHub-Actions-and-Ubuntu-LTS" target="_blank" rel="noopener noreferrer">View Repository &rarr;</a>
           </div>
         </div>
         <p><strong>Problem:</strong> Lab setup was manual, slow, inconsistent across machines, and missing a strong baseline for repeatable onboarding.</p>
@@ -125,8 +130,26 @@
       </article>
     </div>
 
-    <a class="back-link" href="index.html">&larr; Back to Home</a>
+    <div class="projects-footer-nav">
+      <a class="back-link" href="index.html">&larr; Back to Home</a>
+      <button id="projBackToTop" class="proj-btt" aria-label="Back to top" title="Back to top">&#8679; Top</button>
+    </div>
   </div>
+  <style>
+    .projects-footer-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 2rem; flex-wrap: wrap; gap: 1rem; }
+    .proj-btt {
+      background: rgba(138,232,255,0.08); border: 1px solid rgba(138,232,255,0.3);
+      color: rgba(138,232,255,0.8); border-radius: 8px; padding: 0.5rem 1.1rem;
+      font-size: 0.85rem; font-weight: 600; cursor: pointer; letter-spacing: 0.04em;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .proj-btt:hover { background: rgba(138,232,255,0.15); border-color: rgba(138,232,255,0.6); }
+  </style>
+  <script>
+    document.getElementById('projBackToTop').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  </script>
+  <!-- GoatCounter analytics — replace YOUR-CODE with your goatcounter.com site code -->
+  <script data-goatcounter="https://YOUR-CODE.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
 

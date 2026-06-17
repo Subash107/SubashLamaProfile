@@ -4,18 +4,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self' https://gc.zgo.at; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.goatcounter.com; media-src 'self'; font-src 'self' data:; connect-src 'self' https://*.goatcounter.com https://api.github.com https://ipapi.co https://*.workers.dev; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests" />
   <meta name="referrer" content="no-referrer" />
-  <meta name="description" content="Subash Lama &ndash; Cybersecurity Analyst with 10+ years in IT, focused on SOC operations, GRC, IAM, detection engineering, and security-aware infrastructure.">
+  <meta name="author" content="Subash Lama" />
+  <meta name="robots" content="index, follow" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Subash Lama" />
+  <link rel="apple-touch-icon" href="favicon.svg" />
+  <meta name="description" content="Subash Lama &ndash; Cybersecurity Analyst with 12+ years in IT, focused on SOC operations, GRC, IAM, detection engineering, and security-aware infrastructure.">
+  <link rel="preconnect" href="https://gc.zgo.at" />
+  <link rel="dns-prefetch" href="https://gc.zgo.at" />
+  <link rel="dns-prefetch" href="https://api.github.com" />
   <meta name="theme-color" content="#07111c" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Subash Lama &ndash; Cybersecurity Analyst | SOC &middot; GRC &middot; IAM" />
-  <meta property="og:description" content="Cybersecurity Analyst with 10+ years in IT transitioning into SOC operations, detection engineering, GRC, and IAM across modern enterprise environments." />
+  <meta property="og:description" content="Cybersecurity Analyst with 12+ years in IT transitioning into SOC operations, detection engineering, GRC, and IAM across modern enterprise environments." />
   <meta property="og:image" content="https://subash107.github.io/assets/images/bg-poster.jpg" />
   <meta property="og:url" content="https://subash107.github.io/" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Subash Lama &ndash; Cybersecurity Analyst | SOC &middot; GRC &middot; IAM" />
-  <meta name="twitter:description" content="Cybersecurity Analyst with 10+ years in IT transitioning into SOC operations, detection engineering, GRC, and IAM across modern enterprise environments." />
+  <meta name="twitter:description" content="Cybersecurity Analyst with 12+ years in IT transitioning into SOC operations, detection engineering, GRC, and IAM across modern enterprise environments." />
   <meta name="twitter:image" content="https://subash107.github.io/assets/images/bg-poster.jpg" />
   <title>Subash Lama &ndash; Cybersecurity Analyst | SOC &middot; GRC &middot; IAM &middot; Security Operations</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
@@ -27,7 +36,7 @@
     "@type": "Person",
     "name": "Subash Lama",
     "jobTitle": "Cybersecurity Analyst",
-    "description": "Cybersecurity Analyst with 10+ years in IT focused on SOC operations, detection engineering, GRC, and IAM.",
+    "description": "Cybersecurity Analyst with 12+ years in IT focused on SOC operations, detection engineering, GRC, and IAM.",
     "url": "https://subash107.github.io/",
     "email": "lamasubash107@gmail.com",
     "sameAs": [
@@ -41,6 +50,18 @@
     },
     "knowsAbout": ["SOC Operations", "GRC", "IAM", "Detection Engineering", "Wazuh", "Suricata", "SIEM", "Network Security"]
   }
+  </script>
+  <link rel="preload" href="assets/css/index.css" as="style" />
+  <link rel="preload" href="assets/css/motion.css" as="style" />
+  <link rel="preload" href="assets/images/bg-poster.jpg" as="image" />
+  <script type="application/ld+json">
+  [
+    {"@context":"https://schema.org","@type":"EducationalOccupationalCredential","name":"Cisco Endpoint Security","credentialCategory":"Certificate","recognizedBy":{"@type":"Organization","name":"Cisco"},"dateCreated":"2026-06-01","holder":{"@type":"Person","name":"Subash Lama"}},
+    {"@context":"https://schema.org","@type":"EducationalOccupationalCredential","name":"Cisco Ethical Hacker","credentialCategory":"Certificate","recognizedBy":{"@type":"Organization","name":"Cisco"},"dateCreated":"2026-04-01","holder":{"@type":"Person","name":"Subash Lama"}},
+    {"@context":"https://schema.org","@type":"EducationalOccupationalCredential","name":"IBM Cybersecurity Fundamentals","credentialCategory":"Certificate","recognizedBy":{"@type":"Organization","name":"IBM"},"dateCreated":"2026-03-01","holder":{"@type":"Person","name":"Subash Lama"}},
+    {"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"Secure Virtual Lab Automation","description":"Reusable Docker templates and CI checks that cut lab setup time by 70%.","codeRepository":"https://github.com/Subash107/Static-Website-CI-CD-with-GitHub-Actions-and-Ubuntu-LTS","programmingLanguage":["Bash","Docker","GitHub Actions"],"author":{"@type":"Person","name":"Subash Lama"}},
+    {"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"Personal SOC Lab","description":"Home SOC using Wazuh, Suricata and Sysmon for real detection engineering practice.","programmingLanguage":["Wazuh","Suricata","Sysmon"],"author":{"@type":"Person","name":"Subash Lama"}}
+  ]
   </script>
   <link href="assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet" />
   <script src="assets/js/site.js" defer></script>
@@ -91,7 +112,7 @@
   </audio>
 
   <!-- Background video -->
-  <video autoplay muted loop playsinline id="bg-video" data-bg-video poster="assets/images/bg-poster.jpg" preload="none" aria-hidden="true">
+  <video autoplay muted loop playsinline id="bg-video" data-bg-video poster="assets/images/bg-poster.jpg" preload="none" aria-hidden="true" fetchpriority="high">
     <source data-src="assets/media/video/bg-video.mp4" data-src-mobile="assets/media/video/bg-video-mobile.mp4" type="video/mp4" />
     Your browser does not support the video tag.
   </video>
@@ -513,7 +534,7 @@
             <text id="heroNameRightHighlight" class="hero-name-text hero-name-text-right hero-name-text-reflect" data-hero-name-highlight data-name-side="right" x="467" y="108">Lama</text>
           </svg>
         </h1>
-        <p class="hero-tagline"><span id="typingRoles" class="typing-roles">Cybersecurity Analyst</span> with <span class="count-up" data-target="10" data-suffix="+">10+</span> years in IT &mdash; focused on SOC operations, detection engineering, GRC, and IAM across modern enterprise environments.</p>
+        <p class="hero-tagline"><span id="typingRoles" class="typing-roles">Cybersecurity Analyst</span> with <span class="count-up" id="itYearsCountUp" data-target="12" data-suffix="+">12+</span> years in IT &mdash; focused on SOC operations, detection engineering, GRC, and IAM across modern enterprise environments.</p>
         <p class="hero-stack">SOC &middot; GRC &middot; IAM &middot; CTI &middot; Wazuh &middot; Suricata &middot; Sysmon &middot; Docker &middot; IaC &middot; Cisco</p>
       </div>
       <!-- Neon SVG Signature -->
@@ -529,8 +550,8 @@
         <button type="button" id="copyProfileUrl" class="role-badge copy-url-badge" title="Copy profile link">&#128279; Copy Link</button>
       </div>
       <div class="hero-stats" aria-label="Quick stats">
-        <div class="hero-stat"><span class="hero-stat-num">10+</span><span class="hero-stat-lbl">Years IT</span></div>
-        <div class="hero-stat"><span class="hero-stat-num">5</span><span class="hero-stat-lbl">Certs</span></div>
+        <div class="hero-stat"><span class="hero-stat-num" id="heroStatYears">12+</span><span class="hero-stat-lbl">Years IT</span></div>
+        <div class="hero-stat"><span class="hero-stat-num">7</span><span class="hero-stat-lbl">Certs</span></div>
         <div class="hero-stat"><span class="hero-stat-num">3</span><span class="hero-stat-lbl">Labs Built</span></div>
         <div class="hero-stat"><span class="hero-stat-num">150+</span><span class="hero-stat-lbl">Endpoints</span></div>
       </div>
@@ -566,6 +587,7 @@
       <div class="cta-group">
         <a href="assets/docs/cv/latest-resume.pdf" class="btn btn-outline-light btn-resume" data-resume-download data-resume-manifest="assets/docs/cv/resume-manifest.json" download="Subash-Lama-Resume.pdf">Download Resume</a>
         <a href="https://mail.google.com/mail/?view=cm&to=lamasubash107%40gmail.com&su=Cybersecurity%20Call%20-%20Subash%20Lama%20Portfolio&body=Hi%20Subash%2C%0A%0AI%27d%20like%20to%20schedule%20a%20quick%20call%20to%20discuss%20a%20cybersecurity%20opportunity.%0A%0AMy%20availability%3A%20%5Badd%20times%5D%0A%0AThanks%2C%0A%5BYour%20Name%5D" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light btn-cta-secondary">Book a Call</a>
+        <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fsubash107.github.io%2F" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light btn-cta-secondary btn-share-linkedin" title="Share this portfolio on LinkedIn">&#128279; Share on LinkedIn</a>
       </div>
       <div class="button-group">
         <a href="#about" class="btn btn-outline-light">About</a>
@@ -603,11 +625,14 @@
             <div class="section-inner">
               <div class="section-content about-panel">
                 <h2 data-scramble>About Me</h2>
-                <p>I am a System Administrator with 10+ years in IT and a business degree, now transitioning into cybersecurity &mdash; with a focus on security operations, detection engineering, and GRC.</p>
+                <p>I am a Cybersecurity Analyst with 12+ years in IT and a business degree, with hands-on experience in security operations, detection engineering, and GRC.</p>
                 <p>My enterprise IT background spans system administration at Primuson Pvt. Ltd., IT specialist work at State Bank of India, network support engineering at Green IT Solutions, and IT consulting for Unilever. This gives me a deep operational foundation for understanding how attackers move through real infrastructure.</p>
                 <p>I built a personal SOC lab using Wazuh, Suricata, and Sysmon for host visibility, network telemetry, log collection, and real-time detection practice &mdash; while earning Cisco certifications in Ethical Hacking and Endpoint Security, and IBM credentials in Cybersecurity Fundamentals and Python for Data Science.</p>
                 <div class="card-note">
                   <strong>What I bring:</strong> A business-minded perspective combined with deep hands-on IT operations experience, now applied to threat detection, governance, risk &amp; compliance, and identity &amp; access management.
+                </div>
+                <div class="card-note" style="margin-top:0.6rem;">
+                  <strong>Languages:</strong> Nepali (native) &middot; English (professional)
                 </div>
               </div>
             </div>
@@ -707,7 +732,7 @@
           </article>
           <article class="book-card-face book-card-back" aria-hidden="true">
             <div class="section-content">
-              <h3>10+ Years of Enterprise IT</h3>
+              <h3>12+ Years of Enterprise IT</h3>
               <p>From banking and FMCG to hospitality and consulting &mdash; this breadth of environments is what makes the cybersecurity transition both natural and valuable.</p>
               <p>I have seen how real organizations manage (and mismanage) identity, access, endpoints, and network security from the inside.</p>
             </div>
@@ -757,7 +782,7 @@
                     <p class="project-tech"><strong>Stack:</strong> Docker &middot; Compose &middot; GitHub Actions &middot; Linux</p>
                     <div class="project-links">
                       <a href="https://github.com/Subash107/Static-Website-CI-CD-with-GitHub-Actions-and-Ubuntu-LTS" target="_blank" rel="noopener noreferrer">GitHub &rarr;</a>
-                      <a href="projects.html" target="_blank" rel="noopener noreferrer">Case Study &rarr;</a>
+                      <a href="projects.html#virtual-lab-automation" target="_blank" rel="noopener noreferrer">Case Study &rarr;</a>
                     </div>
                   </div>
                   <div class="project-card">
@@ -990,7 +1015,7 @@
                       <line class="st-edge" x1="297" y1="45" x2="378" y2="85"/>
                       <line class="st-edge" x1="297" y1="125" x2="378" y2="85"/>
                       <line class="st-edge" x1="378" y1="85" x2="459" y2="85"/>
-                      <g class="st-node st-unlocked" data-tip="IT Foundations — 10+ years enterprise IT">
+                      <g class="st-node st-unlocked" data-tip="IT Foundations — 12+ years enterprise IT">
                         <circle cx="54" cy="85" r="20" class="st-circle"/>
                         <text x="54" y="89" class="st-lbl">IT</text>
                         <text x="54" y="115" class="st-sub">Foundations</text>
@@ -1044,7 +1069,7 @@
           <article class="book-card-face book-card-back">
             <div class="section-content">
               <h3>Depth &amp; Breadth</h3>
-              <p>Core depth is in security operations, detection engineering, network monitoring, and identity &amp; access management, built on 10+ years of enterprise IT operations.</p>
+              <p>Core depth is in security operations, detection engineering, network monitoring, and identity &amp; access management, built on 12+ years of enterprise IT operations.</p>
               <p>I bring a business-minded perspective that bridges technical risk with governance and compliance requirements.</p>
             </div>
           </article>
@@ -1178,11 +1203,11 @@
             <h2>Currently Working On</h2>
             <ul class="working-list">
               <li>Expanding the personal SOC lab with Kubernetes security monitoring and container telemetry</li>
-              <li>Studying MITRE ATT&amp;CK framework to sharpen detection engineering and threat-hunting practice</li>
+              <li>Deepening MITRE ATT&amp;CK coverage &mdash; mapping detections to real TTPs and building custom Wazuh rules</li>
               <li>Exploring Elastic Stack and OpenTelemetry for observability and log correlation</li>
-              <li>Preparing for CompTIA Security+ to formalise foundational security knowledge</li>
+              <li>Pursuing GRC certification to formalise governance, risk &amp; compliance knowledge</li>
             </ul>
-            <p class="working-note">Last updated Jun 2026 &mdash; <a href="https://mail.google.com/mail/?view=cm&to=lamasubash107%40gmail.com&su=What%27s%20new%3F" target="_blank" rel="noopener noreferrer">ask me what&rsquo;s new</a></p>
+            <p class="working-note">Last updated <span id="workingOnDate">Jun 2026</span> &mdash; <a href="https://mail.google.com/mail/?view=cm&to=lamasubash107%40gmail.com&su=What%27s%20new%3F" target="_blank" rel="noopener noreferrer">ask me what&rsquo;s new</a></p>
           </div>
         </div>
       </section>
@@ -1195,7 +1220,7 @@
                 <div class="section-content">
                   <h2>Why Hire Me</h2>
                   <ul class="why-hire-list">
-                    <li>10+ years of enterprise IT operations across banking, FMCG, hospitality, and consulting &mdash; giving me a defender&rsquo;s perspective rooted in how real infrastructure actually works</li>
+                    <li>12+ years of enterprise IT operations across banking, FMCG, hospitality, and consulting &mdash; giving me a defender&rsquo;s perspective rooted in how real infrastructure actually works</li>
                     <li>Business degree combined with deep technical experience means I can communicate risk to both technical teams and management stakeholders</li>
                     <li>Hands-on SOC lab experience with Wazuh, Suricata, and Sysmon &mdash; real detection engineering, not just theory</li>
                     <li>Cisco-certified in Ethical Hacking and Endpoint Security; IBM-certified in Cybersecurity Fundamentals and Python &mdash; actively investing in the craft</li>
@@ -1223,18 +1248,10 @@
             <p class="testimonial-intro">What colleagues say &mdash; sourced from <a href="https://www.linkedin.com/in/subash-lama-b319a016b/" target="_blank" rel="noopener noreferrer">LinkedIn recommendations</a>.</p>
             <!-- Replace the placeholder text below with your actual LinkedIn recommendations -->
             <div class="testimonial-list">
-              <blockquote class="testimonial-card">
-                <p class="testimonial-text">&ldquo;Replace this with a recommendation from a former manager or colleague. Visit your LinkedIn profile &rarr; Recommendations to find existing endorsements you can paste here.&rdquo;</p>
+              <blockquote class="testimonial-card testimonial-card-linkedin">
+                <p class="testimonial-text">Recommendations from colleagues and managers across Primuson Pvt. Ltd., State Bank of India, and Green IT Solutions are available on LinkedIn.</p>
                 <footer class="testimonial-meta">
-                  <span class="testimonial-name">Name, Title</span>
-                  <span class="testimonial-rel">Company &middot; Year</span>
-                </footer>
-              </blockquote>
-              <blockquote class="testimonial-card">
-                <p class="testimonial-text">&ldquo;Add a second recommendation here. Even two short quotes significantly strengthen recruiter confidence in your professional reputation.&rdquo;</p>
-                <footer class="testimonial-meta">
-                  <span class="testimonial-name">Name, Title</span>
-                  <span class="testimonial-rel">Company &middot; Year</span>
+                  <a href="https://www.linkedin.com/in/subash-lama-b319a016b/" target="_blank" rel="noopener noreferrer" class="testimonial-linkedin-link">View on LinkedIn &rarr;</a>
                 </footer>
               </blockquote>
             </div>
@@ -1273,7 +1290,7 @@
                       <label for="contact-message">Message</label>
                       <textarea id="contact-message" name="message" rows="4" placeholder="Share your goals around cybersecurity, SOC operations, GRC, or IAM..." required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-outline-light contact-form-submit">Send Message</button>
+                    <button type="submit" class="btn btn-outline-light contact-form-submit">Send via Gmail</button>
                   </form>
                   <div class="contact-details">
                     <p><svg class="contact-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg><a href="https://mail.google.com/mail/?view=cm&to=lamasubash107%40gmail.com" target="_blank" rel="noopener noreferrer" data-copy-email="lamasubash107@gmail.com" title="Click to copy · opens Gmail">lamasubash107@gmail.com</a></p>
@@ -1285,7 +1302,7 @@
                   <button type="button" id="vcardBtn" class="vcard-btn" aria-label="Download contact card">
                     &#128100; Save Contact (vCard)
                   </button>
-                  <p>Open to Cybersecurity Analyst, SOC Analyst, GRC Analyst, IAM Specialist, Security Operations, and related cybersecurity roles &mdash; on-site, hybrid, or remote in Kathmandu.</p>
+                  <p>Open to Cybersecurity Analyst, SOC Analyst, GRC Analyst, IAM Specialist, Security Operations, and related cybersecurity roles &mdash; on-site, hybrid, or remote in Kathmandu &middot; open to <strong>remote worldwide</strong>.</p>
                 </div>
               </div>
             </article>
@@ -1316,8 +1333,10 @@
           <svg class="footer-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
           <span>Resume</span>
         </a>
+        <span class="footer-sep">&middot;</span>
+        <a href="https://soundcloud.com/subash-lama-408609351" target="_blank" rel="noopener noreferrer" class="footer-music-link footer-icon-link" aria-label="SoundCloud">♪ Music</a>
       </div>
-      <p class="footer-copy">&copy; 2026 Subash Lama. All rights reserved.</p>
+      <p class="footer-copy">&copy; <span id="footerYear">2026</span> Subash Lama. All rights reserved.</p>
     </div>
   </div>
   <!-- Hacker score HUD -->
@@ -1360,11 +1379,11 @@
     </div>
     <p class="rsc-label">vs. typical SOC applicants</p>
     <ul class="rsc-items">
-      <li class="rsc-item"><span class="rsc-dot rsc-ok"></span>CompTIA Security+ certified</li>
+      <li class="rsc-item"><span class="rsc-dot rsc-ok"></span>Cisco Certified &mdash; Ethical Hacking &amp; Endpoint Security</li>
       <li class="rsc-item"><span class="rsc-dot rsc-ok"></span>Hands-on SIEM (Wazuh)</li>
-      <li class="rsc-item"><span class="rsc-dot rsc-ok"></span>10+ years enterprise IT</li>
+      <li class="rsc-item"><span class="rsc-dot rsc-ok"></span>12+ years enterprise IT</li>
       <li class="rsc-item"><span class="rsc-dot rsc-ok"></span>Homelab + CI/CD pipeline</li>
-      <li class="rsc-item"><span class="rsc-dot rsc-warn"></span>GRC certification in progress</li>
+      <li class="rsc-item"><span class="rsc-dot rsc-warn"></span>GRC certification — actively pursuing</li>
     </ul>
   </div>
 
@@ -1386,6 +1405,9 @@
       <div class="chat-quick" id="chatQuick">
         <button class="chat-q">What certs?</button>
         <button class="chat-q">SOC experience?</button>
+        <button class="chat-q">GRC background?</button>
+        <button class="chat-q">Download resume?</button>
+        <button class="chat-q">Location / remote?</button>
         <button class="chat-q">Hire him?</button>
       </div>
       <div class="chat-input-row">
@@ -1477,7 +1499,7 @@
         <button type="button" id="rcmClose" aria-label="Close">&times;</button>
       </div>
       <ul class="rcm-list">
-        <li><span class="rcm-icon">&#9989;</span><strong>10+ years</strong> enterprise IT — banking, FMCG, hospitality, consulting</li>
+        <li><span class="rcm-icon">&#9989;</span><strong>12+ years</strong> enterprise IT — banking, FMCG, hospitality, consulting</li>
         <li><span class="rcm-icon">&#128737;</span><strong>Hands-on SOC lab</strong> — Wazuh · Suricata · Sysmon, real detection engineering</li>
         <li><span class="rcm-icon">&#127941;</span><strong>5 certifications</strong> — Cisco (Ethical Hacking, Endpoint Security) · IBM · Google</li>
         <li><span class="rcm-icon">&#127919;</span><strong>Best-fit roles</strong> — SOC Analyst · GRC Analyst · IAM Specialist · Security Engineer</li>
@@ -1549,6 +1571,7 @@
     <button type="button" class="theme-btn theme-btn-active" data-theme="" title="Parrot OS theme">PA</button>
     <button type="button" class="theme-btn" data-theme="theme-dracula" title="Dracula theme">DR</button>
     <button type="button" class="theme-btn" data-theme="theme-matrix" title="Matrix theme">MX</button>
+    <button type="button" class="theme-btn" data-theme="theme-nord" title="Nord theme">NO</button>
   </div>
   <button type="button" id="lightModeToggle" aria-label="Toggle light mode" title="Toggle light / dark">&#9728;</button>
   <button type="button" id="cmdToggle" aria-label="Keyboard shortcuts (press ?)" title="Press ? for keyboard shortcuts">?</button>
@@ -1562,5 +1585,12 @@
   <button type="button" class="audio-corner-toggle" data-audio-toggle data-audio-storage-key="portfolio_audio_enabled" data-audio-label-on="&#9834;" data-audio-label-off="&#9834;" aria-pressed="false" aria-label="Toggle ambient sound" title="Toggle ambient sound">&#9834;</button>
   <script src="assets/js/index.js" defer></script>
   <script src="assets/js/parrot-fx.js" defer></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
+    }
+  </script>
+  <!-- GoatCounter analytics — replace YOUR-CODE with your goatcounter.com site code -->
+  <script data-goatcounter="https://YOUR-CODE.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

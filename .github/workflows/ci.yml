@@ -25,6 +25,17 @@ jobs:
         shell: pwsh
         run: ./scripts/sync-resume.ps1
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install htmlhint
+        run: npm install -g htmlhint
+
+      - name: Validate HTML
+        run: htmlhint "public/**/*.html" --config .htmlhintrc || true
+
       - name: List project files
         run: |
           echo "Current directory:"
