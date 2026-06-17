@@ -44,7 +44,7 @@ docker run --rm -p 8080:80 --name static-site static-site
 # python -m http.server 8000 --directory public
 # npx serve public
 ```
-Then open `http://localhost:8080/` (Docker) or your chosen server URL.
+Then open `http://` (Docker) or your chosen server URL.
 
 If `pwsh` is not installed on your machine, use:
 `powershell -ExecutionPolicy Bypass -File .\scripts\sync-resume.ps1`
