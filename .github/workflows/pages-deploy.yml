@@ -35,12 +35,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies (locked versions only)
+        run: npm ci --ignore-scripts
 
       - name: Validate CSS (dry-run minification)
         run: |
-          npx clean-css-cli@5 public/assets/css/index.css     -o /dev/null
-          npx clean-css-cli@5 public/assets/css/motion.css    -o /dev/null
-          npx clean-css-cli@5 public/assets/css/parrot-fx.css -o /dev/null
+          npx clean-css-cli public/assets/css/index.css     -o /dev/null
+          npx clean-css-cli public/assets/css/motion.css    -o /dev/null
+          npx clean-css-cli public/assets/css/parrot-fx.css -o /dev/null
           echo "CSS validation passed"
 
       - name: Validate JS (dry-run minification)

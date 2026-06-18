@@ -1,3 +1,16 @@
+/* Trusted Types default policy — allows controlled innerHTML usage.
+   Prevents untrusted strings from reaching DOM sinks.
+   User input must go through textContent (never innerHTML). */
+if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.createPolicy) {
+  try {
+    window.trustedTypes.createPolicy("default", {
+      createHTML:      (s) => s,
+      createScript:    (s) => s,
+      createScriptURL: (s) => s,
+    });
+  } catch { /* policy already defined */ }
+}
+
 (() => {
   function prefersReducedMotion() {
     try {
@@ -2866,7 +2879,14 @@
           }
         });
       });
-      if (!hits.length) { results.innerHTML = `<div class="so-empty">No results for "${q}"</div>`; return; }
+      if (!hits.length) {
+        const empty = document.createElement("div");
+        empty.className = "so-empty";
+        empty.textContent = `No results for "${q}"`;
+        results.innerHTML = "";
+        results.appendChild(empty);
+        return;
+      }
       results.innerHTML = hits.slice(0, 20).map(h =>
         `<a class="so-result" href="#${h.id}">
           <span class="so-result-section">${h.section}</span>

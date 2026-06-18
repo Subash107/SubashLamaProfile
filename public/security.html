@@ -331,12 +331,19 @@
         <span class="hdr-badge hdr-badge--green">&#10003; WAF — OWASP managed rules</span>
         <span class="hdr-badge hdr-badge--green">&#10003; Bot Fight Mode</span>
         <span class="hdr-badge hdr-badge--green">&#10003; DDoS protection (always-on)</span>
-        <span class="hdr-badge hdr-badge--green">&#10003; TLS 1.2+ enforced</span>
+        <span class="hdr-badge hdr-badge--green">&#10003; TLS 1.3 + 1.2 enforced</span>
         <span class="hdr-badge hdr-badge--green">&#10003; HTTP/3 (QUIC)</span>
         <span class="hdr-badge hdr-badge--green">&#10003; Early Hints (HTTP 103)</span>
+        <span class="hdr-badge hdr-badge--green">&#10003; Page Shield (JS integrity)</span>
+        <span class="hdr-badge hdr-badge--green">&#10003; Turnstile (bot verification)</span>
         <span class="hdr-badge hdr-badge--blue">&#10003; Pages Functions (serverless)</span>
         <span class="hdr-badge hdr-badge--blue">&#10003; CSP violation reporting</span>
+        <span class="hdr-badge hdr-badge--blue">&#10003; KV storage (submissions)</span>
+        <span class="hdr-badge hdr-badge--blue">&#10003; Web Analytics (privacy-first)</span>
       </div>
+
+      <h3>Live Health Check</h3>
+      <p>The <code><a href="/api/health" target="_blank" rel="noopener noreferrer">/api/health</a></code> endpoint returns real-time Cloudflare PoP, TLS version, HTTP protocol, and serving country. Use it to verify the site is live and which data centre is serving you.</p>
 
       <h3>Live Endpoints</h3>
       <ul>
