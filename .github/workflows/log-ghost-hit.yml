@@ -1,0 +1,65 @@
+﻿name: Log BBP Ghost Link / Callback Hit
+
+on:
+  repository_dispatch:
+    types: [ghost-link-hit]
+
+permissions:
+  contents: write
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Append hit to ghost-hits log
+        run: |
+          mkdir -p download-logs
+
+          TS="${{ github.event.client_payload.timestamp }}"
+          TOKEN="${{ github.event.client_payload.token }}"
+          IP="${{ github.event.client_payload.ip }}"
+          COUNTRY="${{ github.event.client_payload.country }}"
+          UA="${{ github.event.client_payload.ua }}"
+          REFERER="${{ github.event.client_payload.referer }}"
+          PROTO="${{ github.event.client_payload.protocol }}"
+
+          printf "%-26s| %-35s| %-16s| %-3s| %-12s| %-60s| %s\n" \
+            "$TS" "$TOKEN" "$IP" "$COUNTRY" "$PROTO" "$UA" "$REFERER" \
+            >> download-logs/ghost-hits.txt
+
+      - name: Commit and push
+        run: |
+          git config user.email "bbp-tracker@users.noreply.github.com"
+          git config user.name "BBP Ghost Tracker"
+          git add download-logs/ghost-hits.txt
+          git diff --staged --quiet && echo "No changes" && exit 0
+          git commit -m "track: ghost hit [${{ github.event.client_payload.token }}] ${{ github.event.client_payload.timestamp }}"
+          git push
+
+      - name: Send email notification
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: lamasubash107@gmail.com
+          password: ${{ secrets.GMAIL_APP_PASSWORD }}
+          subject: "BBP HIT — ${{ github.event.client_payload.token }} [${{ github.event.client_payload.protocol }}]"
+          to: lamasubash107@gmail.com
+          body: |
+            BBP Callback / Ghost Link Hit Detected!
+
+            Token     : ${{ github.event.client_payload.token }}
+            Protocol  : ${{ github.event.client_payload.protocol }}
+            Time      : ${{ github.event.client_payload.timestamp }}
+            IP        : ${{ github.event.client_payload.ip }}
+            Country   : ${{ github.event.client_payload.country }}
+            User-Agent: ${{ github.event.client_payload.ua }}
+            Referer   : ${{ github.event.client_payload.referer }}
+
+            ---
+            Check token: python scripts/bbp_callback_gen.py show ${{ github.event.client_payload.token }}
+            Check all hits: python scripts/bbp_callback_gen.py hits

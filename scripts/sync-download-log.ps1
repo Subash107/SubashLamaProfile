@@ -2,6 +2,10 @@
 # Checks GitHub every 2 minutes for new resume downloads
 # Shows Windows notification + opens log when new download detected
 
+# Hide this window immediately so no black CMD popup appears on screen
+Add-Type -Name Win32 -Namespace Native -MemberDefinition '[DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);'
+[Native.Win32]::ShowWindow((Get-Process -Id $PID).MainWindowHandle, 0) | Out-Null
+
 $repoPath    = "d:\Staging\Static-Website-CI-CD-with-GitHub-Actions-and-Ubuntu-LTS-main\Static-Website-CI-CD-with-GitHub-Actions-and-Ubuntu-LTS-Portfolio"
 $logFile     = "$repoPath\download-logs\resume-downloads.txt"
 $countFile   = "$env:TEMP\resume_dl_count.txt"
