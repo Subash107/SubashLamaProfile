@@ -39,7 +39,7 @@ self.addEventListener('fetch', e => {
     url.hostname === 'api.github.com' ||
     url.hostname.endsWith('goatcounter.com') ||
     url.hostname === 'urlhaus-api.abuse.ch' ||
-    url.hostname === 'ipapi.co'
+    url.hostname === 'check.torproject.org'
   ) return;
   e.respondWith(
     caches.match(e.request).then(cached => {

@@ -2420,49 +2420,7 @@
   }
 
   function initDarkWebScan() {
-    const btn     = document.getElementById("dwScanBtn");
-    const result  = document.getElementById("dwResult");
-    const log     = document.getElementById("dwLog");
-    const verdict = document.getElementById("dwVerdict");
-    if (!btn) return;
-
-    const LINES = [
-      { text: "[*] Initializing scan engine...", delay: 0 },
-      { text: "[*] Connecting to dark web index...", delay: 500 },
-      { text: "[>] Scanning breach databases (haveibeenpwned index)...", delay: 1100 },
-      { text: "[>] Checking paste sites — pastebin, ghostbin, ghostpaste...", delay: 1800 },
-      { text: "[>] Scanning credential marketplaces...", delay: 2500 },
-      { text: "[!] Checking lamasubash107@gmail.com...", delay: 3100, warn: true },
-      { text: "[>] Cross-referencing 14.2B leaked records...", delay: 3800 },
-      { text: "[*] Running hash comparison...", delay: 4500 },
-      { text: "[*] Scan complete. Compiling report...", delay: 5200 },
-    ];
-
-    btn.addEventListener("click", () => {
-      btn.disabled = true;
-      btn.textContent = "Scanning...";
-      if (result) result.removeAttribute("hidden");
-      if (log)    log.innerHTML = "";
-      if (verdict) verdict.setAttribute("hidden", "");
-
-      LINES.forEach(({ text, delay, warn }) => {
-        setTimeout(() => {
-          if (!log) return;
-          const div = document.createElement("div");
-          div.textContent = text;
-          if (warn) div.className = "dw-line-warn";
-          log.appendChild(div);
-          log.scrollTop = log.scrollHeight;
-        }, delay);
-      });
-
-      setTimeout(() => {
-        if (verdict) verdict.removeAttribute("hidden");
-        btn.textContent = "Scan Again";
-        btn.disabled = false;
-        document.dispatchEvent(new CustomEvent("hackerPoints", { detail: { pts: 25, label: "+25 Security Scan" } }));
-      }, 5800);
-    });
+    /* Replaced with real threat intel links in HTML — function is a no-op */
   }
 
   function initNeonSpotlight() {
