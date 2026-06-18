@@ -5935,15 +5935,8 @@
 
 /* ══════════════════════════════════════════
    UPGRADE 1 — Scroll-Triggered Section Reveal
+   (animations only on child cards, sections always visible)
    ══════════════════════════════════════════ */
-.motion-ok [data-reveal].is-revealed > .book-card,
-.motion-ok [data-reveal].is-revealed > .section-inner {
-  animation: sectionFadeIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-@keyframes sectionFadeIn {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
 .motion-ok [data-reveal].is-revealed .exp-card,
 .motion-ok [data-reveal].is-revealed .cert-card,
 .motion-ok [data-reveal].is-revealed .project-card,
