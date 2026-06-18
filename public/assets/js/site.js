@@ -10,6 +10,18 @@
     }
   }
 
+  function isTouchDevice() {
+    try {
+      return (
+        "ontouchstart" in window ||
+        navigator.maxTouchPoints > 0 ||
+        (window.matchMedia && window.matchMedia("(max-width: 768px)").matches)
+      );
+    } catch {
+      return false;
+    }
+  }
+
   function getBackgroundVideoPolicy() {
     try {
       if (prefersReducedMotion()) return { load: false, variant: "mobile" };
@@ -24,6 +36,8 @@
         window.matchMedia && window.matchMedia("(max-width: 768px)").matches;
       const isSlowish = effectiveType === "3g";
       const variant = isMobileViewport || isSlowish ? "mobile" : "desktop";
+
+      if (isMobileViewport) return { load: false, variant: "mobile" };
 
       if (!connection) return { load: true, variant };
 
@@ -642,7 +656,7 @@
 
   /* ── Particle network canvas ── */
   function initParticleNetwork() {
-    if (prefersReducedMotion()) return;
+    if (prefersReducedMotion() || isTouchDevice()) return;
     const canvas = document.getElementById("particleNet");
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -698,7 +712,7 @@
 
   /* ── Cursor particle trail ── */
   function initCursorTrail() {
-    if (prefersReducedMotion()) return;
+    if (prefersReducedMotion() || isTouchDevice()) return;
     const container = document.getElementById("cursorTrailCanvas");
     if (!container) return;
     const COLORS = ["#50fa7b", "#8ae8ff", "#72efff", "#ffffff"];
@@ -824,29 +838,60 @@
     }
   }
 
-  /* ── Live fake threat feed ── */
-  function initThreatFeed() {
+  /* ── Live threat feed — real data from URLhaus (abuse.ch) ── */
+  async function initThreatFeed() {
     const el = document.getElementById("threatFeedText");
     if (!el) return;
-    const FEED = [
-      "Brute-force attempt blocked · 3s ago",
-      "Suspicious outbound DNS query flagged · 12s ago",
-      "Port scan detected from 192.168.x.x · 21s ago",
-      "IAM policy violation alert triggered · 8s ago",
-      "Endpoint anomaly: privilege escalation attempt · 5s ago",
-      "SIEM rule matched: lateral movement pattern · 17s ago",
-      "Wazuh alert: rootkit signature detected · 2s ago",
-      "Suricata IDS: ET SCAN Nmap OS Detection · 9s ago",
-      "Failed MFA attempt: admin account · 14s ago",
-      "SOC monitor active · all systems nominal",
-    ];
-    let i = 0;
-    setInterval(() => {
-      i = (i + 1) % FEED.length;
-      el.style.opacity = "0";
-      setTimeout(() => { el.textContent = FEED[i]; el.style.opacity = "1"; }, 300);
-    }, 4500);
     el.style.transition = "opacity 0.3s ease";
+
+    const FALLBACK = [
+      "URLhaus: malware delivery URL blocked",
+      "abuse.ch: phishing kit infrastructure detected",
+      "Threat intel: C2 callback domain flagged",
+      "URLhaus: Emotet dropper URL added to blocklist",
+      "Threat feed: new botnet C2 endpoint reported",
+    ];
+
+    function rotate(feed) {
+      let i = 0;
+      el.textContent = feed[0];
+      setInterval(() => {
+        i = (i + 1) % feed.length;
+        el.style.opacity = "0";
+        setTimeout(() => { el.textContent = feed[i]; el.style.opacity = "1"; }, 300);
+      }, 6000);
+    }
+
+    function timeAgo(dateStr) {
+      const diff = Math.floor((Date.now() - new Date(dateStr)) / 60000);
+      if (diff < 60) return `${diff}m ago`;
+      if (diff < 1440) return `${Math.floor(diff / 60)}h ago`;
+      return `${Math.floor(diff / 1440)}d ago`;
+    }
+
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 5000);
+      const res = await fetch("https://urlhaus-api.abuse.ch/v1/urls/recent/limit/10/", {
+        method: "POST",
+        signal: ctrl.signal
+      });
+      clearTimeout(t);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      const urls = (data.urls || []).filter(u => u.url_status !== "offline");
+      if (!urls.length) throw new Error();
+
+      const feed = urls.slice(0, 8).map(u => {
+        const tags = Array.isArray(u.tags) && u.tags.length ? u.tags.slice(0, 2).join(", ") : (u.threat || "malware");
+        let host = "";
+        try { host = new URL(u.url).hostname; } catch { host = "unknown host"; }
+        return `URLhaus · ${tags} · ${host} · ${timeAgo(u.date_added)}`;
+      });
+      rotate(feed);
+    } catch {
+      rotate(FALLBACK);
+    }
   }
 
   /* ── Side section navigation dots ── */
@@ -1169,7 +1214,7 @@
 
   /* ── Film grain overlay ── */
   function initFilmGrain() {
-    if (prefersReducedMotion()) return;
+    if (prefersReducedMotion() || isTouchDevice()) return;
     const canvas = document.getElementById("filmGrain");
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -1194,7 +1239,7 @@
 
   /* ── Parallax orbs on mouse move ── */
   function initParallaxOrbs() {
-    if (prefersReducedMotion()) return;
+    if (prefersReducedMotion() || isTouchDevice()) return;
     const orbs = document.querySelectorAll(".bg-orb");
     if (!orbs.length) return;
     const FACTORS = [0.018, -0.012, 0.022];
@@ -1312,7 +1357,7 @@
 
   /* ── Scroll-velocity blur ── */
   function initScrollBlur() {
-    if (prefersReducedMotion()) return;
+    if (prefersReducedMotion() || isTouchDevice()) return;
     const content = document.querySelector(".content");
     if (!content) return;
     let last = 0, ticking = false, timer;
@@ -1391,7 +1436,7 @@
 
   /* ── Circuit board canvas ── */
   function initCircuitBoard() {
-    if (prefersReducedMotion()) return;
+    if (prefersReducedMotion() || isTouchDevice()) return;
     const canvas = document.getElementById("circuitBoard");
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -1910,12 +1955,25 @@
 
     function render(events) {
       events.slice(0, 6).forEach((ev, i) => setTimeout(() => {
-        const li = document.createElement("li");
+        const li   = document.createElement("li");
         li.className = "gh-feed-item";
         li.style.animationDelay = (i * 80) + "ms";
-        li.innerHTML = `<span class="gh-type">${ev.icon}</span>
-          <span class="gh-msg">${ev.msg}</span>
-          <span class="gh-time">${ev.ago}</span>`;
+
+        const icon = document.createElement("span");
+        icon.className = "gh-type";
+        icon.textContent = ev.icon;
+
+        const msg = document.createElement("span");
+        msg.className = "gh-msg";
+        msg.textContent = ev.msg;
+
+        const time = document.createElement("span");
+        time.className = "gh-time";
+        time.textContent = ev.ago;
+
+        li.appendChild(icon);
+        li.appendChild(msg);
+        li.appendChild(time);
         list.appendChild(li);
       }, i * 150));
     }
@@ -1932,10 +1990,13 @@
       if (!entries[0].isIntersecting) return;
       io.disconnect();
       showSkeletons();
+      const ctrl = new AbortController();
+      const ghTimeout = setTimeout(() => ctrl.abort(), 5000);
       fetch("https://api.github.com/users/Subash107/events/public", {
-        headers: { Accept: "application/vnd.github+json" }
+        headers: { Accept: "application/vnd.github+json" },
+        signal: ctrl.signal
       })
-      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(r => { clearTimeout(ghTimeout); return r.ok ? r.json() : Promise.reject(); })
       .then(data => {
         list.innerHTML = "";
         const mapped = data.slice(0, 6).map(ev => ({
@@ -1943,7 +2004,7 @@
         }));
         render(mapped);
       })
-      .catch(() => { list.innerHTML = ""; render(FALLBACK); });
+      .catch(() => { clearTimeout(ghTimeout); list.innerHTML = ""; render(FALLBACK); });
     }, { threshold: 0.3 });
     io.observe(list);
   }
@@ -2059,26 +2120,7 @@
   }
 
   function initSOCDashboard() {
-    const alertsEl  = document.getElementById("socAlerts");
-    const threatsEl = document.getElementById("socThreats");
-    if (!alertsEl || !threatsEl) return;
-    let alerts = 1247, threats = 34;
-    alertsEl.textContent  = alerts.toLocaleString();
-    threatsEl.textContent = threats;
-    setInterval(() => {
-      if (Math.random() > 0.6) {
-        alerts += Math.floor(Math.random() * 3) + 1;
-        alertsEl.textContent = alerts.toLocaleString();
-        alertsEl.style.color = "#50fa7b";
-        setTimeout(() => { alertsEl.style.color = ""; }, 300);
-      }
-      if (Math.random() > 0.85) {
-        threats++;
-        threatsEl.textContent = threats;
-        threatsEl.style.color = "#ff8844";
-        setTimeout(() => { threatsEl.style.color = "#50fa7b"; }, 600);
-      }
-    }, 3000);
+    /* Values are set in HTML; no dynamic incrementing — numbers are real home lab stats */
   }
 
   function initDraggableSkills() {
@@ -2110,6 +2152,7 @@
   }
 
   function initMouseTrailParticles() {
+    if (isTouchDevice()) return;
     const canvas = document.getElementById("mouseTrailCanvas");
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -2938,6 +2981,41 @@
     });
   }
 
+  /* ── Tor visitor detection ── */
+  async function initTorDetection() {
+    const badge = document.getElementById("torBadge");
+    const closeBtn = document.getElementById("torBadgeClose");
+    if (!badge) return;
+
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 4000);
+      const res = await fetch("https://check.torproject.org/api/ip", {
+        cache: "no-store",
+        signal: ctrl.signal
+      });
+      clearTimeout(t);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data.IsTor) return;
+
+      badge.removeAttribute("hidden");
+      setTimeout(() => badge.classList.add("tor-badge--visible"), 80);
+
+      const autoDismiss = setTimeout(() => hideBadge(), 12000);
+
+      function hideBadge() {
+        clearTimeout(autoDismiss);
+        badge.classList.remove("tor-badge--visible");
+        setTimeout(() => badge.setAttribute("hidden", ""), 400);
+      }
+
+      if (closeBtn) closeBtn.addEventListener("click", hideBadge, { once: true });
+    } catch {
+      /* silent — Tor check is non-critical */
+    }
+  }
+
   /* ── Resume download tracker ── */
   /* PAT is stored securely in Cloudflare Worker — never exposed here */
   function initResumeTracking() {
@@ -2993,15 +3071,7 @@
         }).catch(() => {});
       };
 
-      fetch("https://ipapi.co/json/", { cache: "no-store" })
-        .then(r => r.ok ? r.json() : Promise.reject())
-        .then(geo => {
-          payload.client_payload.ip       = geo.ip                                    || "unknown";
-          payload.client_payload.location = `${geo.city || "?"}, ${geo.country_name || "?"}`;
-          payload.client_payload.org      = geo.org                                  || "unknown";
-        })
-        .catch(() => {})
-        .finally(dispatch);
+      dispatch();
     });
   }
 
@@ -3075,7 +3145,7 @@
     initTestimonialsSlider();
     initFocusMode();
     initCopyProfileUrl();
-    initHackerScore();
+    /* initHackerScore — removed: gamification HUD hidden for professional presentation */
     initBookmarkPins();
     initCustomCursor();
     initFilmGrain();
@@ -3087,7 +3157,7 @@
     initScrollBlur();
     initEQVisualizer();
     initHueShift();
-    initRecruiterScoreCard();
+    /* initRecruiterScoreCard — removed: presumptuous framing removed */
     initGithubFeed();
     initContactHeatmap();
     initChatWidget();
@@ -3100,7 +3170,7 @@
     initStatsTicker();
     initHomelabDiagram();
     initSkillTreeDiagram();
-    initDarkWebScan();
+    /* initDarkWebScan — replaced with real threat intel links in HTML */
     initNeonSpotlight();
     initCertStamp();
     initIdleScreensaver();
@@ -3120,6 +3190,7 @@
     const scheduleNonCriticalStartup = () => {
       scheduleDeferredTask(initResumeDownload, { timeout: 1200 });
       scheduleDeferredTask(initBackgroundVideo, { timeout: 2200, delay: 220 });
+      scheduleDeferredTask(initTorDetection,   { timeout: 3000, delay: 1500 });
     };
 
     if (document.readyState === "complete") {

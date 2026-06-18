@@ -1,7 +1,38 @@
 version: 2
 updates:
+
+  # GitHub Actions — keep action versions current
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kathmandu"
     open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+
+  # npm — watches terser, clean-css-cli used in the build pipeline
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kathmandu"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "build-tools"
+    commit-message:
+      prefix: "build"
+    ignore:
+      # Only alert on security updates for build-only tools
+      - dependency-name: "terser"
+        update-types: ["version-update:semver-patch"]
+      - dependency-name: "clean-css-cli"
+        update-types: ["version-update:semver-patch"]

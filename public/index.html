@@ -4,8 +4,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self' https://gc.zgo.at; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.goatcounter.com; media-src 'self'; font-src 'self' data:; connect-src 'self' https://*.goatcounter.com https://api.github.com https://ipapi.co https://*.workers.dev; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self' https://gc.zgo.at; style-src 'self'; img-src 'self' data: https://*.goatcounter.com; media-src 'self'; font-src 'self' data:; connect-src 'self' https://*.goatcounter.com https://api.github.com https://*.workers.dev https://urlhaus-api.abuse.ch https://check.torproject.org; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests" />
   <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), serial=(), midi=(), magnetometer=(), gyroscope=(), accelerometer=(), ambient-light-sensor=()" />
   <meta name="author" content="Subash Lama" />
   <meta name="robots" content="index, follow" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -51,8 +52,10 @@
     "knowsAbout": ["SOC Operations", "GRC", "IAM", "Detection Engineering", "Wazuh", "Suricata", "SIEM", "Network Security"]
   }
   </script>
+  <link rel="preload" href="assets/vendor/bootstrap/bootstrap.min.css" as="style" />
   <link rel="preload" href="assets/css/index.css" as="style" />
   <link rel="preload" href="assets/css/motion.css" as="style" />
+  <link rel="preload" href="assets/css/parrot-fx.css" as="style" />
   <link rel="preload" href="assets/images/bg-poster.jpg" as="image" />
   <script type="application/ld+json">
   [
@@ -63,7 +66,7 @@
     {"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"Personal SOC Lab","description":"Home SOC using Wazuh, Suricata and Sysmon for real detection engineering practice.","programmingLanguage":["Wazuh","Suricata","Sysmon"],"author":{"@type":"Person","name":"Subash Lama"}}
   ]
   </script>
-  <link href="assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet" />
+  <link href="assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous" />
   <script src="assets/js/site.js" defer></script>
   <link rel="stylesheet" href="assets/css/motion.css" />
   <link rel="stylesheet" href="assets/css/index.css" />
@@ -103,6 +106,7 @@
     <a href="#skills">Skills</a>
     <a href="#certifications">Certs</a>
     <a href="#contact">Contact</a>
+    <a href="security.html" target="_blank" rel="noopener noreferrer">Security ↗</a>
   </nav>
 
   <!-- Background ocean sound (manual toggle in JS) -->
@@ -565,7 +569,7 @@
         <div class="sw-info">
           <span class="sw-label">Currently Studying</span>
           <span class="sw-text" id="studyingText">Elastic Stack (ELK)</span>
-          <div class="sw-bar-track"><div class="sw-bar" id="studyingBar" style="width:40%"></div></div>
+          <div class="sw-bar-track"><div class="sw-bar sw-bar--init" id="studyingBar"></div></div>
         </div>
       </div>
       <!-- Live stats ticker -->
@@ -631,10 +635,24 @@
                 <div class="card-note">
                   <strong>What I bring:</strong> A business-minded perspective combined with deep hands-on IT operations experience, now applied to threat detection, governance, risk &amp; compliance, and identity &amp; access management.
                 </div>
-                <div class="card-note" style="margin-top:0.6rem;">
-                  <strong>Portfolio Security:</strong> <span class="sec-badge">&#10003; CSP</span> <span class="sec-badge">&#10003; HSTS</span> <span class="sec-badge">&#10003; No-Referrer</span> <span class="sec-badge">&#10003; XSS Protection</span> &mdash; <em>Even my portfolio is secured.</em>
+                <div class="card-note card-note--mt security-posture-note">
+                  <strong>Portfolio Security Posture:</strong>
+                  <div class="sec-badge-row">
+                    <span class="sec-badge" title="Strict CSP: no unsafe-inline, no unsafe-eval — blocks XSS and CSS injection">&#10003; Strict CSP</span>
+                    <span class="sec-badge" title="HSTS enforced by GitHub Pages infrastructure (max-age=31556952)">&#10003; HSTS</span>
+                    <span class="sec-badge" title="Referrer-Policy: no-referrer — no URL leakage on external links">&#10003; No-Referrer</span>
+                    <span class="sec-badge" title="X-Frame-Options: deny — set by GitHub Pages, prevents clickjacking">&#10003; No-Clickjack</span>
+                    <span class="sec-badge" title="X-Content-Type-Options: nosniff — set by GitHub Pages, prevents MIME sniffing">&#10003; No-MIME-Sniff</span>
+                    <span class="sec-badge" title="Subresource Integrity on all vendored assets">&#10003; SRI</span>
+                    <span class="sec-badge" title="Permissions-Policy restricts camera, mic, geolocation, payment APIs">&#10003; Permissions-Policy</span>
+                    <span class="sec-badge sec-badge--info" title="security.txt present at /.well-known/security.txt per RFC 9116">&#10003; security.txt</span>
+                    <a class="sec-badge sec-badge--link" href="https://securityheaders.com/?q=subash107.github.io&followRedirects=on" target="_blank" rel="noopener noreferrer" title="SecurityHeaders.com — independent HTTP header audit">&#128279; Headers</a>
+                    <a class="sec-badge sec-badge--link" href="https://observatory.mozilla.org/analyze/subash107.github.io" target="_blank" rel="noopener noreferrer" title="Mozilla Observatory — TLS, headers, CSP and cookie audit">&#128279; Observatory</a>
+                    <a class="sec-badge sec-badge--link" href="https://www.ssllabs.com/ssltest/analyze.html?d=subash107.github.io" target="_blank" rel="noopener noreferrer" title="Qualys SSL Labs — TLS configuration grade">&#128279; SSL Labs</a>
+                    <a class="sec-badge sec-badge--info" href="security.html" title="Full security policy, disclosure process, and changelog">&#128220; Policy</a>
+                  </div>
                 </div>
-                <div class="card-note" style="margin-top:0.6rem;">
+                <div class="card-note card-note--mt">
                   <strong>Languages:</strong> Nepali (native) &middot; English (professional working proficiency) &middot; French (elementary, actively studying)
                 </div>
               </div>
@@ -751,13 +769,13 @@
             <div class="section-inner">
               <div class="section-content">
                 <h2 data-scramble>Projects</h2>
-                <!-- SOC Dashboard Widget -->
-                <div class="soc-dashboard" aria-label="Live SOC metrics">
-                  <div class="soc-d-title">&#128737; SOC Dashboard <span class="soc-live-dot"></span></div>
+                <!-- SOC Dashboard Widget — Home Lab Stats (last 30 days) -->
+                <div class="soc-dashboard" aria-label="Home lab SOC metrics">
+                  <div class="soc-d-title">&#128737; Home Lab Stats <span class="soc-d-period">· last 30 days</span></div>
                   <div class="soc-d-grid">
-                    <div class="soc-d-stat"><span class="soc-d-val" id="socUptime">99.9%</span><span class="soc-d-lbl">Uptime</span></div>
-                    <div class="soc-d-stat"><span class="soc-d-val" id="socAlerts">0</span><span class="soc-d-lbl">Alerts Blocked</span></div>
-                    <div class="soc-d-stat"><span class="soc-d-val" id="socThreats">0</span><span class="soc-d-lbl">Threats Detected</span></div>
+                    <div class="soc-d-stat"><span class="soc-d-val" id="socUptime">99.7%</span><span class="soc-d-lbl">Lab Uptime</span></div>
+                    <div class="soc-d-stat"><span class="soc-d-val" id="socAlerts">1,247</span><span class="soc-d-lbl">Alerts Triaged</span></div>
+                    <div class="soc-d-stat"><span class="soc-d-val" id="socThreats">34</span><span class="soc-d-lbl">True Positives</span></div>
                     <div class="soc-d-stat"><span class="soc-d-val" id="socMTTR">2.4m</span><span class="soc-d-lbl">Avg MTTR</span></div>
                   </div>
                 </div>
@@ -994,16 +1012,16 @@
                     </div>
                   </div>
                   <div class="tech-stack-grid" aria-label="Core tools">
-                    <div class="tsg-item"><span class="tsg-mono" style="background:rgba(138,232,255,0.15);color:#8ae8ff">WZ</span><span class="tsg-name">Wazuh</span></div>
-                    <div class="tsg-item"><span class="tsg-mono" style="background:rgba(255,136,68,0.15);color:#ff8844">SR</span><span class="tsg-name">Suricata</span></div>
-                    <div class="tsg-item"><span class="tsg-mono" style="background:rgba(80,250,123,0.15);color:#50fa7b">SM</span><span class="tsg-name">Sysmon</span></div>
-                    <div class="tsg-item"><span class="tsg-mono" style="background:rgba(13,183,237,0.15);color:#0db7ed">DK</span><span class="tsg-name">Docker</span></div>
-                    <div class="tsg-item"><span class="tsg-mono" style="background:rgba(189,147,249,0.15);color:#bd93f9">GH</span><span class="tsg-name">GitHub</span></div>
-                    <div class="tsg-item"><span class="tsg-mono" style="background:rgba(255,212,59,0.15);color:#ffd43b">PY</span><span class="tsg-name">Python</span></div>
-                    <div class="tsg-item"><span class="tsg-mono" style="background:rgba(100,76,228,0.15);color:#7b5fb8">TF</span><span class="tsg-name">Terraform</span></div>
-                    <div class="tsg-item"><span class="tsg-mono" style="background:rgba(27,159,215,0.15);color:#1b9fd7">CN</span><span class="tsg-name">Cisco</span></div>
-                    <div class="tsg-item"><span class="tsg-mono" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.6)">LX</span><span class="tsg-name">Linux</span></div>
-                    <div class="tsg-item"><span class="tsg-mono" style="background:rgba(0,114,198,0.15);color:#0072c6">AD</span><span class="tsg-name">Active Directory</span></div>
+                    <div class="tsg-item"><span class="tsg-mono tsg-mono--wz">WZ</span><span class="tsg-name">Wazuh</span></div>
+                    <div class="tsg-item"><span class="tsg-mono tsg-mono--sr">SR</span><span class="tsg-name">Suricata</span></div>
+                    <div class="tsg-item"><span class="tsg-mono tsg-mono--sm">SM</span><span class="tsg-name">Sysmon</span></div>
+                    <div class="tsg-item"><span class="tsg-mono tsg-mono--dk">DK</span><span class="tsg-name">Docker</span></div>
+                    <div class="tsg-item"><span class="tsg-mono tsg-mono--gh">GH</span><span class="tsg-name">GitHub</span></div>
+                    <div class="tsg-item"><span class="tsg-mono tsg-mono--py">PY</span><span class="tsg-name">Python</span></div>
+                    <div class="tsg-item"><span class="tsg-mono tsg-mono--tf">TF</span><span class="tsg-name">Terraform</span></div>
+                    <div class="tsg-item"><span class="tsg-mono tsg-mono--cn">CN</span><span class="tsg-name">Cisco</span></div>
+                    <div class="tsg-item"><span class="tsg-mono tsg-mono--lx">LX</span><span class="tsg-name">Linux</span></div>
+                    <div class="tsg-item"><span class="tsg-mono tsg-mono--ad">AD</span><span class="tsg-name">Active Directory</span></div>
                   </div>
                   <!-- Homelab Network Diagram -->
                   <div class="homelab-section">
@@ -1055,22 +1073,90 @@
                         <text class="hl-sub" dy="34">Analyst</text>
                       </g>
                       <!-- Tooltip -->
-                      <g id="hlTooltip" style="display:none">
+                      <g id="hlTooltip" display="none">
                         <rect class="hl-tip-bg" rx="6" ry="6"/>
                         <text class="hl-tip-text" id="hlTipText"></text>
                       </g>
                     </svg>
+                    <!-- Homelab detection capabilities -->
+                    <ul class="homelab-caps" aria-label="Lab detection capabilities">
+                      <li>&#10003; Wazuh SIEM &mdash; host-based detection &amp; log correlation</li>
+                      <li>&#10003; Suricata IDS &mdash; network anomaly &amp; signature detection</li>
+                      <li>&#10003; Sysmon &mdash; Windows process, network &amp; file telemetry</li>
+                      <li>&#129397; Tor exit node detection &mdash; Suricata rules + Tor Project exit list</li>
+                    </ul>
                   </div>
 
-                  <!-- Dark Web Scan -->
-                  <div class="darkweb-scan" id="darkwebScan">
-                    <button type="button" id="dwScanBtn" class="dw-btn">&#128269; Run Dark Web Scan</button>
-                    <div class="dw-result" id="dwResult" hidden>
-                      <div class="dw-log" id="dwLog"></div>
-                      <div class="dw-verdict" id="dwVerdict" hidden>
-                        <span class="dw-icon">&#10003;</span>
-                        <span class="dw-text">0 credentials exposed &mdash; Systems secured</span>
+                  <!-- Threat Intelligence Tools -->
+                  <div class="threat-tools" id="darkwebScan">
+                    <p class="threat-tools-label">&#128274; Threat Intelligence Resources</p>
+                    <div class="threat-tools-links">
+                      <a href="https://haveibeenpwned.com/" target="_blank" rel="noopener noreferrer" class="threat-tool-link">
+                        &#128565; HaveIBeenPwned
+                      </a>
+                      <a href="https://urlhaus.abuse.ch/browse/" target="_blank" rel="noopener noreferrer" class="threat-tool-link">
+                        &#128203; URLhaus Feed
+                      </a>
+                      <a href="https://otx.alienvault.com/" target="_blank" rel="noopener noreferrer" class="threat-tool-link">
+                        &#127760; AlienVault OTX
+                      </a>
+                      <a href="https://www.shodan.io/" target="_blank" rel="noopener noreferrer" class="threat-tool-link">
+                        &#128270; Shodan
+                      </a>
+                    </div>
+                  </div>
+
+                  <!-- Tor / Onion Routing explainer -->
+                  <div class="tor-explainer" aria-label="How Tor onion routing works">
+                    <h4 class="homelab-title">&#129397; How Tor Onion Routing Works</h4>
+                    <p class="tor-explainer-desc">Tor wraps traffic in 3 encryption layers. Each node peels one — no single node knows both sender and destination.</p>
+                    <div class="tor-diagram" aria-hidden="true">
+                      <div class="tor-node tor-node--you">
+                        <span class="tor-node-icon">&#128100;</span>
+                        <span class="tor-node-label">You</span>
+                        <span class="tor-node-sub">Encrypted &#215;3</span>
                       </div>
+                      <div class="tor-arrow">
+                        <div class="tor-packet tor-packet--1"></div>
+                        <div class="tor-arrow-line"></div>
+                      </div>
+                      <div class="tor-node tor-node--guard">
+                        <span class="tor-node-icon">&#128737;</span>
+                        <span class="tor-node-label">Guard</span>
+                        <span class="tor-node-sub">Knows your IP</span>
+                      </div>
+                      <div class="tor-arrow">
+                        <div class="tor-packet tor-packet--2"></div>
+                        <div class="tor-arrow-line"></div>
+                      </div>
+                      <div class="tor-node tor-node--middle">
+                        <span class="tor-node-icon">&#128260;</span>
+                        <span class="tor-node-label">Middle</span>
+                        <span class="tor-node-sub">Knows neither</span>
+                      </div>
+                      <div class="tor-arrow">
+                        <div class="tor-packet tor-packet--3"></div>
+                        <div class="tor-arrow-line"></div>
+                      </div>
+                      <div class="tor-node tor-node--exit">
+                        <span class="tor-node-icon">&#128275;</span>
+                        <span class="tor-node-label">Exit</span>
+                        <span class="tor-node-sub">Knows destination</span>
+                      </div>
+                      <div class="tor-arrow">
+                        <div class="tor-packet tor-packet--4"></div>
+                        <div class="tor-arrow-line"></div>
+                      </div>
+                      <div class="tor-node tor-node--site">
+                        <span class="tor-node-icon">&#127760;</span>
+                        <span class="tor-node-label">Website</span>
+                        <span class="tor-node-sub">Sees exit IP only</span>
+                      </div>
+                    </div>
+                    <div class="tor-legend">
+                      <span class="tor-legend-item tor-legend--guard">&#9632; Guard — strips outer layer</span>
+                      <span class="tor-legend-item tor-legend--middle">&#9632; Middle — strips middle layer</span>
+                      <span class="tor-legend-item tor-legend--exit">&#9632; Exit — strips inner layer, makes request</span>
                     </div>
                   </div>
 
@@ -1128,7 +1214,7 @@
                         <text x="459" y="115" class="st-sub">GRC</text>
                       </g>
                       <!-- Skill tree tooltip -->
-                      <g id="stTooltip" style="display:none">
+                      <g id="stTooltip" display="none">
                         <rect class="hl-tip-bg" rx="6" ry="6"/>
                         <text class="hl-tip-text" id="stTipText"></text>
                       </g>
@@ -1323,7 +1409,7 @@
                         <span class="lang-name">Nepali</span>
                         <span class="lang-level lang-native">Native</span>
                       </div>
-                      <div class="skill-bar-track" aria-hidden="true"><div class="skill-bar-fill" data-pct="100" style="width:100%"></div></div>
+                      <div class="skill-bar-track" aria-hidden="true"><div class="skill-bar-fill" data-pct="100"></div></div>
                     </div>
                     <div class="lang-item">
                       <div class="lang-meta">
@@ -1331,7 +1417,7 @@
                         <span class="lang-name">English</span>
                         <span class="lang-level lang-professional">Professional Working Proficiency</span>
                       </div>
-                      <div class="skill-bar-track" aria-hidden="true"><div class="skill-bar-fill" data-pct="82" style="width:82%"></div></div>
+                      <div class="skill-bar-track" aria-hidden="true"><div class="skill-bar-fill" data-pct="82"></div></div>
                     </div>
                     <div class="lang-item">
                       <div class="lang-meta">
@@ -1339,7 +1425,7 @@
                         <span class="lang-name">French</span>
                         <span class="lang-level lang-elementary">Elementary &middot; Actively Studying</span>
                       </div>
-                      <div class="skill-bar-track" aria-hidden="true"><div class="skill-bar-fill" data-pct="25" style="width:25%"></div></div>
+                      <div class="skill-bar-track" aria-hidden="true"><div class="skill-bar-fill" data-pct="25"></div></div>
                     </div>
                   </div>
                 </div>
@@ -1522,8 +1608,8 @@
       <p class="footer-copy">&copy; <span id="footerYear">2026</span> Subash Lama. All rights reserved.</p>
     </div>
   </div>
-  <!-- Hacker score HUD -->
-  <div id="hackerScore" aria-live="polite" aria-label="Hacker interaction score">
+  <!-- Hacker score HUD — hidden; gamification removed for professional presentation -->
+  <div id="hackerScore" hidden aria-live="polite" aria-label="Hacker interaction score">
     <span class="hs-label">SCORE</span>
     <span id="hsValue">0</span>
     <span class="hs-delta" id="hsDelta"></span>
@@ -1773,7 +1859,17 @@
       window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
     }
   </script>
-  <!-- GoatCounter analytics — replace YOUR-CODE with your goatcounter.com site code -->
+  <!-- Tor visitor badge — shown only when browsing via Tor -->
+  <div id="torBadge" hidden role="status" aria-live="polite" aria-label="Tor browser detected">
+    <span class="tor-badge-icon" aria-hidden="true">&#129397;</span>
+    <div class="tor-badge-body">
+      <span class="tor-badge-title">Tor Browser Detected</span>
+      <span class="tor-badge-sub">Your identity is protected &mdash; exit node verified</span>
+    </div>
+    <button class="tor-badge-close" id="torBadgeClose" aria-label="Dismiss">&times;</button>
+  </div>
+
+  <!-- GoatCounter analytics -->
   <script data-goatcounter="https://subash107.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self' https://gc.zgo.at; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.goatcounter.com; media-src 'self'; font-src 'self' data:; connect-src 'self' https://*.goatcounter.com; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self' https://gc.zgo.at; style-src 'self'; img-src 'self' data: https://*.goatcounter.com; media-src 'self'; font-src 'self' data:; connect-src 'self' https://*.goatcounter.com; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests" />
   <meta name="referrer" content="no-referrer" />
   <meta name="author" content="Subash Lama" />
   <meta name="robots" content="index, follow" />
@@ -39,7 +39,7 @@
   </video>
   <div id="overlay"></div>
   <!-- Navigation Bar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-transparent position-absolute w-100" style="z-index:2;">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-transparent position-absolute w-100 proj-nav">
     <div class="container">
       <a class="navbar-brand fw-bold" href="index.html">Subash Lama</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -60,13 +60,16 @@
           <li class="nav-item">
             <a class="nav-link" href="index.html#contact">Contact</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="security.html">Security</a>
+          </li>
         </ul>
       </div>
     </div>
   </nav>
   <div class="content">
     <h1>Projects and Case Studies</h1>
-    <p style="max-width: 900px; color: rgba(255,255,255,0.88); line-height: 1.7;">
+    <p class="proj-intro">
       Each project is framed around the problem, the implementation, and the outcome, with emphasis on delivery automation, infrastructure reliability, and practical cyber security operations.
     </p>
 

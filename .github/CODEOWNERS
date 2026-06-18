@@ -1,10 +1,19 @@
-# Default review owner for this repository.
+# CODEOWNERS — all changes require review from Subash Lama
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global fallback — everything not matched below
 * @Subash107
 
-# Site content and assets.
+# Public site content
 /public/ @Subash107
 
-# Deployment and automation.
-/.github/ @Subash107
+# CI/CD and automation — security-sensitive, always require owner review
+/.github/workflows/ @Subash107
+/.github/CODEOWNERS  @Subash107
 /scripts/ @Subash107
 /nginx/ @Subash107
+
+# Security-critical files — explicit ownership
+/public/.well-known/ @Subash107
+/public/security.html @Subash107
+/public/sw.js @Subash107

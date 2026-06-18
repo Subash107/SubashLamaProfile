@@ -1,5 +1,28 @@
+# Security Policy — Subash Lama Portfolio
+# RFC 9116 compliant: https://securitytxt.org/
+
 Contact: mailto:lamasubash107@gmail.com
+# Contact: http://ONION_ADDRESS_HERE.onion  (uncomment after setting up Tor hidden service)
 Preferred-Languages: en
 Canonical: https://subash107.github.io/.well-known/security.txt
-Policy: If you discover a security issue with this site, please email me directly.
-Expires: 2027-06-17T00:00:00.000Z
+
+# Scope of this disclosure policy
+Scope: https://subash107.github.io/
+Scope: https://subash107.github.io/projects.html
+
+# What is in scope for reporting
+# - XSS vulnerabilities on this portfolio
+# - CSP bypass techniques
+# - Sensitive data exposure via JS or HTML source
+# - Clickjacking despite X-Frame-Options
+# Out of scope: GitHub Pages infrastructure, third-party services (GoatCounter, GitHub API)
+
+Policy: https://subash107.github.io/.well-known/security.txt
+
+# Acknowledgements page (will thank researchers who report issues)
+Acknowledgments: https://github.com/Subash107
+
+# Security researcher — I am a cybersecurity analyst open to reciprocal disclosure
+Hiring: https://www.linkedin.com/in/subash-lama-b319a016b/
+
+Expires: 2027-06-18T00:00:00.000Z
