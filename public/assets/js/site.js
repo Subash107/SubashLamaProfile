@@ -450,23 +450,114 @@
   function initContactForm() {
     const form = document.getElementById("contactForm");
     if (!form) return;
+
+    const nameEl    = form.querySelector("#contact-name");
+    const emailEl   = form.querySelector("#contact-email");
+    const subjectEl = form.querySelector("#contact-subject");
+    const msgEl     = form.querySelector("#contact-message");
+    const btn       = form.querySelector(".contact-form-submit");
+    const honey     = form.querySelector("#contact-honey");
+
+    function setError(el, msg) {
+      const wrap = el.closest(".contact-form-field");
+      if (!wrap) return;
+      el.classList.add("cf-invalid");
+      let err = wrap.querySelector(".cf-error");
+      if (!err) {
+        err = document.createElement("span");
+        err.className = "cf-error";
+        err.setAttribute("role", "alert");
+        wrap.appendChild(err);
+      }
+      err.textContent = msg;
+    }
+
+    function clearError(el) {
+      el.classList.remove("cf-invalid");
+      const err = el.closest(".contact-form-field")?.querySelector(".cf-error");
+      if (err) err.remove();
+    }
+
+    function validateEmail(v) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+    }
+
+    [nameEl, emailEl, msgEl].forEach(el => {
+      if (!el) return;
+      el.addEventListener("input", () => clearError(el));
+      el.addEventListener("blur", () => {
+        if (!el.value.trim()) setError(el, "This field is required");
+        else if (el === emailEl && !validateEmail(el.value.trim())) setError(el, "Enter a valid email address");
+        else clearError(el);
+      });
+    });
+
+    function showSuccess() {
+      const wrap = document.createElement("div");
+      wrap.className = "cf-success";
+      wrap.innerHTML = "";
+
+      const icon = document.createElement("span");
+      icon.className = "cf-success-icon";
+      icon.textContent = "✓";
+
+      const title = document.createElement("strong");
+      title.textContent = "Gmail opened!";
+
+      const sub = document.createElement("span");
+      sub.textContent = "Your message is pre-filled — just hit Send in Gmail.";
+
+      wrap.appendChild(icon);
+      wrap.appendChild(title);
+      wrap.appendChild(sub);
+
+      form.style.display = "none";
+      form.parentNode.insertBefore(wrap, form.nextSibling);
+      setTimeout(() => {
+        wrap.remove();
+        form.style.display = "";
+      }, 6000);
+    }
+
     form.addEventListener("submit", (e) => {
       e.preventDefault();
-      const name = (form.querySelector("#contact-name").value || "").trim();
-      const email = (form.querySelector("#contact-email").value || "").trim();
-      const subject = (form.querySelector("#contact-subject").value || "General Inquiry").trim();
-      const message = (form.querySelector("#contact-message").value || "").trim();
-      const body = `Hi Subash,\n\n${message}\n\nFrom: ${name}\nReply to: ${email}`;
-      const gmailUrl = `https://mail.google.com/mail/?view=cm&to=lamasubash107%40gmail.com&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+      if (honey && honey.value) return;
+
+      const name    = (nameEl?.value    || "").trim();
+      const email   = (emailEl?.value   || "").trim();
+      const subject = (subjectEl?.value || "General Inquiry").trim();
+      const message = (msgEl?.value     || "").trim();
+
+      let valid = true;
+      if (!name)                      { setError(nameEl, "Please enter your name");        valid = false; }
+      if (!email)                     { setError(emailEl, "Please enter your email");       valid = false; }
+      else if (!validateEmail(email)) { setError(emailEl, "Enter a valid email address");   valid = false; }
+      if (!message)                   { setError(msgEl, "Please write a message");          valid = false; }
+      if (!valid) return;
+
+      const body = [
+        `Hi Subash,`,
+        ``,
+        message,
+        ``,
+        `---`,
+        `From: ${name}`,
+        `Reply-To: ${email}`,
+        `Subject: ${subject}`,
+        `Sent via: subash107.github.io contact form`
+      ].join("\n");
+
+      const gmailUrl =
+        `https://mail.google.com/mail/?view=cm` +
+        `&to=lamasubash107%40gmail.com` +
+        `&su=${encodeURIComponent(`[${subject}] from ${name}`)}` +
+        `&body=${encodeURIComponent(body)}`;
+
       window.open(gmailUrl, "_blank", "noopener,noreferrer");
+
       form.reset();
-      const btn = form.querySelector(".contact-form-submit");
-      if (btn) {
-        const orig = btn.textContent;
-        btn.textContent = "Opening Gmail ✓";
-        btn.disabled = true;
-        setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 3000);
-      }
+      showSuccess();
     });
   }
 
