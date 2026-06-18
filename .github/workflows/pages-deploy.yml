@@ -38,15 +38,22 @@ jobs:
 
       - name: Minify CSS
         run: |
-          npx clean-css-cli@5 public/assets/css/index.css    -o public/assets/css/index.css
-          npx clean-css-cli@5 public/assets/css/motion.css   -o public/assets/css/motion.css
-          npx clean-css-cli@5 public/assets/css/projects.css -o public/assets/css/projects.css
+          npx clean-css-cli@5 public/assets/css/index.css          -o public/assets/css/index.css
+          npx clean-css-cli@5 public/assets/css/motion.css         -o public/assets/css/motion.css
+          npx clean-css-cli@5 public/assets/css/projects.css       -o public/assets/css/projects.css
+          npx clean-css-cli@5 public/assets/css/parrot-fx.css      -o public/assets/css/parrot-fx.css
+          npx clean-css-cli@5 public/assets/css/record-producer.css -o public/assets/css/record-producer.css
 
       - name: Minify JS
         run: |
-          npx terser public/assets/js/site.js     -o public/assets/js/site.js     --compress --mangle
-          npx terser public/assets/js/index.js    -o public/assets/js/index.js    --compress --mangle
-          npx terser public/assets/js/parrot-fx.js -o public/assets/js/parrot-fx.js --compress --mangle
+          npx terser public/assets/js/site.js      -o public/assets/js/site.js      --compress drop_console=true --mangle --comments false
+          npx terser public/assets/js/index.js     -o public/assets/js/index.js     --compress drop_console=true --mangle --comments false
+          npx terser public/assets/js/parrot-fx.js -o public/assets/js/parrot-fx.js --compress drop_console=true --mangle --comments false
+
+      - name: Stamp service worker cache version with deploy date
+        run: |
+          DATE=$(date +%Y%m%d%H%M)
+          sed -i "s/portfolio-[0-9]*/portfolio-${DATE}/" public/sw.js
 
       - name: Upload static files for GitHub Pages
         uses: actions/upload-pages-artifact@v3

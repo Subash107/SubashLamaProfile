@@ -1,0 +1,59 @@
+name: SBOM — Software Bill of Materials
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'public/**'
+      - '.github/workflows/sbom.yml'
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: read
+
+jobs:
+  generate-sbom:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Generate SBOM with Anchore Syft
+        uses: anchore/sbom-action@v0
+        with:
+          path: ./public
+          format: spdx-json
+          output-file: sbom.spdx.json
+          artifact-name: portfolio-sbom.spdx.json
+
+      - name: Generate CycloneDX SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: ./public
+          format: cyclonedx-json
+          output-file: sbom.cyclonedx.json
+          artifact-name: portfolio-sbom.cyclonedx.json
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-reports
+          path: |
+            sbom.spdx.json
+            sbom.cyclonedx.json
+          retention-days: 90
+
+      - name: Attach SBOM to release (on release events)
+        if: github.event_name == 'release'
+        uses: anchore/sbom-action/publish-sbom@v0
+        with:
+          sbom-artifact-match: ".*\\.spdx\\.json$"

@@ -12,6 +12,16 @@
     catch { return false; }
   })();
 
+  const touch = (() => {
+    try {
+      return (
+        'ontouchstart' in window ||
+        navigator.maxTouchPoints > 0 ||
+        (window.matchMedia && window.matchMedia('(max-width: 768px)').matches)
+      );
+    } catch { return false; }
+  })();
+
   const motionOk = () =>
     document.documentElement.classList.contains('motion-ok');
 
@@ -196,7 +206,7 @@
          Fade in after loader, capped at 18 fps to save CPU.
   ══════════════════════════════════════════════════════════ */
   function initMatrixRain() {
-    if (reduced) return;
+    if (reduced || touch) return;
 
     const canvas = document.getElementById('parrot-rain');
     if (!canvas) return;
@@ -318,7 +328,7 @@
          Fires on: (a) first scroll-into-view, (b) every hover.
   ══════════════════════════════════════════════════════════ */
   function initCardScans() {
-    if (reduced || !motionOk()) return;
+    if (reduced || touch || !motionOk()) return;
 
     /* Inject one scanline span per card */
     document.querySelectorAll('.glass-card').forEach(card => {

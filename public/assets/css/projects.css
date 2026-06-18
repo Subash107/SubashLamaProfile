@@ -1,3 +1,5 @@
+.proj-nav { z-index: 2; }
+.proj-intro { max-width: 900px; color: rgba(255,255,255,0.88); line-height: 1.7; }
 body, html {
       margin: 0;
       padding: 0;

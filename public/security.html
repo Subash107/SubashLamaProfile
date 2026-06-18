@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests" />
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), serial=(), midi=(), magnetometer=(), gyroscope=(), accelerometer=(), ambient-light-sensor=()" />
+  <meta name="author" content="Subash Lama" />
+  <meta name="robots" content="index, follow" />
+  <meta name="description" content="Security policy, vulnerability disclosure process, and security posture for Subash Lama's portfolio site." />
+  <meta name="theme-color" content="#07111c" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Security Policy | Subash Lama" />
+  <meta property="og:description" content="Vulnerability disclosure policy, CSP configuration, and security posture for subash107.github.io" />
+  <meta property="og:url" content="https://subash107.github.io/security.html" />
+  <title>Security Policy | Subash Lama &ndash; Cybersecurity Analyst</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="canonical" href="https://subash107.github.io/security.html" />
+  <link href="assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous" />
+  <link rel="stylesheet" href="assets/css/motion.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body, html {
+      margin: 0; padding: 0; min-height: 100%;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: #07111c; color: #e0e0e0;
+    }
+    body {
+      background:
+        radial-gradient(ellipse 120% 90% at 8% 3%, rgba(80,250,123,0.055) 0%, transparent 50%),
+        radial-gradient(ellipse 100% 80% at 90% 95%, rgba(138,232,255,0.065) 0%, transparent 50%),
+        #07111c;
+    }
+    a { color: #8ae8ff; }
+    a:hover { color: #50fa7b; }
+    .sec-nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(7,17,28,0.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding: 0.75rem 2rem; display: flex; align-items: center;
+      justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    }
+    .sec-nav-brand { font-weight: 800; color: #50fa7b; text-decoration: none; font-size: 1rem; }
+    .sec-nav-links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+    .sec-nav-links a { color: rgba(255,255,255,0.65); text-decoration: none; font-size: 0.88rem; transition: color 0.15s; }
+    .sec-nav-links a:hover { color: #8ae8ff; }
+    .sec-nav-links a.active { color: #50fa7b; }
+    .page-wrap { max-width: 860px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+    .page-hero { text-align: center; margin-bottom: 3.5rem; }
+    .page-hero-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .page-hero h1 {
+      font-size: clamp(1.6rem, 5vw, 2.4rem); font-weight: 900; margin: 0 0 0.5rem;
+      background: linear-gradient(135deg, #50fa7b 0%, #8ae8ff 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .page-hero p { color: rgba(255,255,255,0.55); max-width: 560px; margin: 0 auto; font-size: 0.95rem; line-height: 1.65; }
+    .sec-section {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px; padding: 1.75rem 2rem; margin-bottom: 1.5rem;
+      transition: border-color 0.2s;
+    }
+    .sec-section:hover { border-color: rgba(80,250,123,0.2); }
+    .sec-section h2 {
+      font-size: 1rem; font-weight: 800; color: #50fa7b;
+      text-transform: uppercase; letter-spacing: 0.07em; margin: 0 0 1.1rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .sec-section h3 { font-size: 0.88rem; font-weight: 700; color: #8ae8ff; margin: 1rem 0 0.4rem; }
+    .sec-section p, .sec-section li { font-size: 0.88rem; line-height: 1.7; color: rgba(255,255,255,0.75); }
+    .sec-section ul, .sec-section ol { padding-left: 1.25rem; margin: 0.5rem 0; }
+    .sec-section li { margin-bottom: 0.3rem; }
+    code {
+      font-family: "Cascadia Code", "Fira Code", monospace;
+      font-size: 0.78rem; background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;
+      padding: 0.1rem 0.35rem; color: #8ae8ff;
+    }
+    pre {
+      background: rgba(0,0,0,0.4); border: 1px solid rgba(80,250,123,0.15);
+      border-radius: 10px; padding: 1.1rem 1.25rem; overflow-x: auto;
+      font-family: "Cascadia Code", "Fira Code", monospace;
+      font-size: 0.75rem; line-height: 1.65; color: rgba(255,255,255,0.8);
+      margin: 0.75rem 0 0;
+    }
+    pre .csp-dir { color: #50fa7b; font-weight: 700; }
+    pre .csp-val { color: #8ae8ff; }
+    pre .csp-comment { color: rgba(255,255,255,0.35); font-style: italic; }
+    .badge-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+    .hdr-badge {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      font-size: 0.72rem; font-weight: 700; padding: 0.25rem 0.7rem;
+      border-radius: 6px; white-space: nowrap;
+    }
+    .hdr-badge--green { background: rgba(80,250,123,0.12); border: 1px solid rgba(80,250,123,0.3); color: #50fa7b; }
+    .hdr-badge--blue  { background: rgba(138,232,255,0.1); border: 1px solid rgba(138,232,255,0.3); color: #8ae8ff; }
+    .hdr-badge--warn  { background: rgba(255,184,108,0.1); border: 1px solid rgba(255,184,108,0.3); color: #ffb86c; }
+    .audit-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; margin-top: 0.75rem; }
+    .audit-card {
+      background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 1rem 1.1rem; text-decoration: none;
+      transition: border-color 0.2s, background 0.2s; display: block;
+    }
+    .audit-card:hover { border-color: rgba(80,250,123,0.35); background: rgba(80,250,123,0.04); }
+    .audit-card-name { font-size: 0.78rem; font-weight: 800; color: #50fa7b; margin-bottom: 0.25rem; }
+    .audit-card-desc { font-size: 0.72rem; color: rgba(255,255,255,0.5); line-height: 1.5; }
+    .scope-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.75rem; }
+    @media (max-width: 600px) { .scope-grid { grid-template-columns: 1fr; } }
+    .scope-col h3 { margin-top: 0; }
+    .scope-col--in  h3 { color: #50fa7b; }
+    .scope-col--out h3 { color: rgba(255,85,85,0.85); }
+    .timeline { border-left: 2px solid rgba(80,250,123,0.25); margin-top: 0.75rem; padding-left: 1.25rem; }
+    .tl-item { position: relative; margin-bottom: 1.1rem; }
+    .tl-item::before {
+      content: ""; position: absolute; left: -1.45rem; top: 0.3rem;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #50fa7b; border: 2px solid #07111c;
+    }
+    .tl-date { font-size: 0.68rem; color: rgba(80,250,123,0.7); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.15rem; }
+    .tl-text { font-size: 0.83rem; color: rgba(255,255,255,0.75); line-height: 1.6; }
+    .contact-box {
+      background: rgba(80,250,123,0.05); border: 1px solid rgba(80,250,123,0.2);
+      border-radius: 10px; padding: 1rem 1.25rem; margin-top: 0.75rem;
+      font-size: 0.85rem; color: rgba(255,255,255,0.8); line-height: 1.7;
+    }
+    .contact-box strong { color: #50fa7b; }
+    .page-footer { text-align: center; margin-top: 3rem; color: rgba(255,255,255,0.2); font-size: 0.75rem; }
+    .page-footer a { color: rgba(138,232,255,0.5); }
+    @media (max-width: 600px) {
+      .page-wrap { padding: 2rem 1rem 4rem; }
+      .sec-section { padding: 1.25rem 1.1rem; }
+      .sec-nav { padding: 0.65rem 1rem; }
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="sec-nav" aria-label="Site navigation">
+    <a class="sec-nav-brand" href="index.html">&#9632; Subash Lama</a>
+    <div class="sec-nav-links">
+      <a href="index.html">Home</a>
+      <a href="projects.html">Projects</a>
+      <a href="index.html#contact">Contact</a>
+      <a href="security.html" class="active" aria-current="page">Security</a>
+    </div>
+  </nav>
+
+  <main class="page-wrap" id="main-content">
+
+    <div class="page-hero">
+      <div class="page-hero-icon">&#128737;</div>
+      <h1>Security Policy</h1>
+      <p>Vulnerability disclosure process, security controls in place, and how to contact me if you find an issue with this portfolio. A cybersecurity professional should hold their own work to the same standard they apply to others.</p>
+    </div>
+
+    <!-- 1. Security Posture -->
+    <section class="sec-section" id="posture" aria-labelledby="posture-heading">
+      <h2 id="posture-heading">&#128274; Security Controls</h2>
+      <p>The following controls are active on this site. Where a control is enforced by GitHub Pages infrastructure, that is noted explicitly.</p>
+
+      <div class="badge-grid">
+        <span class="hdr-badge hdr-badge--green" title="Content Security Policy via meta HTTP-Equiv">&#10003; CSP (meta)</span>
+        <span class="hdr-badge hdr-badge--green" title="HSTS max-age=31556952 — enforced by GitHub Pages">&#10003; HSTS (GitHub Pages)</span>
+        <span class="hdr-badge hdr-badge--green" title="Referrer-Policy: no-referrer — meta tag">&#10003; No-Referrer</span>
+        <span class="hdr-badge hdr-badge--green" title="X-Frame-Options: deny — enforced by GitHub Pages">&#10003; No-Clickjack (GitHub Pages)</span>
+        <span class="hdr-badge hdr-badge--green" title="X-Content-Type-Options: nosniff — enforced by GitHub Pages">&#10003; No-MIME-Sniff (GitHub Pages)</span>
+        <span class="hdr-badge hdr-badge--green" title="Subresource Integrity on Bootstrap CSS">&#10003; SRI (Bootstrap)</span>
+        <span class="hdr-badge hdr-badge--green" title="Permissions-Policy meta restricts 12 browser APIs">&#10003; Permissions-Policy</span>
+        <span class="hdr-badge hdr-badge--blue"  title="security.txt per RFC 9116">&#10003; security.txt (RFC 9116)</span>
+        <span class="hdr-badge hdr-badge--blue"  title="upgrade-insecure-requests in CSP">&#10003; Force HTTPS</span>
+        <span class="hdr-badge hdr-badge--green" title="style-src 'self' only — unsafe-inline removed June 2026">&#10003; No unsafe-inline</span>
+      </div>
+
+      <h3>Active Content Security Policy</h3>
+      <pre><span class="csp-comment"># Content-Security-Policy (meta HTTP-Equiv)</span>
+<span class="csp-dir">default-src</span>    <span class="csp-val">'self'</span>
+<span class="csp-dir">script-src</span>     <span class="csp-val">'self' https://gc.zgo.at</span>          <span class="csp-comment"># GoatCounter analytics only</span>
+<span class="csp-dir">style-src</span>      <span class="csp-val">'self'</span>                            <span class="csp-comment"># unsafe-inline removed June 2026</span>
+<span class="csp-dir">connect-src</span>    <span class="csp-val">'self' *.goatcounter.com api.github.com</span>
+               <span class="csp-val">*.workers.dev urlhaus-api.abuse.ch</span>
+<span class="csp-dir">img-src</span>        <span class="csp-val">'self' data: *.goatcounter.com</span>
+<span class="csp-dir">media-src</span>      <span class="csp-val">'self'</span>
+<span class="csp-dir">font-src</span>       <span class="csp-val">'self' data:</span>
+<span class="csp-dir">frame-src</span>      <span class="csp-val">'none'</span>
+<span class="csp-dir">object-src</span>     <span class="csp-val">'none'</span>
+<span class="csp-dir">base-uri</span>       <span class="csp-val">'self'</span>
+<span class="csp-dir">form-action</span>    <span class="csp-val">'self'</span>
+<span class="csp-dir">manifest-src</span>   <span class="csp-val">'self'</span>
+               <span class="csp-val">upgrade-insecure-requests</span></pre>
+
+      <h3>Permissions Policy (12 APIs disabled)</h3>
+      <pre><span class="csp-dir">camera</span>=()  <span class="csp-dir">microphone</span>=()  <span class="csp-dir">geolocation</span>=()  <span class="csp-dir">payment</span>=()
+<span class="csp-dir">usb</span>=()  <span class="csp-dir">bluetooth</span>=()  <span class="csp-dir">serial</span>=()  <span class="csp-dir">midi</span>=()
+<span class="csp-dir">magnetometer</span>=()  <span class="csp-dir">gyroscope</span>=()  <span class="csp-dir">accelerometer</span>=()
+<span class="csp-dir">ambient-light-sensor</span>=()</pre>
+    </section>
+
+    <!-- 2. External Audits -->
+    <section class="sec-section" id="audits" aria-labelledby="audits-heading">
+      <h2 id="audits-heading">&#128203; External Audits</h2>
+      <p>Third-party tools that independently verify the security posture of this site. Click any to run a live scan.</p>
+      <div class="audit-grid">
+        <a class="audit-card" href="https://securityheaders.com/?q=subash107.github.io&followRedirects=on" target="_blank" rel="noopener noreferrer">
+          <div class="audit-card-name">&#128279; SecurityHeaders.com</div>
+          <div class="audit-card-desc">HTTP response header grade. Checks CSP, HSTS, X-Frame-Options, Permissions-Policy and more.</div>
+        </a>
+        <a class="audit-card" href="https://observatory.mozilla.org/analyze/subash107.github.io" target="_blank" rel="noopener noreferrer">
+          <div class="audit-card-name">&#128279; Mozilla Observatory</div>
+          <div class="audit-card-desc">Comprehensive scan covering TLS, headers, cookies, CSP strength and cross-origin policies.</div>
+        </a>
+        <a class="audit-card" href="https://www.ssllabs.com/ssltest/analyze.html?d=subash107.github.io" target="_blank" rel="noopener noreferrer">
+          <div class="audit-card-name">&#128279; SSL Labs</div>
+          <div class="audit-card-desc">Qualys SSL/TLS configuration test. Checks cipher suites, certificate chain, and HSTS preload status.</div>
+        </a>
+        <a class="audit-card" href="https://transparencyreport.google.com/safe-browsing/search?url=subash107.github.io" target="_blank" rel="noopener noreferrer">
+          <div class="audit-card-name">&#128279; Google Safe Browsing</div>
+          <div class="audit-card-desc">Checks whether this domain is flagged for malware, phishing, or unwanted software.</div>
+        </a>
+      </div>
+    </section>
+
+    <!-- 3. Disclosure Policy -->
+    <section class="sec-section" id="disclosure" aria-labelledby="disclosure-heading">
+      <h2 id="disclosure-heading">&#128220; Vulnerability Disclosure Policy</h2>
+      <p>I am a cybersecurity analyst and take the security of this site seriously. If you discover a vulnerability, I encourage responsible disclosure and will respond promptly.</p>
+
+      <h3>What I ask of researchers</h3>
+      <ul>
+        <li>Report issues by email before public disclosure — give me reasonable time to fix it</li>
+        <li>Do not access, modify, or exfiltrate data beyond what is needed to demonstrate the vulnerability</li>
+        <li>Do not run automated scanners against the live site in a way that degrades availability</li>
+        <li>Include enough detail to reproduce the issue (steps, payload, screenshots if relevant)</li>
+      </ul>
+
+      <h3>What I commit to</h3>
+      <ul>
+        <li>Acknowledge receipt within <strong>48 hours</strong></li>
+        <li>Provide an initial assessment within <strong>5 business days</strong></li>
+        <li>Keep you updated on remediation progress</li>
+        <li>Credit you in the acknowledgements section of this page (if you wish)</li>
+        <li>No legal action for good-faith disclosures that follow this policy</li>
+      </ul>
+    </section>
+
+    <!-- 4. Scope -->
+    <section class="sec-section" id="scope" aria-labelledby="scope-heading">
+      <h2 id="scope-heading">&#127919; Scope</h2>
+      <div class="scope-grid">
+        <div class="scope-col scope-col--in">
+          <h3>&#10003; In Scope</h3>
+          <ul>
+            <li><code>subash107.github.io</code></li>
+            <li><code>subash107.github.io/projects.html</code></li>
+            <li><code>subash107.github.io/security.html</code></li>
+            <li>XSS / CSP bypass</li>
+            <li>Clickjacking (if X-Frame-Options bypassed)</li>
+            <li>Sensitive data exposure in HTML/JS source</li>
+            <li>Content injection</li>
+            <li>Service worker scope abuse</li>
+          </ul>
+        </div>
+        <div class="scope-col scope-col--out">
+          <h3>&#10007; Out of Scope</h3>
+          <ul>
+            <li>GitHub Pages infrastructure (report to GitHub)</li>
+            <li>GoatCounter analytics service</li>
+            <li>GitHub API endpoints</li>
+            <li>Third-party CDN behaviour</li>
+            <li>Denial of service attacks</li>
+            <li>Social engineering</li>
+            <li>Physical attacks</li>
+            <li>Automated scanning without prior notice</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. How to Report -->
+    <section class="sec-section" id="contact" aria-labelledby="contact-heading">
+      <h2 id="contact-heading">&#128233; How to Report</h2>
+      <p>Please use one of the following channels. Email is preferred for sensitive findings.</p>
+      <div class="contact-box">
+        <strong>Email (preferred):</strong> <a href="mailto:lamasubash107@gmail.com">lamasubash107@gmail.com</a><br>
+        <strong>Subject line:</strong> <code>[Security] &lt;brief description&gt;</code><br>
+        <strong>security.txt:</strong> <a href="/.well-known/security.txt">/.well-known/security.txt</a> (RFC 9116)<br>
+        <strong>Anonymous via Tor:</strong> <a href="http://ONION_ADDRESS_HERE.onion" class="onion-link" rel="noopener noreferrer">&#129397; .onion mirror</a> <em style="font-size:0.75rem;color:rgba(255,255,255,0.3)">(coming soon)</em><br>
+        <strong>GitHub Issues:</strong> Not recommended for security vulnerabilities — use email instead.
+      </div>
+      <p style="font-size:0.75rem;color:rgba(255,255,255,0.3);margin-top:0.5rem;">
+        &#129397; The Tor hidden service allows anonymous vulnerability reporting without exposing your IP address.
+        Accessible only via <a href="https://www.torproject.org/download/" target="_blank" rel="noopener noreferrer">Tor Browser</a>.
+      </p>
+    </section>
+
+    <!-- 6. Security Changelog -->
+    <section class="sec-section" id="changelog" aria-labelledby="changelog-heading">
+      <h2 id="changelog-heading">&#128336; Security Changelog</h2>
+      <p>A record of security improvements made to this site over time.</p>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-date">June 2026</div>
+          <div class="tl-text">Added <code>Permissions-Policy</code> meta header disabling 12 browser APIs. Added SRI hash to Bootstrap CSS. Replaced fake dark web scan widget with real threat intelligence links. Real-time threat feed replaced with live URLhaus (abuse.ch) data. Removed misleading XSS Protection badge.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">June 2026</div>
+          <div class="tl-text">Implemented Content Security Policy via <code>meta http-equiv</code>. Added <code>Referrer-Policy: no-referrer</code>. Added <code>upgrade-insecure-requests</code> directive. Configured GoatCounter analytics in CSP <code>connect-src</code>.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">June 2026</div>
+          <div class="tl-text">Added <code>security.txt</code> per RFC 9116 with contact, scope, and expiry fields. Added <code>Canonical</code> and <code>Policy</code> directives.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">March 2025</div>
+          <div class="tl-text">Initial portfolio deployed to GitHub Pages. HTTPS and HSTS enforced by platform. <code>X-Frame-Options: deny</code> and <code>X-Content-Type-Options: nosniff</code> set by GitHub Pages infrastructure.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Acknowledgements -->
+    <section class="sec-section" id="acknowledgements" aria-labelledby="ack-heading">
+      <h2 id="ack-heading">&#127942; Acknowledgements</h2>
+      <p>Security researchers who have responsibly disclosed issues with this site will be listed here with their permission. No disclosures have been received yet.</p>
+      <p style="color: rgba(255,255,255,0.35); font-size: 0.8rem; font-style: italic;">Be the first — report a finding to be listed here.</p>
+    </section>
+
+    <footer class="page-footer">
+      <p>
+        <a href="index.html">Portfolio</a> &nbsp;&middot;&nbsp;
+        <a href="/.well-known/security.txt">security.txt</a> &nbsp;&middot;&nbsp;
+        <a href="https://securityheaders.com/?q=subash107.github.io&followRedirects=on" target="_blank" rel="noopener noreferrer">Header Audit</a>
+      </p>
+      <p>Subash Lama &mdash; Cybersecurity Analyst &mdash; Kathmandu, Nepal</p>
+    </footer>
+
+  </main>
+</body>
+</html>
