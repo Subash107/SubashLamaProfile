@@ -492,20 +492,21 @@
       });
     });
 
-    function showSuccess() {
-      const wrap = document.createElement("div");
+    function showSuccess(serverSide) {
+      const wrap  = document.createElement("div");
       wrap.className = "cf-success";
-      wrap.innerHTML = "";
 
-      const icon = document.createElement("span");
+      const icon  = document.createElement("span");
       icon.className = "cf-success-icon";
       icon.textContent = "✓";
 
       const title = document.createElement("strong");
-      title.textContent = "Gmail opened!";
+      title.textContent = serverSide ? "Message sent!" : "Gmail opened!";
 
-      const sub = document.createElement("span");
-      sub.textContent = "Your message is pre-filled — just hit Send in Gmail.";
+      const sub   = document.createElement("span");
+      sub.textContent = serverSide
+        ? "Your message was received — I'll get back to you soon."
+        : "Your message is pre-filled — just hit Send in Gmail.";
 
       wrap.appendChild(icon);
       wrap.appendChild(title);
@@ -513,13 +514,24 @@
 
       form.style.display = "none";
       form.parentNode.insertBefore(wrap, form.nextSibling);
-      setTimeout(() => {
-        wrap.remove();
-        form.style.display = "";
-      }, 6000);
+      setTimeout(() => { wrap.remove(); form.style.display = ""; }, 6000);
     }
 
-    form.addEventListener("submit", (e) => {
+    function gmailFallback(name, email, subject, message) {
+      const body = [
+        `Hi Subash,`, ``, message, ``,
+        `---`, `From: ${name}`, `Reply-To: ${email}`,
+        `Subject: ${subject}`, `Sent via: subashlamaprofile.pages.dev`
+      ].join("\n");
+      const url =
+        `https://mail.google.com/mail/?view=cm` +
+        `&to=lamasubash107%40gmail.com` +
+        `&su=${encodeURIComponent(`[${subject}] from ${name}`)}` +
+        `&body=${encodeURIComponent(body)}`;
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
       if (honey && honey.value) return;
@@ -530,34 +542,35 @@
       const message = (msgEl?.value     || "").trim();
 
       let valid = true;
-      if (!name)                      { setError(nameEl, "Please enter your name");        valid = false; }
-      if (!email)                     { setError(emailEl, "Please enter your email");       valid = false; }
-      else if (!validateEmail(email)) { setError(emailEl, "Enter a valid email address");   valid = false; }
-      if (!message)                   { setError(msgEl, "Please write a message");          valid = false; }
+      if (!name)                      { setError(nameEl,  "Please enter your name");      valid = false; }
+      if (!email)                     { setError(emailEl, "Please enter your email");      valid = false; }
+      else if (!validateEmail(email)) { setError(emailEl, "Enter a valid email address");  valid = false; }
+      if (!message)                   { setError(msgEl,   "Please write a message");       valid = false; }
       if (!valid) return;
 
-      const body = [
-        `Hi Subash,`,
-        ``,
-        message,
-        ``,
-        `---`,
-        `From: ${name}`,
-        `Reply-To: ${email}`,
-        `Subject: ${subject}`,
-        `Sent via: subashlamaprofile.pages.dev contact form`
-      ].join("\n");
+      if (btn) { btn.disabled = true; btn.textContent = "Sending…"; }
 
-      const gmailUrl =
-        `https://mail.google.com/mail/?view=cm` +
-        `&to=lamasubash107%40gmail.com` +
-        `&su=${encodeURIComponent(`[${subject}] from ${name}`)}` +
-        `&body=${encodeURIComponent(body)}`;
-
-      window.open(gmailUrl, "_blank", "noopener,noreferrer");
+      let serverSuccess = false;
+      try {
+        const res = await fetch("/api/contact", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ name, email, subject, message, honey: "" }),
+          signal:  AbortSignal.timeout(6000),
+        });
+        const data = await res.json();
+        serverSuccess = !!data.ok;
+      } catch { /* Pages Function unavailable — fall through to Gmail */ }
 
       form.reset();
-      showSuccess();
+      if (btn) { btn.disabled = false; btn.textContent = "✉ Send via Gmail"; }
+
+      if (serverSuccess) {
+        showSuccess(true);
+      } else {
+        gmailFallback(name, email, subject, message);
+        showSuccess(false);
+      }
     });
   }
 

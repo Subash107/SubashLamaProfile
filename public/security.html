@@ -322,7 +322,37 @@
       </div>
     </section>
 
-    <!-- 7. Acknowledgements -->
+    <!-- 7. Cloudflare Security Infrastructure -->
+    <section class="sec-section" id="infrastructure" aria-labelledby="infra-heading">
+      <h2 id="infra-heading">&#9729; Cloudflare Security Infrastructure</h2>
+      <p>This site is proxied through Cloudflare Pages, which provides the following security layers beyond what the application code controls:</p>
+
+      <div class="badge-grid" style="margin-bottom:1rem;">
+        <span class="hdr-badge hdr-badge--green">&#10003; WAF — OWASP managed rules</span>
+        <span class="hdr-badge hdr-badge--green">&#10003; Bot Fight Mode</span>
+        <span class="hdr-badge hdr-badge--green">&#10003; DDoS protection (always-on)</span>
+        <span class="hdr-badge hdr-badge--green">&#10003; TLS 1.2+ enforced</span>
+        <span class="hdr-badge hdr-badge--green">&#10003; HTTP/3 (QUIC)</span>
+        <span class="hdr-badge hdr-badge--green">&#10003; Early Hints (HTTP 103)</span>
+        <span class="hdr-badge hdr-badge--blue">&#10003; Pages Functions (serverless)</span>
+        <span class="hdr-badge hdr-badge--blue">&#10003; CSP violation reporting</span>
+      </div>
+
+      <h3>Live Endpoints</h3>
+      <ul>
+        <li><code>GET /api/health</code> — Real-time site health, Cloudflare PoP, TLS version</li>
+        <li><code>POST /api/contact</code> — Server-side contact form with rate limiting and KV storage</li>
+        <li><code>POST /api/csp-report</code> — CSP violation ingestion, logged and stored for 30 days</li>
+      </ul>
+
+      <h3>Security Analytics</h3>
+      <p>Cloudflare provides real-time attack analytics visible in the dashboard:
+        WAF events, bot challenges, firewall triggers, and blocked requests are logged per-request.
+        CSP violations are additionally captured via the <code>/api/csp-report</code> Pages Function.
+      </p>
+    </section>
+
+    <!-- 8. Acknowledgements -->
     <section class="sec-section" id="acknowledgements" aria-labelledby="ack-heading">
       <h2 id="ack-heading">&#127942; Acknowledgements</h2>
       <p>Security researchers who have responsibly disclosed issues with this site will be listed here with their permission. No disclosures have been received yet.</p>

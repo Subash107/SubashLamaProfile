@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self' https://gc.zgo.at https://static.cloudflareinsights.com; style-src 'self'; img-src 'self' data: https://*.goatcounter.com https://ghchart.rshah.org; media-src 'self'; font-src 'self'; connect-src 'self' https://*.goatcounter.com https://api.github.com https://lingering-surf-6d77.lamasubash107.workers.dev https://urlhaus-api.abuse.ch https://check.torproject.org https://cloudflareinsights.com; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests; report-to csp-endpoint" />
-  <meta http-equiv="Reporting-Endpoints" content="csp-endpoint=&quot;https://lingering-surf-6d77.lamasubash107.workers.dev/csp-report&quot;"  />
+  <meta http-equiv="Reporting-Endpoints" content="csp-endpoint=&quot;/api/csp-report&quot;" />
   <meta name="referrer" content="no-referrer" />
   <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), serial=(), midi=(), magnetometer=(), gyroscope=(), accelerometer=(), ambient-light-sensor=()" />
   <meta name="author" content="Subash Lama" />
@@ -1954,7 +1954,9 @@
     <button class="tor-badge-close" id="torBadgeClose" aria-label="Dismiss">&times;</button>
   </div>
 
-  <!-- GoatCounter analytics -->
+  <!-- GoatCounter analytics (kept as backup) -->
   <script data-goatcounter="https://subash107.goatcounter.com/count" async src="//gc.zgo.at/count.js" integrity="sha384-2UjvVpptg4JlEVgJI2PdscrjOjPcil/4F1ZvIMJ81CShQnEDSlPI+l4PfogvTLYi" crossorigin="anonymous"></script>
+  <!-- Cloudflare Web Analytics — privacy-respecting, no individual tracking -->
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "4bb12a6341be419bb14c1542f2461d55"}'></script>
 </body>
 </html>
