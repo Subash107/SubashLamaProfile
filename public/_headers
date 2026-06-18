@@ -1,0 +1,36 @@
+/*
+  # Security headers applied to ALL responses
+  # These become real HTTP headers on Cloudflare Pages — not meta tags
+
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), serial=(), midi=(), magnetometer=(), gyroscope=(), accelerometer=(), ambient-light-sensor=()
+  Cross-Origin-Resource-Policy: same-origin
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: credentialless
+  Reporting-Endpoints: csp-endpoint="https://lingering-surf-6d77.lamasubash107.workers.dev/csp-report"
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self' https://gc.zgo.at; style-src 'self'; img-src 'self' data: https://*.goatcounter.com https://ghchart.rshah.org; media-src 'self'; font-src 'self'; connect-src 'self' https://*.goatcounter.com https://api.github.com https://lingering-surf-6d77.lamasubash107.workers.dev https://urlhaus-api.abuse.ch https://check.torproject.org; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests; report-to csp-endpoint
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/js/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/css/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/images/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/manifest.json
+  Cache-Control: public, max-age=86400
+
+/.well-known/security.txt
+  Cache-Control: public, max-age=86400
+  Content-Type: text/plain; charset=utf-8

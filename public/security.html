@@ -178,10 +178,11 @@
 <span class="csp-dir">script-src</span>     <span class="csp-val">'self' https://gc.zgo.at</span>          <span class="csp-comment"># GoatCounter analytics only</span>
 <span class="csp-dir">style-src</span>      <span class="csp-val">'self'</span>                            <span class="csp-comment"># unsafe-inline removed June 2026</span>
 <span class="csp-dir">connect-src</span>    <span class="csp-val">'self' *.goatcounter.com api.github.com</span>
-               <span class="csp-val">*.workers.dev urlhaus-api.abuse.ch</span>
+               <span class="csp-val">lingering-surf-6d77.lamasubash107.workers.dev</span>
+               <span class="csp-val">urlhaus-api.abuse.ch check.torproject.org</span>
 <span class="csp-dir">img-src</span>        <span class="csp-val">'self' data: *.goatcounter.com</span>
 <span class="csp-dir">media-src</span>      <span class="csp-val">'self'</span>
-<span class="csp-dir">font-src</span>       <span class="csp-val">'self' data:</span>
+<span class="csp-dir">font-src</span>       <span class="csp-val">'self'</span>                            <span class="csp-comment"># data: removed — no data URI fonts used</span>
 <span class="csp-dir">frame-src</span>      <span class="csp-val">'none'</span>
 <span class="csp-dir">object-src</span>     <span class="csp-val">'none'</span>
 <span class="csp-dir">base-uri</span>       <span class="csp-val">'self'</span>
