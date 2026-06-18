@@ -311,6 +311,24 @@
     document.documentElement.classList.add("motion-ok");
   }
 
+  function initSectionReveal() {
+    if (prefersReducedMotion()) return;
+    const sections = document.querySelectorAll("[data-reveal]");
+    if (!sections.length || !("IntersectionObserver" in window)) return;
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-revealed");
+        obs.unobserve(entry.target);
+      });
+    }, { threshold: 0.08, rootMargin: "0px 0px -6% 0px" });
+    sections.forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight) { el.classList.add("is-revealed"); return; }
+      observer.observe(el);
+    });
+  }
+
   function initBackToTop() {
     const btn = document.getElementById("backToTop");
     if (!btn) return;
@@ -498,10 +516,13 @@
     if (!el || prefersReducedMotion()) return;
     const roles = [
       "Cybersecurity Analyst",
-      "SOC Operator",
-      "GRC Specialist",
-      "IAM Analyst",
+      "SOC Analyst L1 / L2",
       "Detection Engineer",
+      "Threat Intelligence Analyst",
+      "IAM Specialist",
+      "GRC Analyst",
+      "Security Operations Engineer",
+      "Blue Team Operator",
     ];
     let roleIdx = 0, charIdx = roles[0].length, deleting = false;
     const spd = { type: 62, del: 32, pauseFull: 2400, pauseEmpty: 420 };
@@ -1952,6 +1973,14 @@
     if (!toggleBtn || !panel) return;
 
     const KB = [
+      { q: ["language","speak","nepali","english","french","multilingual"], a: "Subash speaks Nepali (native), English (professional working proficiency), and is actively studying French (elementary level)." },
+      { q: ["available","looking","open to work","hire","opportunity","job","role"], a: "Yes — Subash is actively available for Cybersecurity Analyst, SOC Analyst, Detection Engineer, GRC Analyst, and IAM Specialist roles. Open to remote, hybrid, or on-site in Kathmandu." },
+      { q: ["bug bounty","hackerone","intigriti","bugcrowd","vulnerability research"], a: "Subash is an active bug bounty researcher on HackerOne, Intigriti, and Bugcrowd — focused on web application vulnerability research and responsible disclosure." },
+      { q: ["mitre","att&ck","ttp","tactics","techniques"], a: "Subash maps detections to MITRE ATT&CK techniques, builds Wazuh rules aligned to real TTPs, and uses the framework to prioritise threat hunting priorities in the lab." },
+      { q: ["suricata","ids","ips","network detection","nids"], a: "Suricata is deployed in Subash's personal SOC lab for network IDS/IPS — monitoring traffic, writing custom rules, and feeding alerts into Wazuh for correlation." },
+      { q: ["sysmon","endpoint telemetry","windows events","endpoint"], a: "Sysmon is configured in the SOC lab for Windows endpoint telemetry — process creation, network connections, and registry events forwarded to Wazuh for detection." },
+      { q: ["phone","contact","number","call","reach"], a: "You can reach Subash at +977 9840005771 or email lamasubash107@gmail.com. Use the Contact section to send a message directly." },
+      { q: ["salary","rate","compensation","pay"], a: "Subash is open to discussing compensation based on role and scope. Reach out via the Contact section or lamasubash107@gmail.com for a conversation." },
       { q: ["certs","certifications","certified"],  a: "Subash holds Cisco Endpoint Security, Cisco Ethical Hacker, Cisco Intro to Cybersecurity, IBM Cybersecurity Fundamentals, IBM Python for Data Science, and Google Ads Video certifications. He is pursuing GRC certification next." },
       { q: ["soc","experience","work"],             a: "12+ years in enterprise IT with hands-on SOC experience — alert triage, incident response, SIEM tuning, and threat detection using Wazuh, Suricata, and Sysmon." },
       { q: ["hire","job","available","contact"],    a: "Yes! Subash is actively available for SOC Analyst, GRC Analyst, IAM Specialist, and Security Operations roles. Scroll to the Contact section or email lamasubash107@gmail.com." },
@@ -2552,12 +2581,14 @@
     const output   = terminal ? (terminal.querySelector("#etBody") || terminal.querySelector(".et-body")) : null;
     if (!btn) return;
     const PITCH = [
-      "Hi! I'm Subash Lama — cybersecurity analyst based in Nepal.",
-      "I specialize in SOC operations, threat detection, and SIEM with Wazuh.",
-      "I hold CompTIA Security+ and have real-world experience securing infrastructure.",
-      "I'm passionate about blue-team work and proactive threat hunting.",
-      "I would love to bring that energy to your security team.",
-      "— Let's connect! Type 'contact' for details."
+      "Hi! I'm Subash Lama — Cybersecurity Analyst based in Kathmandu, Nepal.",
+      "12+ years in enterprise IT across banking, FMCG, hospitality, and consulting.",
+      "I run a personal SOC lab: Wazuh SIEM, Suricata IDS, Sysmon — real detection engineering.",
+      "Cisco-certified in Ethical Hacking & Endpoint Security. IBM-certified in Cybersecurity.",
+      "I research security data normalisation and sensor correlation for threat detection.",
+      "Active bug bounty researcher on HackerOne, Intigriti, and Bugcrowd.",
+      "Open to SOC Analyst, Detection Engineer, GRC, and IAM roles — remote or on-site.",
+      "— Let's talk. Type 'contact' or scroll down to reach me directly."
     ];
     let running = false;
     btn.addEventListener("click", () => {
@@ -3037,6 +3068,7 @@
     initMagneticButtons();
     initBackToTopRing();
     initConfetti();
+    initSectionReveal();
     initSkillTooltips();
     initTestimonialsSlider();
     initFocusMode();

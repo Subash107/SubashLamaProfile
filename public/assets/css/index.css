@@ -5914,3 +5914,171 @@
 .lang-native      { background: rgba(80,250,123,0.18); color: #50fa7b; border: 1px solid rgba(80,250,123,0.35); }
 .lang-professional{ background: rgba(138,232,255,0.15); color: #8ae8ff; border: 1px solid rgba(138,232,255,0.3); }
 .lang-elementary  { background: rgba(255,184,108,0.15); color: #ffb86c; border: 1px solid rgba(255,184,108,0.3); }
+
+/* ── Project Architecture Diagrams ── */
+.project-diagram { margin-bottom: 0.85rem; border-radius: 8px; overflow: hidden; background: rgba(5,9,17,0.7); border: 1px solid rgba(138,232,255,0.1); padding: 0.5rem 0.25rem; }
+.proj-svg { width: 100%; height: auto; display: block; }
+.pd-box   { stroke-width: 1; }
+.pd-box-git    { fill: rgba(189,147,249,0.18); stroke: rgba(189,147,249,0.5); }
+.pd-box-docker { fill: rgba(13,183,237,0.18);  stroke: rgba(13,183,237,0.5); }
+.pd-box-linux  { fill: rgba(255,255,255,0.08); stroke: rgba(255,255,255,0.25); }
+.pd-box-tf     { fill: rgba(100,76,228,0.18);  stroke: rgba(100,76,228,0.5); }
+.pd-box-cloud  { fill: rgba(0,120,212,0.18);   stroke: rgba(0,120,212,0.5); }
+.pd-box-red    { fill: rgba(255,85,85,0.18);   stroke: rgba(255,85,85,0.5); }
+.pd-box-green  { fill: rgba(80,250,123,0.18);  stroke: rgba(80,250,123,0.5); }
+.pd-box-blue   { fill: rgba(138,232,255,0.18); stroke: rgba(138,232,255,0.5); }
+.pd-box-ok     { fill: rgba(80,250,123,0.22);  stroke: rgba(80,250,123,0.6); }
+.pd-lbl  { fill: rgba(255,255,255,0.9); font-size: 7px; font-weight: 700; text-anchor: middle; font-family: system-ui, sans-serif; }
+.pd-sub  { fill: rgba(255,255,255,0.4); font-size: 5.5px; text-anchor: middle; font-family: system-ui, sans-serif; }
+.pd-arrow{ stroke: rgba(138,232,255,0.45); stroke-width: 1; }
+.pd-head { fill: rgba(138,232,255,0.55); }
+
+/* ══════════════════════════════════════════
+   UPGRADE 1 — Scroll-Triggered Section Reveal
+   ══════════════════════════════════════════ */
+.motion-ok [data-reveal] {
+  opacity: 0;
+  transition: opacity 0.72s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.motion-ok [data-reveal].is-revealed {
+  opacity: 1;
+}
+.motion-ok [data-reveal].is-revealed .exp-card,
+.motion-ok [data-reveal].is-revealed .cert-card,
+.motion-ok [data-reveal].is-revealed .project-card,
+.motion-ok [data-reveal].is-revealed .skill-bar-item,
+.motion-ok [data-reveal].is-revealed .lang-item {
+  animation: revealSlideUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.motion-ok [data-reveal].is-revealed .exp-card:nth-child(1)    { animation-delay: 0.05s; }
+.motion-ok [data-reveal].is-revealed .exp-card:nth-child(2)    { animation-delay: 0.13s; }
+.motion-ok [data-reveal].is-revealed .exp-card:nth-child(3)    { animation-delay: 0.21s; }
+.motion-ok [data-reveal].is-revealed .exp-card:nth-child(4)    { animation-delay: 0.29s; }
+.motion-ok [data-reveal].is-revealed .exp-card:nth-child(5)    { animation-delay: 0.37s; }
+.motion-ok [data-reveal].is-revealed .cert-card:nth-child(1)   { animation-delay: 0.05s; }
+.motion-ok [data-reveal].is-revealed .cert-card:nth-child(2)   { animation-delay: 0.10s; }
+.motion-ok [data-reveal].is-revealed .cert-card:nth-child(3)   { animation-delay: 0.15s; }
+.motion-ok [data-reveal].is-revealed .cert-card:nth-child(4)   { animation-delay: 0.20s; }
+.motion-ok [data-reveal].is-revealed .cert-card:nth-child(5)   { animation-delay: 0.25s; }
+.motion-ok [data-reveal].is-revealed .cert-card:nth-child(6)   { animation-delay: 0.30s; }
+.motion-ok [data-reveal].is-revealed .cert-card:nth-child(7)   { animation-delay: 0.35s; }
+.motion-ok [data-reveal].is-revealed .project-card:nth-child(1){ animation-delay: 0.06s; }
+.motion-ok [data-reveal].is-revealed .project-card:nth-child(2){ animation-delay: 0.14s; }
+.motion-ok [data-reveal].is-revealed .project-card:nth-child(3){ animation-delay: 0.22s; }
+.motion-ok [data-reveal].is-revealed .skill-bar-item:nth-child(1){ animation-delay: 0.05s; }
+.motion-ok [data-reveal].is-revealed .skill-bar-item:nth-child(2){ animation-delay: 0.12s; }
+.motion-ok [data-reveal].is-revealed .skill-bar-item:nth-child(3){ animation-delay: 0.19s; }
+.motion-ok [data-reveal].is-revealed .skill-bar-item:nth-child(4){ animation-delay: 0.26s; }
+.motion-ok [data-reveal].is-revealed .skill-bar-item:nth-child(5){ animation-delay: 0.33s; }
+.motion-ok [data-reveal].is-revealed .lang-item:nth-child(1)   { animation-delay: 0.07s; }
+.motion-ok [data-reveal].is-revealed .lang-item:nth-child(2)   { animation-delay: 0.16s; }
+.motion-ok [data-reveal].is-revealed .lang-item:nth-child(3)   { animation-delay: 0.25s; }
+@keyframes revealSlideUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════
+   UPGRADE 2 — Enhanced Experience Timeline
+   ══════════════════════════════════════════ */
+.exp-timeline { padding-left: 2rem !important; }
+.exp-timeline::before {
+  width: 2px !important;
+  background: linear-gradient(180deg,
+    rgba(80,250,123,0.9) 0%,
+    rgba(138,232,255,0.7) 40%,
+    rgba(138,232,255,0.25) 100%) !important;
+}
+.exp-timeline .exp-card::before {
+  width: 13px !important;
+  height: 13px !important;
+  left: -2.38rem !important;
+  top: 0.35rem !important;
+  border: 2px solid rgba(138,232,255,0.5) !important;
+  box-shadow: 0 0 0 3px rgba(138,232,255,0.1), 0 0 10px rgba(138,232,255,0.5) !important;
+}
+.exp-timeline .exp-card:first-child::before {
+  background: #50fa7b !important;
+  border-color: rgba(80,250,123,0.6) !important;
+  box-shadow: 0 0 0 4px rgba(80,250,123,0.12), 0 0 14px rgba(80,250,123,0.7) !important;
+  animation: timelinePulse 2s ease-in-out infinite !important;
+}
+@keyframes timelinePulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(80,250,123,0.12), 0 0 14px rgba(80,250,123,0.7); }
+  50%       { box-shadow: 0 0 0 7px rgba(80,250,123,0.06), 0 0 22px rgba(80,250,123,0.9); }
+}
+.exp-card h4 { font-size: 1.02rem !important; }
+.exp-company { font-size: 0.87rem !important; margin: 0.2rem 0 0.5rem !important; }
+.exp-achievements { padding-left: 1.1rem !important; }
+.exp-achievements li { margin-bottom: 0.3rem; font-size: 0.9rem; line-height: 1.55; }
+
+/* ══════════════════════════════════════════
+   UPGRADE 3 — Cert Issuer Logo Badges
+   ══════════════════════════════════════════ */
+.cert-logo-wrap {
+  margin-bottom: 0.6rem;
+  opacity: 0.85;
+  transition: opacity 0.2s ease;
+}
+.cert-card:hover .cert-logo-wrap { opacity: 1; }
+.cert-logo { width: 44px; height: 18px; display: block; }
+
+/* ══════════════════════════════════════════
+   UPGRADE 4 — Mobile Layout
+   ══════════════════════════════════════════ */
+@media (max-width: 600px) {
+  /* Hero */
+  .hero-section { padding: 1.5rem 1rem 1rem; min-height: auto; }
+  .hero-tagline  { font-size: 0.92rem; }
+  .hero-stack    { font-size: 0.75rem; letter-spacing: 0.03em; }
+  .cta-group     { flex-direction: column; gap: 0.5rem; align-items: stretch; }
+  .cta-group .btn { text-align: center; }
+  .button-group  { flex-wrap: wrap; gap: 0.4rem; justify-content: center; }
+
+  /* Cards */
+  .glass-card {
+    padding: 1.25rem 1rem !important;
+    min-height: auto !important;
+    margin: 10px 0 !important;
+    border-radius: 12px !important;
+  }
+
+  /* Timeline */
+  .exp-timeline { padding-left: 1.4rem !important; }
+  .exp-timeline .exp-card::before { left: -1.72rem !important; width: 10px !important; height: 10px !important; }
+  .exp-header { flex-direction: column; gap: 0.1rem; }
+  .exp-duration { font-size: 0.75rem; }
+  .exp-achievements li { font-size: 0.84rem; }
+
+  /* Certs */
+  .cert-list { grid-template-columns: repeat(2, 1fr) !important; gap: 0.6rem !important; }
+  .cert-card { padding: 0.75rem !important; }
+  .cert-card h4 { font-size: 0.8rem; }
+
+  /* Skills */
+  .skill-groups { gap: 1rem; }
+  .skill-pills  { gap: 0.35rem; }
+  .skill-pill   { font-size: 0.72rem; padding: 0.2rem 0.55rem; }
+  .skill-bars   { gap: 0.65rem; }
+
+  /* Projects */
+  .project-list { grid-template-columns: 1fr !important; }
+
+  /* Stats / ticker */
+  .hero-stats   { gap: 0.75rem; }
+  .stats-ticker { gap: 0.4rem; }
+  .st-num       { font-size: 1.1rem; }
+  .st-lbl       { font-size: 0.6rem; }
+
+  /* Languages */
+  .lang-meta    { gap: 0.4rem; }
+  .lang-name    { font-size: 0.9rem; }
+  .lang-level   { font-size: 0.7rem; padding: 0.1rem 0.4rem; }
+  .lang-flag    { font-size: 1.1rem; }
+
+  /* Floating widgets — less intrusive on small screens */
+  #hireMeFloat  { bottom: 4.5rem; right: 0.5rem; padding: 0.4rem 0.65rem; }
+  .hmf-sub      { display: none; }
+  #chatWidget   { right: 0.35rem; bottom: 0.75rem; }
+  #hackerScore  { top: 0.35rem; left: 0.35rem; font-size: 0.58rem; padding: 0.2rem 0.45rem; }
+}
