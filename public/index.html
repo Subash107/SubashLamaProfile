@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self' https://gc.zgo.at; style-src 'self'; img-src 'self' data: https://*.goatcounter.com; media-src 'self'; font-src 'self' data:; connect-src 'self' https://*.goatcounter.com https://api.github.com https://*.workers.dev https://urlhaus-api.abuse.ch https://check.torproject.org; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self' https://gc.zgo.at; style-src 'self'; img-src 'self' data: https://*.goatcounter.com https://ghchart.rshah.org; media-src 'self'; font-src 'self' data:; connect-src 'self' https://*.goatcounter.com https://api.github.com https://*.workers.dev https://urlhaus-api.abuse.ch https://check.torproject.org; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests" />
   <meta name="referrer" content="no-referrer" />
   <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), serial=(), midi=(), magnetometer=(), gyroscope=(), accelerometer=(), ambient-light-sensor=()" />
   <meta name="author" content="Subash Lama" />
@@ -786,6 +786,22 @@
                   <ul class="gh-feed-list" id="ghFeedList"></ul>
                 </div>
 
+                <!-- GitHub Contribution Graph -->
+                <div class="gh-contrib-wrap" aria-label="GitHub contribution graph">
+                  <div class="gh-feed-title">&#128200; Contribution Activity</div>
+                  <a href="https://github.com/Subash107" target="_blank" rel="noopener noreferrer" class="gh-contrib-link">
+                    <img
+                      src="https://ghchart.rshah.org/50fa7b/Subash107"
+                      alt="Subash Lama GitHub contribution chart"
+                      class="gh-contrib-chart"
+                      loading="lazy"
+                      width="720"
+                      height="112"
+                    />
+                  </a>
+                  <p class="gh-contrib-note">&#128279; <a href="https://github.com/Subash107" target="_blank" rel="noopener noreferrer">github.com/Subash107</a></p>
+                </div>
+
                 <div class="project-tag-filters" role="group" aria-label="Filter by technology">
                   <span class="ptf-label">Filter:</span>
                   <button type="button" class="ptf-btn ptf-active" data-tag="all">All</button>
@@ -1221,22 +1237,89 @@
                     </svg>
                   </div>
 
-                  <!-- MITRE ATT&CK Coverage -->
+                  <!-- MITRE ATT&CK Coverage — full 14-tactic heatmap -->
                   <div class="mitre-section">
                     <h4 class="homelab-title">&#127919; MITRE ATT&amp;CK Detection Coverage</h4>
+                    <p class="mitre-note mitre-note--top">Hover each tactic for technique details &middot; Home lab: Wazuh + Suricata + Sysmon</p>
                     <div class="mitre-grid">
-                      <div class="mitre-cell mitre-yes"><span class="mc-tactic">Initial Access</span><span class="mc-status">Partial</span></div>
-                      <div class="mitre-cell mitre-yes"><span class="mc-tactic">Execution</span><span class="mc-status">Detected</span></div>
-                      <div class="mitre-cell mitre-yes"><span class="mc-tactic">Persistence</span><span class="mc-status">Detected</span></div>
-                      <div class="mitre-cell mitre-yes"><span class="mc-tactic">Privilege Esc.</span><span class="mc-status">Detected</span></div>
-                      <div class="mitre-cell mitre-partial"><span class="mc-tactic">Defense Evasion</span><span class="mc-status">Partial</span></div>
-                      <div class="mitre-cell mitre-partial"><span class="mc-tactic">Credential Access</span><span class="mc-status">Partial</span></div>
-                      <div class="mitre-cell mitre-partial"><span class="mc-tactic">Discovery</span><span class="mc-status">Partial</span></div>
-                      <div class="mitre-cell mitre-partial"><span class="mc-tactic">Lateral Movement</span><span class="mc-status">Partial</span></div>
-                      <div class="mitre-cell mitre-partial"><span class="mc-tactic">Exfiltration</span><span class="mc-status">Partial</span></div>
-                      <div class="mitre-cell mitre-gap"><span class="mc-tactic">C2</span><span class="mc-status">In Progress</span></div>
+                      <div class="mitre-cell mitre-partial" tabindex="0" aria-label="Reconnaissance: Partial coverage">
+                        <span class="mc-tactic">Recon</span>
+                        <span class="mc-status">Partial</span>
+                        <span class="mc-tooltip">T1595 Active Scanning&#10;T1592 Gather Host Info&#10;Tool: Suricata</span>
+                      </div>
+                      <div class="mitre-cell mitre-partial" tabindex="0" aria-label="Resource Development: Partial">
+                        <span class="mc-tactic">Resource Dev</span>
+                        <span class="mc-status">Partial</span>
+                        <span class="mc-tooltip">T1583 Acquire Infrastructure&#10;T1588 Obtain Capabilities&#10;Tool: Threat Intel feeds</span>
+                      </div>
+                      <div class="mitre-cell mitre-yes" tabindex="0" aria-label="Initial Access: Detected">
+                        <span class="mc-tactic">Initial Access</span>
+                        <span class="mc-status">Detected</span>
+                        <span class="mc-tooltip">T1190 Exploit Public App&#10;T1078 Valid Accounts&#10;T1566 Phishing&#10;Tool: Suricata + Wazuh</span>
+                      </div>
+                      <div class="mitre-cell mitre-yes" tabindex="0" aria-label="Execution: Detected">
+                        <span class="mc-tactic">Execution</span>
+                        <span class="mc-status">Detected</span>
+                        <span class="mc-tooltip">T1059 Command Scripting&#10;T1204 User Execution&#10;T1047 WMI&#10;Tool: Sysmon + Wazuh</span>
+                      </div>
+                      <div class="mitre-cell mitre-yes" tabindex="0" aria-label="Persistence: Detected">
+                        <span class="mc-tactic">Persistence</span>
+                        <span class="mc-status">Detected</span>
+                        <span class="mc-tooltip">T1547 Boot Autostart&#10;T1053 Scheduled Task&#10;T1543 Create Service&#10;Tool: Sysmon + Wazuh</span>
+                      </div>
+                      <div class="mitre-cell mitre-yes" tabindex="0" aria-label="Privilege Escalation: Detected">
+                        <span class="mc-tactic">Priv Esc</span>
+                        <span class="mc-status">Detected</span>
+                        <span class="mc-tooltip">T1134 Token Manipulation&#10;T1055 Process Injection&#10;T1068 Exploit Privilege&#10;Tool: Wazuh + Sysmon</span>
+                      </div>
+                      <div class="mitre-cell mitre-partial" tabindex="0" aria-label="Defense Evasion: Partial">
+                        <span class="mc-tactic">Def Evasion</span>
+                        <span class="mc-status">Partial</span>
+                        <span class="mc-tooltip">T1070 Indicator Removal&#10;T1027 Obfuscated Files&#10;T1562 Impair Defenses&#10;Tool: Wazuh (partial)</span>
+                      </div>
+                      <div class="mitre-cell mitre-yes" tabindex="0" aria-label="Credential Access: Detected">
+                        <span class="mc-tactic">Cred Access</span>
+                        <span class="mc-status">Detected</span>
+                        <span class="mc-tooltip">T1003 OS Cred Dumping&#10;T1110 Brute Force&#10;T1552 Unsecured Creds&#10;Tool: Wazuh + Sysmon</span>
+                      </div>
+                      <div class="mitre-cell mitre-partial" tabindex="0" aria-label="Discovery: Partial">
+                        <span class="mc-tactic">Discovery</span>
+                        <span class="mc-status">Partial</span>
+                        <span class="mc-tooltip">T1046 Network Scan&#10;T1082 System Info&#10;T1069 Permission Groups&#10;Tool: Suricata + Sysmon</span>
+                      </div>
+                      <div class="mitre-cell mitre-partial" tabindex="0" aria-label="Lateral Movement: Partial">
+                        <span class="mc-tactic">Lateral Mov</span>
+                        <span class="mc-status">Partial</span>
+                        <span class="mc-tooltip">T1021 Remote Services&#10;T1570 Lateral Tool Transfer&#10;Tool: Wazuh (in progress)</span>
+                      </div>
+                      <div class="mitre-cell mitre-partial" tabindex="0" aria-label="Collection: Partial">
+                        <span class="mc-tactic">Collection</span>
+                        <span class="mc-status">Partial</span>
+                        <span class="mc-tooltip">T1560 Archive Collected&#10;T1005 Local Data&#10;Tool: Sysmon file events</span>
+                      </div>
+                      <div class="mitre-cell mitre-gap" tabindex="0" aria-label="Command and Control: In Progress">
+                        <span class="mc-tactic">C2</span>
+                        <span class="mc-status">In Progress</span>
+                        <span class="mc-tooltip">T1071 App Layer Protocol&#10;T1573 Encrypted Channel&#10;Tor exit node detection active&#10;Tool: Suricata (expanding)</span>
+                      </div>
+                      <div class="mitre-cell mitre-partial" tabindex="0" aria-label="Exfiltration: Partial">
+                        <span class="mc-tactic">Exfiltration</span>
+                        <span class="mc-status">Partial</span>
+                        <span class="mc-tooltip">T1048 Alt Protocol Exfil&#10;T1041 Exfil over C2&#10;Tool: Suricata rules</span>
+                      </div>
+                      <div class="mitre-cell mitre-yes" tabindex="0" aria-label="Impact: Detected">
+                        <span class="mc-tactic">Impact</span>
+                        <span class="mc-status">Detected</span>
+                        <span class="mc-tooltip">T1485 Data Destruction&#10;T1490 Inhibit Recovery&#10;T1489 Service Stop&#10;Tool: Wazuh FIM + alerts</span>
+                      </div>
                     </div>
-                    <p class="mitre-note">Based on Wazuh + Suricata + Sysmon rules deployed in personal SOC lab &middot; <span class="mitre-key mitre-yes">&#9632; Detected</span> <span class="mitre-key mitre-partial">&#9632; Partial</span> <span class="mitre-key mitre-gap">&#9632; In Progress</span></p>
+                    <p class="mitre-note">
+                      <span class="mitre-key mitre-yes">&#9632; Detected</span>
+                      <span class="mitre-key mitre-partial">&#9632; Partial</span>
+                      <span class="mitre-key mitre-gap">&#9632; In Progress</span>
+                      &nbsp;&middot;&nbsp;
+                      <a href="https://attack.mitre.org/" target="_blank" rel="noopener noreferrer" class="mitre-link">MITRE ATT&amp;CK Framework &#8599;</a>
+                    </p>
                   </div>
 
                 </div>

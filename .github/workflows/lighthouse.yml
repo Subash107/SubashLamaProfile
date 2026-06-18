@@ -1,21 +1,24 @@
-name: Lighthouse CI
+name: Lighthouse CI — Performance & Accessibility Audit
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
+    paths: ['public/**']
   pull_request:
-    branches: [ "main" ]
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   lighthouse:
+    name: Lighthouse Audit
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           persist-credentials: false
@@ -26,19 +29,43 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Sync latest resume
-        shell: pwsh
-        run: ./scripts/sync-resume.ps1
+      - name: Install dependencies
+        run: npm install -g http-server @lhci/cli
 
       - name: Start local server
-        run: npx serve public -p 8080 &
+        run: http-server public -p 8080 --silent &
 
-      - name: Wait for server
-        run: sleep 5
+      - name: Wait for server to be ready
+        run: npx wait-on http://localhost:8080 --timeout 15000
 
-      - name: Run Lighthouse CI
+      - name: Run Lighthouse — Desktop
         run: |
-          npx @lhci/cli@0.14.x autorun \
-            --collect.url=http://localhost:8080 \
+          lhci autorun \
+            --collect.url=http://localhost:8080/ \
             --collect.numberOfRuns=1 \
-            --upload.target=temporary-public-storage || true
+            --collect.settings.preset=desktop \
+            --upload.target=temporary-public-storage \
+            --assert.assertions.categories:performance=warn,0.7 \
+            --assert.assertions.categories:accessibility=error,0.9 \
+            --assert.assertions.categories:best-practices=warn,0.8 \
+            --assert.assertions.categories:seo=warn,0.8
+        continue-on-error: true
+
+      - name: Run Lighthouse — Mobile
+        run: |
+          lhci autorun \
+            --collect.url=http://localhost:8080/ \
+            --collect.numberOfRuns=1 \
+            --collect.settings.emulatedFormFactor=mobile \
+            --upload.target=temporary-public-storage \
+            --assert.assertions.categories:performance=warn,0.6 \
+            --assert.assertions.categories:accessibility=error,0.9
+        continue-on-error: true
+
+      - name: Upload Lighthouse reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci/
+          retention-days: 30

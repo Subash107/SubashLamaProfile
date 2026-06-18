@@ -5811,6 +5811,12 @@
     /* ── 2. GitHub Activity Feed ── */
     .gh-feed { margin-bottom: 1rem; }
     .gh-feed-title { font-size: 0.7rem; font-weight: 800; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+    .gh-contrib-wrap { margin-top: 1.25rem; }
+    .gh-contrib-link { display: block; border-radius: 8px; overflow: hidden; transition: opacity 0.2s; }
+    .gh-contrib-link:hover { opacity: 0.85; }
+    .gh-contrib-chart { width: 100%; height: auto; display: block; border-radius: 8px; filter: brightness(0.9); }
+    .gh-contrib-note { font-size: 0.68rem; color: rgba(255,255,255,0.3); margin: 0.4rem 0 0; }
+    .gh-contrib-note a { color: rgba(138,232,255,0.6); }
     .gh-feed-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.3rem; }
     /* Skeleton loader for GitHub feed */
     .gh-skeleton {
@@ -6076,15 +6082,39 @@
 
 /* ── MITRE ATT&CK Coverage Grid ── */
 .mitre-section { margin-top: 1.5rem; }
-.mitre-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.5rem; margin: 0.75rem 0; }
-.mitre-cell { border-radius: 6px; padding: 0.5rem 0.6rem; display: flex; flex-direction: column; gap: 0.2rem; }
-.mitre-yes     { background: rgba(80,250,123,0.12); border: 1px solid rgba(80,250,123,0.35); }
-.mitre-partial { background: rgba(255,184,108,0.12); border: 1px solid rgba(255,184,108,0.35); }
-.mitre-gap     { background: rgba(255,85,85,0.1);   border: 1px solid rgba(255,85,85,0.25); }
-.mc-tactic { font-size: 0.72rem; font-weight: 700; color: rgba(255,255,255,0.85); }
+.mitre-note--top { font-size: 0.68rem; color: rgba(255,255,255,0.35); margin: 0.25rem 0 0.75rem; }
+.mitre-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.45rem; margin: 0.75rem 0; }
+.mitre-cell {
+  border-radius: 6px; padding: 0.45rem 0.55rem;
+  display: flex; flex-direction: column; gap: 0.15rem;
+  position: relative; cursor: default;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.mitre-cell:hover, .mitre-cell:focus { transform: translateY(-2px); outline: none; }
+.mitre-yes     { background: rgba(80,250,123,0.1);  border: 1px solid rgba(80,250,123,0.35); }
+.mitre-partial { background: rgba(255,184,108,0.1); border: 1px solid rgba(255,184,108,0.35); }
+.mitre-gap     { background: rgba(255,85,85,0.08);  border: 1px solid rgba(255,85,85,0.25); }
+.mitre-yes:hover     { box-shadow: 0 4px 16px rgba(80,250,123,0.2); }
+.mitre-partial:hover { box-shadow: 0 4px 16px rgba(255,184,108,0.2); }
+.mitre-gap:hover     { box-shadow: 0 4px 16px rgba(255,85,85,0.15); }
+.mc-tactic { font-size: 0.68rem; font-weight: 800; }
 .mitre-yes     .mc-tactic { color: #50fa7b; }
 .mitre-partial .mc-tactic { color: #ffb86c; }
 .mitre-gap     .mc-tactic { color: #ff5555; }
+.mc-tooltip {
+  position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  background: rgba(7,17,28,0.97); border: 1px solid rgba(138,232,255,0.25);
+  border-radius: 8px; padding: 0.5rem 0.7rem;
+  font-size: 0.63rem; color: rgba(255,255,255,0.8); white-space: pre-line;
+  line-height: 1.55; min-width: 160px; z-index: 50;
+  pointer-events: none; opacity: 0;
+  transition: opacity 0.15s ease;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.mitre-cell:hover .mc-tooltip,
+.mitre-cell:focus .mc-tooltip { opacity: 1; }
+.mitre-link { color: rgba(138,232,255,0.6); font-size: 0.68rem; }
+.mitre-link:hover { color: #8ae8ff; }
 .mc-status { font-size: 0.6rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.06em; }
 .mitre-note { font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-top: 0.5rem; }
 .mitre-key { font-size: 0.72rem; font-weight: 700; }

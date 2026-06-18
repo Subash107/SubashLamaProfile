@@ -50,6 +50,16 @@ jobs:
           npx terser public/assets/js/index.js     -o public/assets/js/index.js     --compress drop_console=true --mangle --comments false
           npx terser public/assets/js/parrot-fx.js -o public/assets/js/parrot-fx.js --compress drop_console=true --mangle --comments false
 
+      - name: Convert images to WebP
+        run: |
+          sudo apt-get install -y webp --quiet
+          for img in public/assets/images/*.jpg public/assets/images/*.jpeg public/assets/images/*.png; do
+            [ -f "$img" ] || continue
+            base="${img%.*}"
+            cwebp -q 82 "$img" -o "${base}.webp" -quiet
+            echo "Converted: $img → ${base}.webp"
+          done
+
       - name: Stamp service worker cache version with deploy date
         run: |
           DATE=$(date +%Y%m%d%H%M)
