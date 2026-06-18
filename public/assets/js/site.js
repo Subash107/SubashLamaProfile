@@ -545,7 +545,7 @@
         `From: ${name}`,
         `Reply-To: ${email}`,
         `Subject: ${subject}`,
-        `Sent via: subash107.github.io contact form`
+        `Sent via: subashlamaprofile.pages.dev contact form`
       ].join("\n");
 
       const gmailUrl =
@@ -1185,7 +1185,7 @@
     const btn = document.getElementById("copyProfileUrl");
     if (!btn) return;
     btn.addEventListener("click", () => {
-      const url = "https://subash107.github.io/";
+      const url = "https://subashlamaprofile.pages.dev/";
       navigator.clipboard?.writeText(url).then(() => {
         btn.textContent = "✓ Copied!";
         setTimeout(() => { btn.innerHTML = "&#128279; Copy Link"; }, 2200);

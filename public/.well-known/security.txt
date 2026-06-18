@@ -4,11 +4,11 @@
 Contact: mailto:lamasubash107@gmail.com
 # Contact: http://ONION_ADDRESS_HERE.onion  (uncomment after setting up Tor hidden service)
 Preferred-Languages: en
-Canonical: https://subash107.github.io/.well-known/security.txt
+Canonical: https://subashlamaprofile.pages.dev/.well-known/security.txt
 
 # Scope of this disclosure policy
-Scope: https://subash107.github.io/
-Scope: https://subash107.github.io/projects.html
+Scope: https://subashlamaprofile.pages.dev/
+Scope: https://subashlamaprofile.pages.dev/projects.html
 
 # What is in scope for reporting
 # - XSS vulnerabilities on this portfolio
@@ -17,7 +17,7 @@ Scope: https://subash107.github.io/projects.html
 # - Clickjacking despite X-Frame-Options
 # Out of scope: GitHub Pages infrastructure, third-party services (GoatCounter, GitHub API)
 
-Policy: https://subash107.github.io/.well-known/security.txt
+Policy: https://subashlamaprofile.pages.dev/.well-known/security.txt
 
 # Acknowledgements page (will thank researchers who report issues)
 Acknowledgments: https://github.com/Subash107
