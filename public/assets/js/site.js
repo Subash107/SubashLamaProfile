@@ -3071,7 +3071,6 @@
     initMagneticButtons();
     initBackToTopRing();
     initConfetti();
-    initSectionReveal();
     initSkillTooltips();
     initTestimonialsSlider();
     initFocusMode();
