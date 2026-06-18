@@ -5936,12 +5936,17 @@
 /* ══════════════════════════════════════════
    UPGRADE 1 — Scroll-Triggered Section Reveal
    ══════════════════════════════════════════ */
-.motion-ok [data-reveal] {
+.motion-ok [data-reveal] > .book-card,
+.motion-ok [data-reveal] > .section-inner {
   opacity: 0;
-  transition: opacity 0.72s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateY(20px);
+  transition: opacity 0.68s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.68s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.motion-ok [data-reveal].is-revealed {
+.motion-ok [data-reveal].is-revealed > .book-card,
+.motion-ok [data-reveal].is-revealed > .section-inner {
   opacity: 1;
+  transform: translateY(0);
 }
 .motion-ok [data-reveal].is-revealed .exp-card,
 .motion-ok [data-reveal].is-revealed .cert-card,

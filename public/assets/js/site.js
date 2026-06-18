@@ -1316,21 +1316,24 @@
     const content = document.querySelector(".content");
     if (!content) return;
     let last = 0, ticking = false, timer;
+    const clear = () => { content.style.filter = ""; };
     window.addEventListener("scroll", () => {
       const y = window.scrollY;
       const vel = Math.abs(y - last);
       last = y;
-      const blur = Math.min(vel * 0.04, 2.5);
+      const blur = Math.min(vel * 0.025, 1.5);
       if (!ticking) {
         requestAnimationFrame(() => {
-          content.style.filter = blur > 0.3 ? `blur(${blur.toFixed(1)}px)` : "";
+          content.style.filter = blur > 0.5 ? `blur(${blur.toFixed(1)}px)` : "";
           ticking = false;
         });
         ticking = true;
       }
       clearTimeout(timer);
-      timer = setTimeout(() => { content.style.filter = ""; }, 120);
+      timer = setTimeout(clear, 80);
     }, { passive: true });
+    window.addEventListener("load", clear);
+    document.addEventListener("visibilitychange", clear);
   }
 
   /* ── Audio EQ visualizer ── */
