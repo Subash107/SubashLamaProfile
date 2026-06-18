@@ -5935,6 +5935,58 @@
 .pd-arrow{ stroke: rgba(138,232,255,0.45); stroke-width: 1; }
 .pd-head { fill: rgba(138,232,255,0.55); }
 
+/* ── Wazuh Alert Card ── */
+.wazuh-alert { background: rgba(5,9,17,0.85); border: 1px solid rgba(255,85,85,0.35); border-radius: 8px; padding: 0.75rem 0.9rem; margin: 0.75rem 0; font-family: monospace; }
+.wa-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem; flex-wrap: wrap; }
+.wa-sev { font-size: 0.65rem; font-weight: 800; padding: 0.15rem 0.45rem; border-radius: 3px; letter-spacing: 0.08em; }
+.wa-high { background: rgba(255,85,85,0.2); color: #ff5555; border: 1px solid rgba(255,85,85,0.5); }
+.wa-rule { font-size: 0.72rem; color: rgba(138,232,255,0.8); font-weight: 600; }
+.wa-time { font-size: 0.65rem; color: rgba(255,255,255,0.35); margin-left: auto; }
+.wa-title { font-size: 0.82rem; color: rgba(255,255,255,0.9); font-weight: 700; margin-bottom: 0.4rem; }
+.wa-meta { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.4rem; }
+.wa-meta span { font-size: 0.68rem; color: rgba(255,255,255,0.45); }
+.wa-meta strong { color: rgba(138,232,255,0.85); }
+.wa-action { font-size: 0.68rem; color: rgba(80,250,123,0.8); border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.35rem; margin-top: 0.35rem; }
+
+/* ── MITRE ATT&CK Coverage Grid ── */
+.mitre-section { margin-top: 1.5rem; }
+.mitre-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.5rem; margin: 0.75rem 0; }
+.mitre-cell { border-radius: 6px; padding: 0.5rem 0.6rem; display: flex; flex-direction: column; gap: 0.2rem; }
+.mitre-yes     { background: rgba(80,250,123,0.12); border: 1px solid rgba(80,250,123,0.35); }
+.mitre-partial { background: rgba(255,184,108,0.12); border: 1px solid rgba(255,184,108,0.35); }
+.mitre-gap     { background: rgba(255,85,85,0.1);   border: 1px solid rgba(255,85,85,0.25); }
+.mc-tactic { font-size: 0.72rem; font-weight: 700; color: rgba(255,255,255,0.85); }
+.mitre-yes     .mc-tactic { color: #50fa7b; }
+.mitre-partial .mc-tactic { color: #ffb86c; }
+.mitre-gap     .mc-tactic { color: #ff5555; }
+.mc-status { font-size: 0.6rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.06em; }
+.mitre-note { font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-top: 0.5rem; }
+.mitre-key { font-size: 0.72rem; font-weight: 700; }
+.mitre-key.mitre-yes     { color: #50fa7b; }
+.mitre-key.mitre-partial { color: #ffb86c; }
+.mitre-key.mitre-gap     { color: #ff5555; }
+
+/* ── What I'm Looking For Section ── */
+.looking-for-section .section-content h2 { margin-bottom: 1rem; }
+.lf-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.85rem; margin: 0.5rem 0 1rem; }
+.lf-card { background: rgba(12,19,32,0.7); border: 1px solid rgba(138,232,255,0.15); border-radius: 10px; padding: 1rem; }
+.lf-card:hover { border-color: rgba(138,232,255,0.35); }
+.lf-icon { font-size: 1.4rem; display: block; margin-bottom: 0.4rem; }
+.lf-card h4 { font-size: 0.85rem; font-weight: 700; color: #8ae8ff; margin: 0 0 0.35rem; }
+.lf-card p { font-size: 0.82rem; color: rgba(255,255,255,0.65); line-height: 1.5; margin: 0; }
+.lf-cta { font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-top: 0.5rem; text-align: center; }
+.lf-cta a { color: #8ae8ff; text-decoration: none; }
+.lf-cta a:hover { text-decoration: underline; }
+
+/* ── Security Headers Badge ── */
+.sec-badge { display: inline-block; font-size: 0.68rem; font-weight: 700; padding: 0.1rem 0.4rem; border-radius: 3px; background: rgba(80,250,123,0.12); border: 1px solid rgba(80,250,123,0.3); color: #50fa7b; margin-right: 0.2rem; }
+
+@media (max-width: 600px) {
+  .mitre-grid { grid-template-columns: repeat(2, 1fr); }
+  .lf-grid    { grid-template-columns: 1fr; }
+  .wa-time    { display: none; }
+}
+
 
 /* ══════════════════════════════════════════
    UPGRADE 2 — Enhanced Experience Timeline
@@ -6039,7 +6091,6 @@
   .hmf-sub      { display: none; }
   #chatWidget   { right: 0.35rem; bottom: 0.75rem; }
   #hackerScore  { top: 0.35rem; left: 0.35rem; font-size: 0.58rem; padding: 0.2rem 0.45rem; }
-}  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ══════════════════════════════════════════
@@ -6146,3 +6197,4 @@
   #chatWidget   { right: 0.35rem; bottom: 0.75rem; }
   #hackerScore  { top: 0.35rem; left: 0.35rem; font-size: 0.58rem; padding: 0.2rem 0.45rem; }
 }
+
