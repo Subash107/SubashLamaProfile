@@ -43,5 +43,30 @@ jobs:
           git config user.name "Resume Download Logger"
           git add download-logs/resume-downloads.txt
           git diff --staged --quiet && echo "No changes" && exit 0
-          git commit -m "log: resume download [${{ github.event.client_payload.country }}] ${{ github.event.client_payload.timestamp }}"
+          git commit -m "log: resume download [${{ github.event.client_payload.location }}] ${{ github.event.client_payload.timestamp }}"
           git push
+
+      - name: Send email notification
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: lamasubash107@gmail.com
+          password: ${{ secrets.GMAIL_APP_PASSWORD }}
+          subject: "Resume Downloaded — ${{ github.event.client_payload.location }}"
+          to: lamasubash107@gmail.com
+          from: Portfolio Tracker <lamasubash107@gmail.com>
+          body: |
+            Someone just downloaded your resume!
+
+            Time:      ${{ github.event.client_payload.timestamp }}
+            IP:        ${{ github.event.client_payload.ip }}
+            Location:  ${{ github.event.client_payload.location }}
+            Company:   ${{ github.event.client_payload.org }}
+            OS:        ${{ github.event.client_payload.os }}
+            Browser:   ${{ github.event.client_payload.browser }}
+            Device:    ${{ github.event.client_payload.device }}
+            Referrer:  ${{ github.event.client_payload.referrer }}
+
+            View full log: https://github.com/Subash107/SubashLamaProfile/blob/main/download-logs/resume-downloads.txt

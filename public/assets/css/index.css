@@ -5903,3 +5903,14 @@
       #chatWidget { right: 0.5rem; bottom: 1rem; }
       .soc-d-grid { grid-template-columns: repeat(2,1fr); }
     }
+
+/* ── Languages section ── */
+.lang-list { display: flex; flex-direction: column; gap: 1.2rem; margin-top: 1rem; }
+.lang-item { display: flex; flex-direction: column; gap: 0.4rem; }
+.lang-meta { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.lang-flag { font-size: 1.4rem; line-height: 1; }
+.lang-name { font-weight: 700; color: #8ae8ff; font-size: 1rem; }
+.lang-level { font-size: 0.78rem; padding: 0.15rem 0.55rem; border-radius: 20px; font-weight: 600; letter-spacing: 0.02em; }
+.lang-native      { background: rgba(80,250,123,0.18); color: #50fa7b; border: 1px solid rgba(80,250,123,0.35); }
+.lang-professional{ background: rgba(138,232,255,0.15); color: #8ae8ff; border: 1px solid rgba(138,232,255,0.3); }
+.lang-elementary  { background: rgba(255,184,108,0.15); color: #ffb86c; border: 1px solid rgba(255,184,108,0.3); }
