@@ -632,6 +632,9 @@
                   <strong>What I bring:</strong> A business-minded perspective combined with deep hands-on IT operations experience, now applied to threat detection, governance, risk &amp; compliance, and identity &amp; access management.
                 </div>
                 <div class="card-note" style="margin-top:0.6rem;">
+                  <strong>Portfolio Security:</strong> <span class="sec-badge">&#10003; CSP</span> <span class="sec-badge">&#10003; HSTS</span> <span class="sec-badge">&#10003; No-Referrer</span> <span class="sec-badge">&#10003; XSS Protection</span> &mdash; <em>Even my portfolio is secured.</em>
+                </div>
+                <div class="card-note" style="margin-top:0.6rem;">
                   <strong>Languages:</strong> Nepali (native) &middot; English (professional working proficiency) &middot; French (elementary, actively studying)
                 </div>
               </div>
@@ -865,6 +868,12 @@
                     <p class="project-purpose"><strong>Built:</strong> Wazuh, Suricata, and Sysmon lab.</p>
                     <p class="project-purpose"><strong>Impact:</strong> Stronger log analysis and detection skills.</p>
                     <p class="project-tech"><strong>Stack:</strong> Wazuh &middot; Suricata &middot; Sysmon</p>
+                    <div class="wazuh-alert" aria-label="Sample alert from SOC lab">
+                      <div class="wa-header"><span class="wa-sev wa-high">HIGH</span><span class="wa-rule">Rule 5710 &mdash; Wazuh SIEM</span><span class="wa-time">08:42 UTC</span></div>
+                      <div class="wa-title">Multiple failed SSH login attempts detected</div>
+                      <div class="wa-meta"><span>Agent: <strong>ubuntu-soc-lab</strong></span><span>MITRE: <strong>T1110.001 Brute Force</strong></span></div>
+                      <div class="wa-action">&#10003; Blocked &mdash; firewall rule triggered &middot; alert logged</div>
+                    </div>
                     <div class="project-links">
                       <a href="https://github.com/Subash107?tab=repositories" target="_blank" rel="noopener noreferrer">GitHub &rarr;</a>
                       <a href="projects.html#soc-lab" target="_blank" rel="noopener noreferrer">Case Study &rarr;</a>
@@ -1126,6 +1135,24 @@
                     </svg>
                   </div>
 
+                  <!-- MITRE ATT&CK Coverage -->
+                  <div class="mitre-section">
+                    <h4 class="homelab-title">&#127919; MITRE ATT&amp;CK Detection Coverage</h4>
+                    <div class="mitre-grid">
+                      <div class="mitre-cell mitre-yes"><span class="mc-tactic">Initial Access</span><span class="mc-status">Partial</span></div>
+                      <div class="mitre-cell mitre-yes"><span class="mc-tactic">Execution</span><span class="mc-status">Detected</span></div>
+                      <div class="mitre-cell mitre-yes"><span class="mc-tactic">Persistence</span><span class="mc-status">Detected</span></div>
+                      <div class="mitre-cell mitre-yes"><span class="mc-tactic">Privilege Esc.</span><span class="mc-status">Detected</span></div>
+                      <div class="mitre-cell mitre-partial"><span class="mc-tactic">Defense Evasion</span><span class="mc-status">Partial</span></div>
+                      <div class="mitre-cell mitre-partial"><span class="mc-tactic">Credential Access</span><span class="mc-status">Partial</span></div>
+                      <div class="mitre-cell mitre-partial"><span class="mc-tactic">Discovery</span><span class="mc-status">Partial</span></div>
+                      <div class="mitre-cell mitre-partial"><span class="mc-tactic">Lateral Movement</span><span class="mc-status">Partial</span></div>
+                      <div class="mitre-cell mitre-partial"><span class="mc-tactic">Exfiltration</span><span class="mc-status">Partial</span></div>
+                      <div class="mitre-cell mitre-gap"><span class="mc-tactic">C2</span><span class="mc-status">In Progress</span></div>
+                    </div>
+                    <p class="mitre-note">Based on Wazuh + Suricata + Sysmon rules deployed in personal SOC lab &middot; <span class="mitre-key mitre-yes">&#9632; Detected</span> <span class="mitre-key mitre-partial">&#9632; Partial</span> <span class="mitre-key mitre-gap">&#9632; In Progress</span></p>
+                  </div>
+
                 </div>
               </div>
             </article>
@@ -1361,6 +1388,37 @@
                 <p>I do my best work where security operations, governance, and technical depth need to converge into practical outcomes.</p>
               </div>
             </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="looking-for" class="glass-card looking-for-section">
+        <div class="section-inner">
+          <div class="section-content">
+            <h2>What I&rsquo;m Looking For</h2>
+            <div class="lf-grid">
+              <div class="lf-card">
+                <span class="lf-icon">&#127919;</span>
+                <h4>Target Roles</h4>
+                <p>SOC Analyst L1/L2 &middot; Detection Engineer &middot; GRC Analyst &middot; IAM Specialist &middot; Security Operations Engineer</p>
+              </div>
+              <div class="lf-card">
+                <span class="lf-icon">&#127758;</span>
+                <h4>Work Setup</h4>
+                <p>Remote worldwide &middot; Hybrid or on-site in Kathmandu &middot; Open to relocation for the right opportunity</p>
+              </div>
+              <div class="lf-card">
+                <span class="lf-icon">&#128337;</span>
+                <h4>Availability</h4>
+                <p>Available immediately &middot; UTC+5:45 (Nepal) &middot; Flexible hours for global teams</p>
+              </div>
+              <div class="lf-card">
+                <span class="lf-icon">&#129309;</span>
+                <h4>Ideal Team</h4>
+                <p>Security-first culture &middot; Hands-on engineering &middot; Continuous learning &middot; Real threat detection work</p>
+              </div>
+            </div>
+            <p class="lf-cta">Let&rsquo;s talk &mdash; <a href="#contact">contact me directly</a> or <a href="assets/docs/cv/latest-resume.pdf" download="Subash-Lama-Resume.pdf">download my CV</a></p>
           </div>
         </div>
       </section>
