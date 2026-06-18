@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self' https://gc.zgo.at; style-src 'self'; img-src 'self' data: https://*.goatcounter.com https://ghchart.rshah.org; media-src 'self'; font-src 'self'; connect-src 'self' https://*.goatcounter.com https://api.github.com https://lingering-surf-6d77.lamasubash107.workers.dev https://urlhaus-api.abuse.ch https://check.torproject.org; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests; report-to csp-endpoint" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self' https://gc.zgo.at https://static.cloudflareinsights.com; style-src 'self'; img-src 'self' data: https://*.goatcounter.com https://ghchart.rshah.org; media-src 'self'; font-src 'self'; connect-src 'self' https://*.goatcounter.com https://api.github.com https://lingering-surf-6d77.lamasubash107.workers.dev https://urlhaus-api.abuse.ch https://check.torproject.org https://cloudflareinsights.com; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests; report-to csp-endpoint" />
   <meta http-equiv="Reporting-Endpoints" content="csp-endpoint=&quot;https://lingering-surf-6d77.lamasubash107.workers.dev/csp-report&quot;"  />
   <meta name="referrer" content="no-referrer" />
   <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), serial=(), midi=(), magnetometer=(), gyroscope=(), accelerometer=(), ambient-light-sensor=()" />
@@ -640,9 +640,9 @@
                   <strong>Portfolio Security Posture:</strong>
                   <div class="sec-badge-row">
                     <span class="sec-badge" title="Strict CSP: no unsafe-inline, no unsafe-eval — blocks XSS and CSS injection">&#10003; Strict CSP</span>
-                    <span class="sec-badge" title="HSTS enforced by GitHub Pages infrastructure (max-age=31556952)">&#10003; HSTS</span>
+                    <span class="sec-badge" title="HSTS max-age=63072000 + includeSubDomains + preload — enforced by Cloudflare Pages">&#10003; HSTS</span>
                     <span class="sec-badge" title="Referrer-Policy: no-referrer — no URL leakage on external links">&#10003; No-Referrer</span>
-                    <span class="sec-badge" title="X-Frame-Options: deny — set by GitHub Pages, prevents clickjacking">&#10003; No-Clickjack</span>
+                    <span class="sec-badge" title="X-Frame-Options: DENY — real HTTP header via Cloudflare Pages, prevents clickjacking">&#10003; No-Clickjack</span>
                     <span class="sec-badge" title="X-Content-Type-Options: nosniff — set by GitHub Pages, prevents MIME sniffing">&#10003; No-MIME-Sniff</span>
                     <span class="sec-badge" title="Subresource Integrity on all vendored assets">&#10003; SRI</span>
                     <span class="sec-badge" title="Permissions-Policy restricts camera, mic, geolocation, payment APIs">&#10003; Permissions-Policy</span>

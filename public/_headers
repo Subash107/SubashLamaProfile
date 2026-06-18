@@ -1,6 +1,6 @@
 /*
-  # Security headers applied to ALL responses
-  # These become real HTTP headers on Cloudflare Pages — not meta tags
+  # Security headers — applied to ALL responses via Cloudflare Pages
+  # _headers file: https://developers.cloudflare.com/pages/configuration/headers/
 
   Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
   X-Frame-Options: DENY
@@ -11,25 +11,42 @@
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Embedder-Policy: credentialless
   Reporting-Endpoints: csp-endpoint="https://lingering-surf-6d77.lamasubash107.workers.dev/csp-report"
-  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self' https://gc.zgo.at; style-src 'self'; img-src 'self' data: https://*.goatcounter.com https://ghchart.rshah.org; media-src 'self'; font-src 'self'; connect-src 'self' https://*.goatcounter.com https://api.github.com https://lingering-surf-6d77.lamasubash107.workers.dev https://urlhaus-api.abuse.ch https://check.torproject.org; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests; report-to csp-endpoint
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self' https://gc.zgo.at https://static.cloudflareinsights.com; style-src 'self'; img-src 'self' data: https://*.goatcounter.com https://ghchart.rshah.org; media-src 'self'; font-src 'self'; connect-src 'self' https://*.goatcounter.com https://api.github.com https://lingering-surf-6d77.lamasubash107.workers.dev https://urlhaus-api.abuse.ch https://check.torproject.org https://cloudflareinsights.com; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests; report-to csp-endpoint
 
-/assets/*
+# Early Hints — browser starts fetching critical assets before HTML is fully sent
+/
+  Link: </assets/css/index.css>; rel=preload; as=style
+  Link: </assets/css/motion.css>; rel=preload; as=style
+  Link: </assets/css/parrot-fx.css>; rel=preload; as=style
+  Link: </assets/js/site.js>; rel=preload; as=script
+  Link: </assets/images/bg-poster.jpg>; rel=preload; as=image
+
+# Immutable asset caching — hashed filenames, cache forever
+/assets/css/*
   Cache-Control: public, max-age=31536000, immutable
 
 /assets/js/*
   Cache-Control: public, max-age=31536000, immutable
 
-/assets/css/*
-  Cache-Control: public, max-age=31536000, immutable
-
 /assets/images/*
   Cache-Control: public, max-age=31536000, immutable
 
+/assets/vendor/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/media/*
+  Cache-Control: public, max-age=604800
+
+# Service worker must always be fresh
 /sw.js
   Cache-Control: no-cache, no-store, must-revalidate
 
+# Short cache for dynamic-ish files
 /manifest.json
   Cache-Control: public, max-age=86400
+
+/assets/docs/cv/*
+  Cache-Control: public, max-age=3600
 
 /.well-known/security.txt
   Cache-Control: public, max-age=86400

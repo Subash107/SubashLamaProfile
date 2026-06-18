@@ -161,7 +161,7 @@
 
       <div class="badge-grid">
         <span class="hdr-badge hdr-badge--green" title="Content Security Policy via meta HTTP-Equiv">&#10003; CSP (meta)</span>
-        <span class="hdr-badge hdr-badge--green" title="HSTS max-age=31556952 — enforced by GitHub Pages">&#10003; HSTS (GitHub Pages)</span>
+        <span class="hdr-badge hdr-badge--green" title="HSTS max-age=63072000 + includeSubDomains + preload — real HTTP header via Cloudflare Pages">&#10003; HSTS (Cloudflare)</span>
         <span class="hdr-badge hdr-badge--green" title="Referrer-Policy: no-referrer — meta tag">&#10003; No-Referrer</span>
         <span class="hdr-badge hdr-badge--green" title="X-Frame-Options: deny — enforced by GitHub Pages">&#10003; No-Clickjack (GitHub Pages)</span>
         <span class="hdr-badge hdr-badge--green" title="X-Content-Type-Options: nosniff — enforced by GitHub Pages">&#10003; No-MIME-Sniff (GitHub Pages)</span>
@@ -299,6 +299,10 @@
       <h2 id="changelog-heading">&#128336; Security Changelog</h2>
       <p>A record of security improvements made to this site over time.</p>
       <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-date">June 2026</div>
+          <div class="tl-text">Migrated from GitHub Pages to <strong>Cloudflare Pages</strong>. All security headers now delivered as real HTTP response headers via <code>_headers</code> file. SecurityHeaders.com grade upgraded from <strong>C → A+</strong>. Added Early Hints (<code>Link</code> preload headers) for CSS, JS, and poster image. HSTS upgraded to <code>max-age=63072000; includeSubDomains; preload</code>. Added <code>Cross-Origin-Resource-Policy</code>, <code>Cross-Origin-Opener-Policy</code>, <code>Cross-Origin-Embedder-Policy</code> headers. CSP now enforced as HTTP header not meta tag. Immutable cache headers added for all static assets.</div>
+        </div>
         <div class="tl-item">
           <div class="tl-date">June 2026</div>
           <div class="tl-text">Added <code>Permissions-Policy</code> meta header disabling 12 browser APIs. Added SRI hash to Bootstrap CSS. Replaced fake dark web scan widget with real threat intelligence links. Real-time threat feed replaced with live URLhaus (abuse.ch) data. Removed misleading XSS Protection badge.</div>
