@@ -72,14 +72,13 @@ jobs:
           DEVICE="${{ github.event.client_payload.device }}"
           TS="${{ github.event.client_payload.timestamp }}"
           IP="${{ github.event.client_payload.ip }}"
-          LOG_URL="https://github.com/Subash107/SubashLamaProfile/blob/main/download-logs/resume-downloads.txt"
-          MSG=$(printf '📥 *Resume Downloaded\!*\n\n📍 Location : %s\n🏢 Company  : %s\n💻 Device   : %s / %s / %s\n🌐 IP       : %s\n🕐 Time     : %s\n\n[View Full Log](%s)' \
-            "$LOC" "$ORG" "$DEVICE" "$OS" "$BROWSER" "$IP" "$TS" "$LOG_URL")
+          MSG=$(printf 'Resume Downloaded!\n\nLocation: %s\nCompany: %s\nDevice: %s / %s / %s\nIP: %s\nTime: %s' "$LOC" "$ORG" "$DEVICE" "$OS" "$BROWSER" "$IP" "$TS")
           curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
             -H "Content-Type: application/json" \
-            -d "{\"chat_id\":\"${{ secrets.TELEGRAM_CHAT_ID }}\",\"text\":\"$MSG\",\"parse_mode\":\"MarkdownV2\",\"disable_web_page_preview\":true}"
+            -d "{\"chat_id\":\"${{ secrets.TELEGRAM_CHAT_ID }}\",\"text\":\"${MSG}\"}"
 
       - name: Send email notification
+        continue-on-error: true
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
