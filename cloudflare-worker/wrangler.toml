@@ -1,3 +1,9 @@
+# Resume Download Tracker Worker
 name = "lingering-surf-6d77"
 main = "worker.js"
 compatibility_date = "2024-09-23"
+
+# Telegram Bot Command Handler
+# Uncomment to deploy the bot worker separately:
+# name = "resume-tracker-bot"
+# main = "telegram-bot.js"

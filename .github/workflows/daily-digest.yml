@@ -1,0 +1,60 @@
+name: Daily Resume Download Digest
+
+on:
+  schedule:
+    - cron: '15 3 * * *'   # 9:00 AM Nepal Time (UTC+5:45)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Build and send daily digest
+        run: |
+          LOG="download-logs/resume-downloads.txt"
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+
+          if [ ! -f "$LOG" ]; then
+            echo "No log file found, skipping digest."
+            exit 0
+          fi
+
+          # Count today's downloads (UTC date)
+          TODAY=$(date -u +"%Y-%m-%d")
+          TODAY_COUNT=$(grep -c "^${TODAY}" "$LOG" 2>/dev/null || echo 0)
+
+          # Count total downloads (skip header lines)
+          TOTAL=$(grep -c "^[0-9]" "$LOG" 2>/dev/null || echo 0)
+
+          # Last 7 days count
+          WEEK_COUNT=0
+          for i in $(seq 0 6); do
+            DAY=$(date -u -d "-${i} days" +"%Y-%m-%d" 2>/dev/null || date -u -v-${i}d +"%Y-%m-%d")
+            COUNT=$(grep -c "^${DAY}" "$LOG" 2>/dev/null || echo 0)
+            WEEK_COUNT=$((WEEK_COUNT + COUNT))
+          done
+
+          # Top countries from last 7 days
+          TOP=$(grep -E "^$(date -u +"%Y-%m")" "$LOG" 2>/dev/null | \
+            awk -F'|' '{print $3}' | \
+            awk -F',' '{print $NF}' | \
+            tr -d ' ' | sort | uniq -c | sort -rn | head -3 | \
+            awk '{print "  " $2 ": " $1}' | tr '\n' ',' | sed 's/,$//')
+
+          MSG=$(printf '📊 Daily Resume Digest - %s\n\nToday    : %s downloads\nThis week: %s downloads\nAll time : %s downloads\n\nTop countries this month:\n%s\n\n📋 Full log: https://github.com/Subash107/SubashLamaProfile/blob/main/download-logs/resume-downloads.txt' \
+            "$TODAY" "$TODAY_COUNT" "$WEEK_COUNT" "$TOTAL" "${TOP:-  No data yet}")
+
+          curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":\"${MSG}\"}"

@@ -5,12 +5,11 @@
  * and geolocation from Cloudflare's built-in request.cf object (no external API
  * needed), then forwards to GitHub Actions via repository_dispatch.
  *
- * The GitHub PAT is stored as a Cloudflare Secret (env.GITHUB_PAT).
+ * Secrets (set via: npx wrangler secret put <NAME> --name lingering-surf-6d77):
+ *   GITHUB_PAT  — Fine-grained GitHub PAT with repo dispatch permission
  *
- * Setup:
- *   1. Deploy this file to Cloudflare Workers (workers.cloudflare.com)
- *   2. Add secret: wrangler secret put GITHUB_PAT  → paste your Fine-Grained PAT
- *   3. Copy the Worker URL → paste into site.js TRACKER_URL
+ * Deploy:
+ *   cd cloudflare-worker && npx wrangler deploy worker.js
  */
 
 const GITHUB_REPO = "Subash107/SubashLamaProfile";
@@ -20,15 +19,21 @@ const ALLOWED_ORIGINS = [
   "https://subash107.github.io",
 ];
 
+/* Your own ISP/org — downloads from these are silently skipped */
+const OWNER_ORGS = [
+  "VIA NET COMMUNICATION LTD",
+  "VIA NET",
+];
+
 function corsHeaders(origin) {
   const allowedOrigin = ALLOWED_ORIGINS.includes(origin)
     ? origin
     : ALLOWED_ORIGINS[0];
   return {
-    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Origin":  allowedOrigin,
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
-    "Access-Control-Max-Age": "86400",
+    "Access-Control-Max-Age":       "86400",
     "Vary": "Origin",
   };
 }
@@ -56,20 +61,21 @@ export default {
 
       /* ── Server-side enrichment ── */
 
-      /* Real visitor IP — Cloudflare always sets CF-Connecting-IP */
-      const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+      const ip     = request.headers.get("CF-Connecting-IP") || "unknown";
+      const cf     = request.cf || {};
+      const city   = cf.city           || "";
+      const region = cf.region         || "";
+      const country= cf.country        || "";
+      const org    = cf.asOrganization || "unknown";
 
-      /* Cloudflare's free built-in geolocation (request.cf) */
-      const cf = request.cf || {};
-      const city    = cf.city            || "";
-      const region  = cf.region          || "";
-      const country = cf.country         || "";
-      const org     = cf.asOrganization  || "unknown";
-
-      /* Build a human-readable location string */
       const location = [city, region, country].filter(Boolean).join(", ") || "unknown";
 
-      /* Override the placeholder values the browser sent */
+      /* Skip owner's own downloads to avoid false notifications */
+      const isOwn = OWNER_ORGS.some(o => org.toUpperCase().includes(o.toUpperCase()));
+      if (isOwn) {
+        return new Response("OK", { status: 200, headers: corsHeaders(origin) });
+      }
+
       if (body.client_payload) {
         body.client_payload.ip       = ip;
         body.client_payload.location = location;

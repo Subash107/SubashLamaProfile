@@ -72,7 +72,8 @@ jobs:
           DEVICE="${{ github.event.client_payload.device }}"
           TS="${{ github.event.client_payload.timestamp }}"
           IP="${{ github.event.client_payload.ip }}"
-          MSG=$(printf 'Resume Downloaded!\n\nLocation: %s\nCompany: %s\nDevice: %s / %s / %s\nIP: %s\nTime: %s' "$LOC" "$ORG" "$DEVICE" "$OS" "$BROWSER" "$IP" "$TS")
+          REF="${{ github.event.client_payload.referrer }}"
+          MSG=$(printf '📥 Resume Downloaded!\n\n📍 Location : %s\n🏢 Company  : %s\n💻 Device   : %s / %s / %s\n🌐 IP       : %s\n🔗 Referrer : %s\n🕐 Time     : %s\n\n📋 Log: https://github.com/Subash107/SubashLamaProfile/blob/main/download-logs/resume-downloads.txt' "$LOC" "$ORG" "$DEVICE" "$OS" "$BROWSER" "$IP" "$REF" "$TS")
           curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
             -H "Content-Type: application/json" \
             -d "{\"chat_id\":\"${{ secrets.TELEGRAM_CHAT_ID }}\",\"text\":\"${MSG}\"}"

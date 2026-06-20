@@ -65,6 +65,40 @@ For a one-command local Docker launch, use:
 ## Contributing
 - See `CONTRIBUTING.md` for the local check and pull request workflow.
 
+## Resume Download Tracking System
+
+Every time someone downloads your resume, the system automatically:
+
+1. **Cloudflare Worker** (`cloudflare-worker/worker.js`) — captures real IP, city, country, and company from Cloudflare's edge headers. Skips your own downloads (VIA NET ISP).
+2. **GitHub Actions** (`log-download.yml`) — triggered by the Worker, appends a row to `download-logs/resume-downloads.txt`, sends Telegram message and ntfy Windows notification.
+3. **Daily Digest** (`daily-digest.yml`) — runs every day at 9:00 AM Nepal time, sends today's count + weekly + all-time stats to Telegram.
+
+### Notification Channels
+| Channel | How |
+|---|---|
+| Telegram bot (@trackerSbash) | GitHub Actions → Telegram API |
+| ntfy Windows popup | GitHub Actions → ntfy.sh |
+| PowerShell toast | Local watcher script |
+
+### GitHub Secrets Required
+| Secret | Purpose |
+|---|---|
+| `GITHUB_PAT` | Cloudflare Worker → GitHub dispatch |
+| `TELEGRAM_BOT_TOKEN` | Send Telegram messages |
+| `TELEGRAM_CHAT_ID` | Your Telegram user ID |
+| `NTFY_TOPIC` | ntfy.sh topic for Windows notifications |
+| `CLOUDFLARE_API_TOKEN` | Deploy Workers via GitHub Actions |
+
+### To Redeploy Cloudflare Worker
+```bash
+cd cloudflare-worker
+npx wrangler login
+npx wrangler deploy worker.js
+```
+
+### Download Log
+View all resume downloads: `download-logs/resume-downloads.txt`
+
 ## Security Notes
 - Only the generated `public/assets/docs/cv/latest-resume.pdf` is published for resume downloads.
 - A stale public CV copy was removed so old resume files are not exposed by the site path anymore.
