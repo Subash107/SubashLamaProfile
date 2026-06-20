@@ -2153,40 +2153,7 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
     const quickBtns = document.querySelectorAll(".chat-q");
     if (!toggleBtn || !panel) return;
 
-    const KB = [
-      { q: ["language","speak","nepali","english","french","multilingual"], a: "Subash speaks Nepali (native), English (professional working proficiency), and is actively studying French (elementary level)." },
-      { q: ["available","looking","open to work","hire","opportunity","job","role"], a: "Yes — Subash is actively available for Cybersecurity Analyst, SOC Analyst, Detection Engineer, GRC Analyst, and IAM Specialist roles. Open to remote, hybrid, or on-site in Kathmandu." },
-      { q: ["bug bounty","hackerone","intigriti","bugcrowd","vulnerability research"], a: "Subash is an active bug bounty researcher on HackerOne, Intigriti, and Bugcrowd — focused on web application vulnerability research and responsible disclosure." },
-      { q: ["mitre","att&ck","ttp","tactics","techniques"], a: "Subash maps detections to MITRE ATT&CK techniques, builds Wazuh rules aligned to real TTPs, and uses the framework to prioritise threat hunting priorities in the lab." },
-      { q: ["suricata","ids","ips","network detection","nids"], a: "Suricata is deployed in Subash's personal SOC lab for network IDS/IPS — monitoring traffic, writing custom rules, and feeding alerts into Wazuh for correlation." },
-      { q: ["sysmon","endpoint telemetry","windows events","endpoint"], a: "Sysmon is configured in the SOC lab for Windows endpoint telemetry — process creation, network connections, and registry events forwarded to Wazuh for detection." },
-      { q: ["phone","contact","number","call","reach"], a: "You can reach Subash at +977 9840005771 or email lamasubash107@gmail.com. Use the Contact section to send a message directly." },
-      { q: ["salary","rate","compensation","pay"], a: "Subash is open to discussing compensation based on role and scope. Reach out via the Contact section or lamasubash107@gmail.com for a conversation." },
-      { q: ["certs","certifications","certified"],  a: "Subash holds Cisco Endpoint Security, Cisco Ethical Hacker, Cisco Intro to Cybersecurity, IBM Cybersecurity Fundamentals, IBM Python for Data Science, and Google Ads Video certifications. He is pursuing GRC certification next." },
-      { q: ["soc","experience","work"],             a: "12+ years in enterprise IT with hands-on SOC experience — alert triage, incident response, SIEM tuning, and threat detection using Wazuh, Suricata, and Sysmon." },
-      { q: ["hire","job","available","contact"],    a: "Yes! Subash is actively available for SOC Analyst, GRC Analyst, IAM Specialist, and Security Operations roles. Scroll to the Contact section or email lamasubash107@gmail.com." },
-      { q: ["skills","tools","tech"],               a: "Core stack: Wazuh · Suricata · Sysmon · Docker · Terraform · Python · Cisco · Linux · Active Directory · GitHub Actions." },
-      { q: ["salary","rate","compensation"],        a: "Compensation expectations are available on request — use the contact form or email directly. Open to discussion based on role and location." },
-      { q: ["location","remote","nepal","kathmandu","relocation"], a: "Based in Kathmandu, Nepal (UTC+5:45). Open to remote, hybrid, or on-site roles — including relocation for the right opportunity." },
-      { q: ["education","degree","bba","university"], a: "Bachelor of Business Administration from Tribhuvan University (2010–2014), combined with Cisco and IBM cybersecurity certifications and extensive hands-on lab work." },
-      { q: ["wazuh","siem","soc lab","homelab","lab"], a: "Subash built a personal SOC lab with Wazuh (SIEM), Suricata (network IDS/IPS), and Sysmon (endpoint telemetry) — custom rules, decoders, dashboards, and live detection workflows." },
-      { q: ["grc","governance","risk","compliance","policy"], a: "GRC experience comes from 12+ years operating inside real environments where governance, risk, and compliance shaped daily IT decisions — banking (SBI), FMCG (Unilever), and enterprise (Primuson)." },
-      { q: ["iam","identity","access","active directory","ad"], a: "Administered Active Directory for 200+ banking staff at SBI, enforced endpoint policies, and managed identity across 150+ endpoints at Primuson. Core skill for IAM analyst roles." },
-      { q: ["resume","cv","download"],              a: "You can download Subash's latest resume directly from the Download Resume button at the top of the page, or press R on your keyboard." },
-      { q: ["github","projects","code","repo"],     a: "Check out the Projects section or visit github.com/Subash107 — featuring the Secure Virtual Lab Automation repo with Docker, GitHub Actions, and CI/CD pipelines." },
-      { q: ["python","scripting","automation"],     a: "IBM-certified in Python for Data Science and Data Analysis. Uses Python for security automation, log parsing, and scripting. Also proficient in Bash and PowerShell." },
-      { q: ["docker","container","devops","cicd","terraform","iac"], a: "Comfortable with Docker, Docker Compose, GitHub Actions CI/CD, and Terraform for IaC. Has a live CI/CD pipeline deploying this portfolio to GitHub Pages." },
-      { q: ["hello","hi","hey","what can you","who are you"], a: "Hi! I'm SubashBot — I can answer questions about Subash's skills, experience, certifications, projects, or how to get in touch. Ask away!" },
-      { q: ["github","projects","code"],            a: "Check the Projects section! He maintains repos for lab automation, CI/CD pipelines, and detection rule sets." },
-    ];
-
-    const reply = text => {
-      const lower = text.toLowerCase();
-      for (const entry of KB) {
-        if (entry.q.some(k => lower.includes(k))) return entry.a;
-      }
-      return "Great question! I don't have a specific answer for that, but you can ask Subash directly via the Contact section below.";
-    };
+    const CHAT_API = "https://portfolio-chat-api.lamasubash107.workers.dev";
 
     const addMsg = (text, isUser) => {
       const div = document.createElement("div");
@@ -2205,15 +2172,25 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
       return t;
     };
 
-    const ask = text => {
+    const ask = async text => {
       if (!text.trim()) return;
       addMsg(text, true);
       if (input) input.value = "";
       const typing = showTyping();
-      setTimeout(() => {
+
+      try {
+        const res = await fetch(CHAT_API, {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ message: text }),
+        });
+        const data = await res.json();
         typing.remove();
-        addMsg(reply(text), false);
-      }, 800 + Math.random() * 400);
+        addMsg(data.reply || "Sorry, I couldn't get a response. Try again!", false);
+      } catch {
+        typing.remove();
+        addMsg("I'm having connection issues. Please try again in a moment.", false);
+      }
     };
 
     toggleBtn.addEventListener("click", () => { panel.toggleAttribute("hidden"); if (!panel.hasAttribute("hidden")) input?.focus(); });
