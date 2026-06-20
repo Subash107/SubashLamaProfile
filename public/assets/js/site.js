@@ -3137,11 +3137,9 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
           browser:   getBrowser(),
           device:    /Mobi|Android|iPhone|iPad/.test(ua) ? "Mobile" : "Desktop",
           referrer:  document.referrer || "direct",
-          ip:        "unknown",
-          location:  "unknown",
-          org:       "unknown",
           tz:        Intl.DateTimeFormat().resolvedOptions().timeZone || "unknown",
           lang:      navigator.language || "unknown"
+          /* ip, location, org are enriched server-side by the Cloudflare Worker */
         }
       };
 

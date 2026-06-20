@@ -46,6 +46,23 @@ jobs:
           git commit -m "log: resume download [${{ github.event.client_payload.location }}] ${{ github.event.client_payload.timestamp }}"
           git push
 
+      - name: Send Windows push notification (ntfy.sh)
+        run: |
+          LOC="${{ github.event.client_payload.location }}"
+          ORG="${{ github.event.client_payload.org }}"
+          OS="${{ github.event.client_payload.os }}"
+          BROWSER="${{ github.event.client_payload.browser }}"
+          DEVICE="${{ github.event.client_payload.device }}"
+          TS="${{ github.event.client_payload.timestamp }}"
+          LOG_URL="https://github.com/Subash107/SubashLamaProfile/blob/main/download-logs/resume-downloads.txt"
+          MSG=$(printf 'Someone downloaded your resume!\n\nLocation : %s\nCompany  : %s\nDevice   : %s / %s / %s\nTime     : %s\n\nView log: %s' \
+            "$LOC" "$ORG" "$DEVICE" "$OS" "$BROWSER" "$TS" "$LOG_URL")
+          curl -s -X POST "https://ntfy.sh/${{ secrets.NTFY_TOPIC }}" \
+            -H "Title: Resume Downloaded" \
+            -H "Priority: high" \
+            -H "Tags: page_facing_up,bell" \
+            --data-raw "$MSG"
+
       - name: Send email notification
         uses: dawidd6/action-send-mail@v3
         with:
