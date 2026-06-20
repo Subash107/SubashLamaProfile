@@ -1,0 +1,41 @@
+name: Deploy Telegram Bot Worker
+
+on:
+  push:
+    branches: [main]
+    paths: ['cloudflare-worker/telegram-bot.js']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy Telegram bot Worker
+        working-directory: cloudflare-worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          npx wrangler deploy telegram-bot.js \
+            --name resume-tracker-bot \
+            --compatibility-date 2024-09-23
+
+      - name: Set Worker secrets
+        working-directory: cloudflare-worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          echo "${{ secrets.TELEGRAM_BOT_TOKEN }}" | npx wrangler secret put TELEGRAM_BOT_TOKEN --name resume-tracker-bot
+          echo "${{ secrets.GITHUB_TOKEN }}"        | npx wrangler secret put GITHUB_TOKEN       --name resume-tracker-bot
+
+      - name: Register Telegram webhook
+        run: |
+          WORKER_URL="https://resume-tracker-bot.lamasubash107.workers.dev"
+          curl -s "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/setWebhook?url=${WORKER_URL}" | cat

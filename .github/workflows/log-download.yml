@@ -63,6 +63,22 @@ jobs:
             -H "Tags: page_facing_up,bell" \
             --data-raw "$MSG"
 
+      - name: Send Telegram notification
+        run: |
+          LOC="${{ github.event.client_payload.location }}"
+          ORG="${{ github.event.client_payload.org }}"
+          OS="${{ github.event.client_payload.os }}"
+          BROWSER="${{ github.event.client_payload.browser }}"
+          DEVICE="${{ github.event.client_payload.device }}"
+          TS="${{ github.event.client_payload.timestamp }}"
+          IP="${{ github.event.client_payload.ip }}"
+          LOG_URL="https://github.com/Subash107/SubashLamaProfile/blob/main/download-logs/resume-downloads.txt"
+          MSG=$(printf '📥 *Resume Downloaded\!*\n\n📍 Location : %s\n🏢 Company  : %s\n💻 Device   : %s / %s / %s\n🌐 IP       : %s\n🕐 Time     : %s\n\n[View Full Log](%s)' \
+            "$LOC" "$ORG" "$DEVICE" "$OS" "$BROWSER" "$IP" "$TS" "$LOG_URL")
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${{ secrets.TELEGRAM_CHAT_ID }}\",\"text\":\"$MSG\",\"parse_mode\":\"MarkdownV2\",\"disable_web_page_preview\":true}"
+
       - name: Send email notification
         uses: dawidd6/action-send-mail@v3
         with:
