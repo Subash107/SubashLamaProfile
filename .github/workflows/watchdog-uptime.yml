@@ -1,0 +1,35 @@
+name: Watchdog — Portfolio Uptime
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'   # Every 5 minutes
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Check portfolio uptime
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          URL="https://subashlamaprofile.pages.dev"
+          TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$URL" || echo "000")
+
+          if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 400 ]; then
+            echo "Site is UP (HTTP $STATUS)"
+          else
+            MSG=$(printf '🚨 PORTFOLIO IS DOWN!\n\nURL: %s\nStatus: HTTP %s\nTime: %s\n\nCheck immediately!' "$URL" "$STATUS" "$TS")
+            curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "{\"chat_id\":\"${CHAT}\",\"text\":\"${MSG}\"}"
+            echo "ALERT SENT — Site returned HTTP $STATUS"
+            exit 1
+          fi

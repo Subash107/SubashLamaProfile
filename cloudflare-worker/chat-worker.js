@@ -17,7 +17,7 @@
  *   npx wrangler deploy chat-worker.js --name portfolio-chat-api
  */
 
-const CLAUDE_MODEL  = "claude-haiku-4-5-20251001";
+const CF_AI_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 const ALLOWED_ORIGINS = [
   "https://subashlamaprofile.pages.dev",
   "https://subash107.github.io",
@@ -77,23 +77,46 @@ function corsHeaders(origin) {
 
 function detectIntent(msg) {
   const m = msg.toLowerCase();
-  const ipMatch = msg.match(/\b(\d{1,3}\.){3}\d{1,3}\b/);
-  const cveMatch = msg.match(/CVE-\d{4}-\d+/i);
+  const ipMatch     = msg.match(/\b(\d{1,3}\.){3}\d{1,3}\b/);
+  const cveMatch    = msg.match(/CVE-\d{4}-\d+/i);
+  const urlMatch    = msg.match(/https?:\/\/[^\s]+|(?:www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\/[^\s]*)?/);
+  const domainMatch = msg.match(/(?:ip|dns|lookup|resolve|check|whois|host)\s+(?:of\s+|for\s+)?([a-zA-Z0-9._-]+\.[a-zA-Z]{2,})/i);
 
-  if (ipMatch)                                          return { type: "ip",      data: ipMatch[0] };
-  if (cveMatch)                                         return { type: "cve",     data: cveMatch[0] };
+  if (ipMatch)     return { type: "ip",      data: ipMatch[0] };
+  if (cveMatch)    return { type: "cve",     data: cveMatch[0] };
+  if (/wayback|archive|archived|history|web\.archive|snapshot/.test(m) && urlMatch)
+                   return { type: "wayback", data: extractDomain(urlMatch[0]) };
+  if (domainMatch) return { type: "dns",     data: domainMatch[1] };
+  if (/\b(?:ip|dns|lookup|resolve|whois)\b/.test(m) && urlMatch)
+                   return { type: "dns",     data: extractDomain(urlMatch[0]) };
   if (/weather|forecast|temperature|rain|sunny|cloudy|humidity/.test(m))
-                                                        return { type: "weather", data: extractCity(msg) };
+                   return { type: "weather", data: extractCity(msg) };
   if (/cricket|football|soccer|match|prediction|win|score|team|league|ipl|npl/.test(m))
-                                                        return { type: "sports",  data: msg };
+                   return { type: "sports",  data: msg };
   if (/cve|vulnerability|exploit|malware|threat|hack|breach|zero.?day|ransomware/.test(m))
-                                                        return { type: "threats", data: msg };
+                   return { type: "threats", data: msg };
   return { type: "general", data: null };
 }
 
+function extractDomain(url) {
+  try {
+    const u = url.startsWith("http") ? new URL(url) : new URL("https://" + url);
+    return u.hostname;
+  } catch {
+    return url.replace(/^https?:\/\//, "").split("/")[0];
+  }
+}
+
 function extractCity(msg) {
-  const m = msg.replace(/weather|in|of|at|for|the|today|tomorrow|forecast|temperature/gi, " ").trim();
-  return m.replace(/\s+/g, " ").trim() || "Kathmandu";
+  const patterns = [
+    /(?:weather|forecast|temperature)\s+(?:in|for|at|of)\s+([a-zA-Z\s]+?)(?:\s*(?:today|tomorrow|now|\?|$))/i,
+    /(?:in|for|at)\s+([a-zA-Z\s]+?)(?:\s*(?:today|tomorrow|now|\?|$))/i,
+  ];
+  for (const p of patterns) {
+    const match = msg.match(p);
+    if (match) return match[1].trim();
+  }
+  return "Kathmandu";
 }
 
 /* ── External API calls ───────────────────────────────────────── */
@@ -138,6 +161,61 @@ function weatherCodeDesc(code) {
   return codes[code] || "Unknown conditions";
 }
 
+async function resolveDomain(domain) {
+  try {
+    /* Resolve via Cloudflare DNS over HTTPS */
+    const [ipv4Res, ipv6Res] = await Promise.all([
+      fetch(`https://cloudflare-dns.com/dns-query?name=${domain}&type=A`, { headers: { Accept: "application/dns-json" } }).then(r => r.json()),
+      fetch(`https://cloudflare-dns.com/dns-query?name=${domain}&type=AAAA`, { headers: { Accept: "application/dns-json" } }).then(r => r.json()),
+    ]);
+
+    const ipv4 = (ipv4Res.Answer || []).filter(a => a.type === 1).map(a => a.data);
+    const ipv6 = (ipv6Res.Answer || []).filter(a => a.type === 28).map(a => a.data);
+    const allIPs = [...ipv4, ...ipv6];
+
+    if (!allIPs.length) return `DNS_DATA: No records found for ${domain}.`;
+
+    /* Get geolocation for first IPv4 */
+    let geoInfo = "";
+    if (ipv4.length) {
+      const geo = await fetch(`https://ipapi.co/${ipv4[0]}/json/`).then(r => r.json()).catch(() => ({}));
+      if (geo.city) geoInfo = ` — ${geo.city}, ${geo.country_name} (${geo.org || "Unknown org"})`;
+    }
+
+    return `DNS_DATA for ${domain}:\nIPv4: ${ipv4.join(", ") || "None"}\nIPv6: ${ipv6.slice(0,2).join(", ") || "None"}${geoInfo}`;
+  } catch (e) {
+    return `DNS_DATA: Could not resolve ${domain}: ${e.message}`;
+  }
+}
+
+async function checkWayback(domain) {
+  try {
+    const res = await fetch(
+      `https://archive.org/wayback/available?url=${domain}`
+    ).then(r => r.json());
+
+    const snap = res.archived_snapshots?.closest;
+
+    /* Also get first ever snapshot */
+    const cdx = await fetch(
+      `https://web.archive.org/cdx/search/cdx?url=${domain}&output=json&limit=1&fl=timestamp,statuscode&from=19900101&to=20991231&fastLatest=false`
+    ).then(r => r.json()).catch(() => []);
+
+    const firstSnap = cdx.length > 1 ? cdx[1] : null;
+    const firstDate = firstSnap ? `${firstSnap[0].slice(0,4)}-${firstSnap[0].slice(4,6)}-${firstSnap[0].slice(6,8)}` : "Unknown";
+
+    if (!snap) return `WAYBACK_DATA for ${domain}: Not found in Wayback Machine archive.`;
+
+    const latestDate = snap.timestamp
+      ? `${snap.timestamp.slice(0,4)}-${snap.timestamp.slice(4,6)}-${snap.timestamp.slice(6,8)}`
+      : "Unknown";
+
+    return `WAYBACK_DATA for ${domain}:\nFirst archived: ${firstDate}\nLatest snapshot: ${latestDate} (HTTP ${snap.status})\nURL: ${snap.url}\nAge: Site has been online since at least ${firstDate}`;
+  } catch {
+    return `WAYBACK_DATA: Could not check archive for ${domain}.`;
+  }
+}
+
 async function checkIP(ip, apiKey) {
   if (!apiKey) return `IP_DATA: No AbuseIPDB key configured. IP ${ip} lookup unavailable.`;
   try {
@@ -172,35 +250,22 @@ async function getCVE(cveId) {
   }
 }
 
-/* ── Claude API call ──────────────────────────────────────────── */
+/* ── Cloudflare AI call (free tier) ───────────────────────────── */
 
-async function askClaude(apiKey, userMessage, contextData = null) {
-  const content = contextData
+async function askAI(ai, userMessage, contextData = null) {
+  const userContent = contextData
     ? `${contextData}\n\nUser question: ${userMessage}`
     : userMessage;
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key":         apiKey,
-      "anthropic-version": "2023-06-01",
-      "content-type":      "application/json",
-    },
-    body: JSON.stringify({
-      model:      CLAUDE_MODEL,
-      max_tokens: 300,
-      system:     SYSTEM_PROMPT,
-      messages:   [{ role: "user", content }],
-    }),
+  const response = await ai.run(CF_AI_MODEL, {
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user",   content: userContent   },
+    ],
+    max_tokens: 350,
   });
 
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Claude API error ${res.status}: ${err}`);
-  }
-
-  const data = await res.json();
-  return data.content?.[0]?.text || "I couldn't generate a response. Please try again.";
+  return response.response || "I couldn't generate a response. Please try again.";
 }
 
 /* ── Main handler ─────────────────────────────────────────────── */
@@ -239,9 +304,13 @@ export default {
         contextData = await checkIP(intent.data, env.ABUSEIPDB_API_KEY);
       } else if (intent.type === "cve") {
         contextData = await getCVE(intent.data);
+      } else if (intent.type === "dns") {
+        contextData = await resolveDomain(intent.data);
+      } else if (intent.type === "wayback") {
+        contextData = await checkWayback(intent.data);
       }
 
-      const reply = await askClaude(env.ANTHROPIC_API_KEY, message, contextData);
+      const reply = await askAI(env.AI, message, contextData);
 
       return new Response(JSON.stringify({ reply, intent: intent.type }), {
         status: 200,

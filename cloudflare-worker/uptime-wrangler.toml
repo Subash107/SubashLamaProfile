@@ -1,0 +1,10 @@
+name = "portfolio-uptime-monitor"
+main = "uptime-worker.js"
+compatibility_date = "2024-09-23"
+
+[[triggers.crons]]
+crons = ["*/5 * * * *"]
+
+[[kv_namespaces]]
+binding  = "UPTIME_KV"
+id       = "a0d073b0620d4d70b325f34ed14491c9"

@@ -1,0 +1,44 @@
+name: Watchdog — Breach Monitor
+
+on:
+  schedule:
+    - cron: '30 3 * * *'   # 9:15 AM Nepal Time daily
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  breach-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check email for breaches (LeakCheck free API)
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          EMAIL="lamasubash107@gmail.com"
+
+          # Check via LeakCheck.io free public endpoint
+          RESULT=$(curl -s "https://leakcheck.io/api/public?check=${EMAIL}" 2>/dev/null || echo '{}')
+          FOUND=$(echo "$RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('found',0))" 2>/dev/null || echo "0")
+          SOURCES=$(echo "$RESULT" | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+sources=d.get('sources',[])
+if sources:
+    print(', '.join([s.get('name','Unknown') for s in sources[:5]]))
+else:
+    print('None')
+" 2>/dev/null || echo "Unknown")
+
+          if [ "$FOUND" -gt 0 ]; then
+            MSG=$(printf '🚨 BREACH ALERT!\n\nEmail: %s\nFound in: %s breach(es)\nSources: %s\n\nAction: Change passwords immediately!\nCheck: https://haveibeenpwned.com' "$EMAIL" "$FOUND" "$SOURCES")
+            curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "{\"chat_id\":\"${CHAT}\",\"text\":\"${MSG}\"}"
+            echo "Breach alert sent — found in $FOUND sources"
+          else
+            echo "No breaches found for $EMAIL"
+          fi

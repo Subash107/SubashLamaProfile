@@ -1,0 +1,55 @@
+name: Watchdog — CVE Monitor
+
+on:
+  schedule:
+    - cron: '0 3 * * *'   # 8:45 AM Nepal Time daily
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cve-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check NVD for new CVEs in monitored tools
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+
+          TOOLS=("wazuh" "suricata" "sysmon" "docker" "active directory" "openssh" "nginx" "linux kernel")
+          SINCE=$(date -u -d "yesterday" +"%Y-%m-%dT00:00:00.000")
+          UNTIL=$(date -u +"%Y-%m-%dT23:59:59.000")
+          FOUND=""
+
+          for TOOL in "${TOOLS[@]}"; do
+            ENCODED=$(python3 -c "import urllib.parse; print(urllib.parse.quote('${TOOL}'))")
+            RESULT=$(curl -s "https://services.nvd.nist.gov/rest/json/cves/2.0?keywordSearch=${ENCODED}&pubStartDate=${SINCE}&pubEndDate=${UNTIL}&resultsPerPage=3" 2>/dev/null)
+            COUNT=$(echo "$RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('totalResults',0))" 2>/dev/null || echo "0")
+
+            if [ "$COUNT" -gt 0 ]; then
+              CVES=$(echo "$RESULT" | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+for v in d.get('vulnerabilities',[])[:2]:
+  cve=v['cve']
+  cid=cve['id']
+  desc=cve['descriptions'][0]['value'][:120]
+  score=cve.get('metrics',{}).get('cvssMetricV31',[{}])[0].get('cvssData',{}).get('baseScore','N/A')
+  print(f'  {cid} (CVSS:{score}) — {desc}...')
+" 2>/dev/null || echo "  Details unavailable")
+              FOUND="${FOUND}\n🔴 ${TOOL^^}: ${COUNT} new CVE(s)\n${CVES}\n"
+            fi
+          done
+
+          if [ -n "$FOUND" ]; then
+            MSG=$(printf '🛡️ CVE WATCHDOG ALERT\n%s\nDate: %s\n\nCheck: https://nvd.nist.gov/vuln/search' "$(echo -e "$FOUND")" "$(date -u +"%Y-%m-%d")")
+            curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "{\"chat_id\":\"${CHAT}\",\"text\":\"${MSG}\"}"
+            echo "CVE alert sent"
+          else
+            echo "No new CVEs found for monitored tools today"
+          fi
