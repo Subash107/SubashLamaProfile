@@ -11,3 +11,4 @@ Timestamp (UTC)           | IP Address       | Location                       | 
 2026-06-18T06:04:17.204Z  | 2404:7c00:49:cc08:c992:562c:d482:a00c| Kathmandu, NP                  | VIA NET COMMUNICATION LTD    | Windows 11/10| Chrome    | Desktop  | direct
 2026-06-20T13:59:42.745Z  | 2.49.20.24       | Dubai, AE                      | Emirates Telecommunications Corporation| Android      | Chrome    | Mobile   | http://m.facebook.com/
 2026-06-20T14:02:06.339Z  | 2.49.20.24       | Dubai, AE                      | Emirates Telecommunications Corporation| Android      | Chrome    | Mobile   | http://m.facebook.com/
+2026-06-20T15:18:24.960Z  | 2604:3d09:b980:64e0:956b:5bcb:1417:e96b| Thunder Bay, CA                | Shaw Communications          | Android      | Chrome    | Mobile   | direct
