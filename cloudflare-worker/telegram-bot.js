@@ -19,6 +19,7 @@
 
 const GITHUB_REPO  = "Subash107/SubashLamaProfile";
 const LOG_PATH     = "download-logs/resume-downloads.txt";
+const VERSION      = "1.0.1";
 
 export default {
   async fetch(request, env) {
