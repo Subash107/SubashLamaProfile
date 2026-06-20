@@ -24,6 +24,19 @@ const VERSION      = "1.0.1";
 export default {
   async fetch(request, env) {
     if (request.method !== "POST") {
+      const url = new URL(request.url);
+      if (url.searchParams.get("setup") === "1") {
+        const token = (env.TELEGRAM_BOT_TOKEN || "").trim();
+        const workerUrl = `https://${url.hostname}`;
+        const res = await fetch(`https://api.telegram.org/bot${token}/setWebhook`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: workerUrl }),
+        });
+        const body = await res.text();
+        const me = await (await fetch(`https://api.telegram.org/bot${token}/getMe`)).text();
+        return new Response(`setWebhook: ${body}\ngetMe: ${me}\ntokenLen:${token.length}`, { status: 200 });
+      }
       return new Response("OK", { status: 200 });
     }
 
