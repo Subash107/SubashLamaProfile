@@ -1,0 +1,88 @@
+name: Monthly SLA Report
+
+on:
+  schedule:
+    - cron: '15 3 1 * *'   # 1st of every month at 9:00 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sla-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build and send monthly SLA report
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          DOMAIN="subashlamaprofile.pages.dev"
+          LOG="download-logs/resume-downloads.txt"
+
+          # Last month name
+          LAST_MONTH=$(date -u -d "last month" +"%Y-%m")
+          LAST_MONTH_NAME=$(date -u -d "last month" +"%B %Y")
+
+          # Check site uptime right now
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "https://${DOMAIN}" || echo "000")
+          if [ "$HTTP_CODE" = "200" ]; then
+            UPTIME_STATUS="ONLINE"
+          else
+            UPTIME_STATUS="ISSUE DETECTED (HTTP ${HTTP_CODE})"
+          fi
+
+          # Check SSL days remaining
+          EXPIRY=$(echo | openssl s_client -servername "$DOMAIN" -connect "$DOMAIN:443" 2>/dev/null \
+            | openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2)
+          EXPIRY_EPOCH=$(date -d "$EXPIRY" +%s 2>/dev/null || echo 0)
+          NOW_EPOCH=$(date +%s)
+          SSL_DAYS=$(( (EXPIRY_EPOCH - NOW_EPOCH) / 86400 ))
+
+          # Downloads last month
+          MONTH_DOWNLOADS=0
+          if [ -f "$LOG" ]; then
+            MONTH_DOWNLOADS=$(grep -c "^${LAST_MONTH}" "$LOG" 2>/dev/null || echo 0)
+            TOTAL=$(grep -c "^[0-9]" "$LOG" 2>/dev/null || echo 0)
+
+            # HOT leads last month
+            HOT=$(grep "^${LAST_MONTH}" "$LOG" 2>/dev/null | \
+              grep -iE "microsoft|google|amazon|cisco|ibm|deloitte|accenture|crowdstrike|palo alto" | \
+              wc -l || echo 0)
+
+            # Top country last month
+            TOP_COUNTRY=$(grep "^${LAST_MONTH}" "$LOG" 2>/dev/null | \
+              awk -F'|' '{print $3}' | awk -F',' '{print $NF}' | tr -d ' ' | \
+              sort | uniq -c | sort -rn | head -1 | awk '{print $2}' || echo "N/A")
+          else
+            TOTAL=0
+            HOT=0
+            TOP_COUNTRY="N/A"
+          fi
+
+          MSG="MONTHLY SLA REPORT — ${LAST_MONTH_NAME}
+
+PORTFOLIO STATUS
+Site status  : ${UPTIME_STATUS}
+SSL cert     : ${SSL_DAYS} days remaining
+
+RESUME DOWNLOADS
+Last month   : ${MONTH_DOWNLOADS} downloads
+HOT leads    : ${HOT}
+Top country  : ${TOP_COUNTRY}
+All time     : ${TOTAL} total
+
+INFRASTRUCTURE
+Uptime checks: Every 5 minutes (automated)
+CVE checks   : Daily
+Breach checks: Daily
+
+Dashboard: https://subashlamaprofile.pages.dev/dashboard"
+
+          curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"

@@ -96,6 +96,8 @@ function detectIntent(msg) {
                    return { type: "sports",  data: msg };
   if (/cve|vulnerability|exploit|malware|threat|hack|breach|zero.?day|ransomware/.test(m))
                    return { type: "threats", data: msg };
+  if (/optimize|improve|match|compare|keywords|ats|job description|jd|tailor|resume for/.test(m))
+                   return { type: "resume_optimizer", data: msg };
   return { type: "general", data: null };
 }
 
@@ -397,6 +399,8 @@ export default {
         contextData = await checkWayback(intent.data);
       } else if (intent.type === "sports") {
         contextData = await getSportsPrediction(intent.data);
+      } else if (intent.type === "resume_optimizer") {
+        contextData = `RESUME OPTIMIZER MODE: The user wants help optimizing Subash's resume for a job description. Extract key skills and keywords from their message and compare against Subash's profile. List: 1) Matching keywords already in resume, 2) Missing keywords to add, 3) Suggested changes. Be specific and actionable. Subash's key skills: SOC, SIEM (Wazuh), Suricata, Sysmon, IAM, Active Directory, RBAC, MFA, Docker, GitHub Actions, Python, Bash, MITRE ATT&CK, NIST, ISO 27001, CIS Controls, GRC, vulnerability management, incident response, bug bounty.`;
       }
 
       const reply = await askAI(env.AI, message, contextData);

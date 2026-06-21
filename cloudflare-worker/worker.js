@@ -73,6 +73,79 @@ function detectBot(org, ua, cf) {
   return null;
 }
 
+/* Recruiter Intent Score 0-100 */
+function calcIntentScore(totalTime, sections, visitCount) {
+  let score = 0;
+  const secs = parseInt(totalTime) || 0;
+  const sectionList = (sections || "").split(",").filter(Boolean);
+
+  if (secs >= 120) score += 35;
+  else if (secs >= 60) score += 25;
+  else if (secs >= 30) score += 15;
+  else if (secs >= 15) score += 5;
+
+  score += Math.min(sectionList.length * 8, 30);
+
+  if (visitCount >= 3) score += 25;
+  else if (visitCount === 2) score += 15;
+  else score += 5;
+
+  score = Math.min(score, 100);
+  if (score >= 75) return { score, label: "HIGH INTENT" };
+  if (score >= 45) return { score, label: "MEDIUM INTENT" };
+  return { score, label: "LOW INTENT" };
+}
+
+/* Achievement checker */
+async function checkAchievements(env, totalDownloads, org, countries) {
+  if (!env.DOWNLOAD_KV) return [];
+  const badges = [];
+  const earned = JSON.parse(await env.DOWNLOAD_KV.get("achievements") || "{}");
+
+  const checks = [
+    { key: "first_download",  label: "First Resume Download!",          cond: totalDownloads >= 1 },
+    { key: "ten_downloads",   label: "10 Total Downloads Milestone!",   cond: totalDownloads >= 10 },
+    { key: "fifty_downloads", label: "50 Total Downloads Milestone!",   cond: totalDownloads >= 50 },
+    { key: "hundred_dl",      label: "100 Downloads — You're on fire!", cond: totalDownloads >= 100 },
+    { key: "first_hot_lead",  label: "First HOT LEAD Download!",        cond: HOT_LEADS.some(h => (org||"").toUpperCase().includes(h.toUpperCase())) },
+    { key: "ten_countries",   label: "Resume reached 10 Countries!",    cond: countries >= 10 },
+  ];
+
+  for (const c of checks) {
+    if (c.cond && !earned[c.key]) {
+      earned[c.key] = new Date().toISOString();
+      badges.push(c.label);
+    }
+  }
+
+  if (badges.length) await env.DOWNLOAD_KV.put("achievements", JSON.stringify(earned));
+  return badges;
+}
+
+/* Download Streak tracker */
+async function updateStreak(env) {
+  if (!env.DOWNLOAD_KV) return null;
+  const today = new Date().toISOString().slice(0, 10);
+  const lastDate  = await env.DOWNLOAD_KV.get("streak_last_date");
+  const streakRaw = await env.DOWNLOAD_KV.get("streak_count");
+  let streak = parseInt(streakRaw) || 0;
+
+  if (lastDate === today) return streak;
+
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  if (lastDate === yesterday) {
+    streak += 1;
+  } else if (lastDate && lastDate < yesterday) {
+    streak = 1;
+  } else {
+    streak = 1;
+  }
+
+  await env.DOWNLOAD_KV.put("streak_last_date", today);
+  await env.DOWNLOAD_KV.put("streak_count", streak.toString());
+  return streak;
+}
+
 function corsHeaders(origin) {
   const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   return {
@@ -193,18 +266,67 @@ export default {
         const botReason = detectBot(org, ua, cf);
         const visitorType = botReason ? `🤖 BOT — ${botReason}` : "✅ HUMAN VISITOR";
 
+        /* Recruiter Intent Score */
+        let visitCount = 1;
+        if (env.DOWNLOAD_KV && ip !== "unknown") {
+          const visitKey = `visits_${ip.replace(/[:/]/g, "_")}`;
+          visitCount = parseInt(await env.DOWNLOAD_KV.get(visitKey) || "0") + 1;
+          await env.DOWNLOAD_KV.put(visitKey, visitCount.toString(), { expirationTtl: 2592000 });
+        }
+        const intent = calcIntentScore(totalTime, sections, visitCount);
+
+        /* Track bounce rate — count all visits including short ones */
+        if (env.DOWNLOAD_KV) {
+          const totalVisits = parseInt(await env.DOWNLOAD_KV.get("total_visits") || "0") + 1;
+          await env.DOWNLOAD_KV.put("total_visits", totalVisits.toString());
+          if (parseInt(totalTime) >= 15) {
+            const engagedVisits = parseInt(await env.DOWNLOAD_KV.get("engaged_visits") || "0") + 1;
+            await env.DOWNLOAD_KV.put("engaged_visits", engagedVisits.toString());
+          }
+        }
+
         if (parseInt(totalTime) >= 15) {
           await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               chat_id: env.TELEGRAM_CHAT_ID,
-              text: `👁️ PORTFOLIO VISIT REPORT\n\n${visitorType}\n\n📍 Location   : ${location}\n🏢 Company    : ${org}\n⏱️ Time spent : ${totalTime}\n📖 Read most  : ${sections}\n📌 Source     : ${ref}\n🌐 IP         : ${ip}\n🕐 Time       : ${payload.timestamp || new Date().toISOString()}`,
+              text: `👁️ PORTFOLIO VISIT REPORT\n\n${visitorType}\n🎯 Intent Score: ${intent.score}/100 — ${intent.label}\n👀 Visit #${visitCount} from this IP\n\n📍 Location   : ${location}\n🏢 Company    : ${org}\n⏱️ Time spent : ${totalTime}\n📖 Read most  : ${sections}\n📌 Source     : ${ref}\n🌐 IP         : ${ip}\n🕐 Time       : ${payload.timestamp || new Date().toISOString()}`,
             }),
           }).catch(() => {});
         }
         return new Response("OK", { status: 200, headers: corsHeaders(origin) });
       } catch { return new Response("OK", { status: 200 }); }
+    }
+
+    /* ── Follow-up Check endpoint (called by GitHub Actions daily) ── */
+    if (url.pathname === "/followup-check" && request.method === "GET") {
+      if (!env.DOWNLOAD_KV) return new Response("OK");
+      try {
+        const list = await env.DOWNLOAD_KV.list({ prefix: "hotlead_" });
+        const now  = Date.now();
+        const alerts = [];
+        for (const key of list.keys) {
+          const raw  = await env.DOWNLOAD_KV.get(key.name);
+          if (!raw) continue;
+          const data = JSON.parse(raw);
+          const ageDays = (now - data.ts) / 86400000;
+          if (ageDays >= 3 && ageDays < 4) {
+            alerts.push(`${data.org} (${data.location}) downloaded ${Math.floor(ageDays)}d ago`);
+          }
+        }
+        if (alerts.length) {
+          await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: env.TELEGRAM_CHAT_ID,
+              text: `FOLLOW-UP REMINDER!\n\nThese HOT LEADS downloaded your resume 3 days ago — consider reaching out on LinkedIn!\n\n${alerts.map((a, i) => `${i+1}. ${a}`).join("\n")}`,
+            }),
+          }).catch(() => {});
+        }
+        return new Response("OK");
+      } catch { return new Response("OK"); }
     }
 
     /* ── Canary Token endpoint ── */
@@ -277,12 +399,49 @@ export default {
         const lastSeen = await env.DOWNLOAD_KV.get(ipKey);
         if (lastSeen) {
           const hoursSince = (Date.now() - parseInt(lastSeen)) / 3600000;
-          if (hoursSince < 168) { // within 7 days
+          if (hoursSince < 168) {
             const daysAgo = Math.round(hoursSince / 24);
             repeatFlag = daysAgo === 0 ? "today" : `${daysAgo}d ago`;
           }
         }
         await env.DOWNLOAD_KV.put(ipKey, Date.now().toString(), { expirationTtl: 604800 });
+      }
+
+      /* ── HOT LEAD follow-up storage ── */
+      const isHotLead = HOT_LEADS.some(h => org.toUpperCase().includes(h.toUpperCase()));
+      if (isHotLead && env.DOWNLOAD_KV && ip !== "unknown") {
+        const flKey = `hotlead_${ip.replace(/[:/]/g, "_")}_${Date.now()}`;
+        await env.DOWNLOAD_KV.put(flKey, JSON.stringify({ org, location, ts: Date.now() }), { expirationTtl: 604800 });
+      }
+
+      /* ── Download Streak ── */
+      const streak = await updateStreak(env);
+
+      /* ── Achievement System ── */
+      const totalDl = parseInt(await env.DOWNLOAD_KV?.get("total_dl_count") || "0") + 1;
+      if (env.DOWNLOAD_KV) await env.DOWNLOAD_KV.put("total_dl_count", totalDl.toString());
+      const badges = await checkAchievements(env, totalDl, org, 0);
+      if (badges.length) {
+        await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: env.TELEGRAM_CHAT_ID,
+            text: `ACHIEVEMENT UNLOCKED!\n\n${badges.map(b => `🏆 ${b}`).join("\n")}`,
+          }),
+        }).catch(() => {});
+      }
+
+      /* ── Streak alert on milestones ── */
+      if (streak && [3, 7, 14, 30].includes(streak)) {
+        await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: env.TELEGRAM_CHAT_ID,
+            text: `DOWNLOAD STREAK: ${streak} days in a row!\n\nYour resume has been downloaded every day for ${streak} consecutive days. Keep up the momentum!`,
+          }),
+        }).catch(() => {});
       }
 
       /* Enrich payload */

@@ -1,0 +1,20 @@
+name: HOT LEAD Follow-up Reminder
+
+on:
+  schedule:
+    - cron: '45 3 * * *'   # Daily 9:30 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  followup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Trigger follow-up check on worker
+        run: |
+          curl -s "https://lingering-surf-6d77.lamasubash107.workers.dev/followup-check"
+          echo "Follow-up check triggered."

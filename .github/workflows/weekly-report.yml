@@ -1,0 +1,120 @@
+name: Weekly Report Card
+
+on:
+  schedule:
+    - cron: '15 3 * * 0'   # Every Sunday 9:00 AM Nepal Time (UTC+5:45)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  weekly-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Build and send weekly report card
+        run: |
+          LOG="download-logs/resume-downloads.txt"
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+
+          if [ ! -f "$LOG" ]; then
+            curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "{\"chat_id\":\"${CHAT}\",\"text\":\"📊 Weekly Report Card\n\nNo resume downloads recorded yet.\"}"
+            exit 0
+          fi
+
+          TOTAL=$(grep -c "^[0-9]" "$LOG" 2>/dev/null || echo 0)
+
+          # This week vs last week
+          THIS_WEEK=0
+          LAST_WEEK=0
+          for i in $(seq 0 6); do
+            DAY=$(date -u -d "-${i} days" +"%Y-%m-%d")
+            C=$(grep -c "^${DAY}" "$LOG" 2>/dev/null || echo 0)
+            THIS_WEEK=$((THIS_WEEK + C))
+          done
+          for i in $(seq 7 13); do
+            DAY=$(date -u -d "-${i} days" +"%Y-%m-%d")
+            C=$(grep -c "^${DAY}" "$LOG" 2>/dev/null || echo 0)
+            LAST_WEEK=$((LAST_WEEK + C))
+          done
+
+          # Trend arrow
+          if [ "$THIS_WEEK" -gt "$LAST_WEEK" ]; then
+            TREND="UP vs last week"
+          elif [ "$THIS_WEEK" -lt "$LAST_WEEK" ]; then
+            TREND="DOWN vs last week"
+          else
+            TREND="SAME as last week"
+          fi
+
+          # Top countries this week
+          TOP_COUNTRIES=""
+          for i in $(seq 0 6); do
+            DAY=$(date -u -d "-${i} days" +"%Y-%m-%d")
+            grep "^${DAY}" "$LOG" 2>/dev/null || true
+          done | awk -F'|' '{print $3}' | awk -F',' '{print $NF}' | tr -d ' ' | \
+            sort | uniq -c | sort -rn | head -5 | \
+            while read count country; do echo "  ${country}: ${count}"; done > /tmp/countries.txt
+          TOP_COUNTRIES=$(cat /tmp/countries.txt | tr '\n' '\n' || echo "  No data")
+
+          # Top companies this week
+          for i in $(seq 0 6); do
+            DAY=$(date -u -d "-${i} days" +"%Y-%m-%d")
+            grep "^${DAY}" "$LOG" 2>/dev/null || true
+          done | awk -F'|' '{print $4}' | tr -d ' ' | grep -v "^$" | \
+            sort | uniq -c | sort -rn | head -3 | \
+            while read count org; do echo "  ${org}: ${count}"; done > /tmp/companies.txt
+          TOP_COMPANIES=$(cat /tmp/companies.txt || echo "  No data")
+
+          # HOT leads this week
+          HOT_LEADS=0
+          for i in $(seq 0 6); do
+            DAY=$(date -u -d "-${i} days" +"%Y-%m-%d")
+            H=$(grep "^${DAY}" "$LOG" 2>/dev/null | grep -iE "microsoft|google|amazon|cisco|ibm|deloitte|accenture|crowdstrike|palo alto" | wc -l || echo 0)
+            HOT_LEADS=$((HOT_LEADS + H))
+          done
+
+          # Best day this week
+          BEST_DAY=""
+          BEST_COUNT=0
+          for i in $(seq 0 6); do
+            DAY=$(date -u -d "-${i} days" +"%Y-%m-%d")
+            C=$(grep -c "^${DAY}" "$LOG" 2>/dev/null || echo 0)
+            if [ "$C" -gt "$BEST_COUNT" ]; then
+              BEST_COUNT=$C
+              BEST_DAY=$DAY
+            fi
+          done
+
+          WEEK_START=$(date -u -d "-6 days" +"%Y-%m-%d")
+          WEEK_END=$(date -u +"%Y-%m-%d")
+
+          MSG="📊 WEEKLY REPORT CARD
+${WEEK_START} to ${WEEK_END}
+
+Downloads this week : ${THIS_WEEK} (${TREND})
+Downloads last week : ${LAST_WEEK}
+All time total      : ${TOTAL}
+HOT leads this week : ${HOT_LEADS}
+Best day            : ${BEST_DAY} (${BEST_COUNT} downloads)
+
+Top Countries:
+${TOP_COUNTRIES}
+Top Companies:
+${TOP_COMPANIES}
+
+Keep applying! Every download is a potential opportunity."
+
+          curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"

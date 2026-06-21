@@ -1,0 +1,48 @@
+name: SSL Certificate Expiry Monitor
+
+on:
+  schedule:
+    - cron: '0 4 * * *'   # Daily 9:45 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ssl-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check SSL certificate expiry
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          DOMAIN="subashlamaprofile.pages.dev"
+
+          EXPIRY=$(echo | openssl s_client -servername "$DOMAIN" -connect "$DOMAIN:443" 2>/dev/null \
+            | openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2)
+
+          if [ -z "$EXPIRY" ]; then
+            curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "{\"chat_id\":\"${CHAT}\",\"text\":\"SSL CHECK FAILED: Could not read SSL certificate for ${DOMAIN}\"}"
+            exit 0
+          fi
+
+          EXPIRY_EPOCH=$(date -d "$EXPIRY" +%s 2>/dev/null || date -j -f "%b %d %T %Y %Z" "$EXPIRY" +%s)
+          NOW_EPOCH=$(date +%s)
+          DAYS_LEFT=$(( (EXPIRY_EPOCH - NOW_EPOCH) / 86400 ))
+          EXPIRY_DATE=$(date -d "$EXPIRY" +"%Y-%m-%d" 2>/dev/null || echo "$EXPIRY")
+
+          if [ "$DAYS_LEFT" -le 30 ]; then
+            curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "{\"chat_id\":\"${CHAT}\",\"text\":\"SSL EXPIRY WARNING!\n\nDomain  : ${DOMAIN}\nExpires : ${EXPIRY_DATE}\nDays left: ${DAYS_LEFT} days\n\nRenew your SSL certificate soon!\"}"
+          elif [ "$DAYS_LEFT" -le 7 ]; then
+            curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "{\"chat_id\":\"${CHAT}\",\"text\":\"CRITICAL: SSL EXPIRES IN ${DAYS_LEFT} DAYS!\n\nDomain: ${DOMAIN}\nExpiry: ${EXPIRY_DATE}\n\nURGENT: Renew immediately!\"}"
+          else
+            echo "SSL OK — ${DAYS_LEFT} days remaining (expires ${EXPIRY_DATE})"
+          fi

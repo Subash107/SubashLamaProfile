@@ -24,15 +24,20 @@ export async function onRequestPost(context) {
     const text    = msg.text.trim().split(" ")[0].toLowerCase();
     let reply     = "";
 
+    const fullText = msg.text.trim();
     switch (text) {
       case "/start":
       case "/help":
-        reply = "Resume Tracker Bot\n\n/stats  - Total downloads and top countries\n/latest - Most recent download\n/log    - Last 5 downloads\n/week   - This week's count\n/help   - Show this menu";
+        reply = "Resume Tracker Bot\n\n/stats   - Total downloads and top countries\n/latest  - Most recent download\n/log     - Last 5 downloads\n/week    - This week's count\n/apply   - Add job application (e.g. /apply Microsoft SOC Analyst)\n/apps    - List all applications\n/hired   - Mark job as hired (e.g. /hired Microsoft)\n/reject  - Mark job as rejected (e.g. /reject Microsoft)\n/help    - Show this menu";
         break;
       case "/stats":  reply = await getStats(env);  break;
       case "/latest": reply = await getLatest(env); break;
       case "/log":    reply = await getLog(env);    break;
       case "/week":   reply = await getWeek(env);   break;
+      case "/apply":  reply = await addApplication(env, fullText); break;
+      case "/apps":   reply = await listApplications(env); break;
+      case "/hired":  reply = await updateApplication(env, fullText, "HIRED"); break;
+      case "/reject": reply = await updateApplication(env, fullText, "REJECTED"); break;
       default:        reply = "Unknown command. Send /help to see available commands.";
     }
 
@@ -109,6 +114,69 @@ async function getWeek(env) {
       const d = parseLine(l);
       return "- " + d.location + " (" + d.timestamp.slice(0,10) + ")";
     }).join("\n");
+}
+
+async function addApplication(env, fullText) {
+  const parts = fullText.replace("/apply", "").trim();
+  if (!parts) return "Usage: /apply CompanyName JobTitle\nExample: /apply Microsoft SOC Analyst";
+  const words = parts.split(" ");
+  const company = words[0];
+  const role = words.slice(1).join(" ") || "Not specified";
+  const date = new Date().toISOString().slice(0, 10);
+
+  const apps = JSON.parse(await env.TELEGRAM_BOT_TOKEN ? "{}" : "{}");
+  const stored = await fetchApps(env);
+  stored.push({ company, role, date, status: "APPLIED" });
+  await saveApps(env, stored);
+  return "Application added!\n\nCompany : " + company + "\nRole    : " + role + "\nDate    : " + date + "\nStatus  : APPLIED\n\nTotal applications: " + stored.length;
+}
+
+async function listApplications(env) {
+  const apps = await fetchApps(env);
+  if (!apps.length) return "No applications tracked yet.\n\nUse /apply CompanyName Role to add one.";
+  const STATUS_ICONS = { APPLIED: "APPLIED", HIRED: "HIRED", REJECTED: "REJECTED", INTERVIEW: "INTERVIEW" };
+  return "Your Job Applications (" + apps.length + " total)\n\n" +
+    apps.slice(-15).reverse().map((a, i) =>
+      (i+1) + ". " + a.company + " — " + a.role + "\n   Status: " + (STATUS_ICONS[a.status]||a.status) + " | Applied: " + a.date
+    ).join("\n\n");
+}
+
+async function updateApplication(env, fullText, newStatus) {
+  const company = fullText.replace("/" + newStatus.toLowerCase(), "").trim();
+  if (!company) return "Usage: /" + newStatus.toLowerCase() + " CompanyName";
+  const apps = await fetchApps(env);
+  const idx = apps.findIndex(a => a.company.toLowerCase().includes(company.toLowerCase()));
+  if (idx === -1) return "No application found for: " + company + "\n\nUse /apps to see all applications.";
+  apps[idx].status = newStatus;
+  await saveApps(env, apps);
+  return "Updated!\n\n" + apps[idx].company + " — " + apps[idx].role + "\nNew status: " + newStatus;
+}
+
+async function fetchApps(env) {
+  try {
+    const res = await fetch("https://api.github.com/repos/" + GITHUB_REPO + "/contents/download-logs/job-applications.json", {
+      headers: { "User-Agent": "ResumeTrackerBot/1.0", ...(env.GITHUB_READ_TOKEN ? { "Authorization": "Bearer " + env.GITHUB_READ_TOKEN } : {}) }
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return JSON.parse(atob(data.content.replace(/\n/g, "")));
+  } catch { return []; }
+}
+
+async function saveApps(env, apps) {
+  if (!env.GITHUB_READ_TOKEN) return;
+  let sha = "";
+  try {
+    const existing = await fetch("https://api.github.com/repos/" + GITHUB_REPO + "/contents/download-logs/job-applications.json", {
+      headers: { "Authorization": "Bearer " + env.GITHUB_READ_TOKEN, "User-Agent": "ResumeTrackerBot/1.0" }
+    });
+    if (existing.ok) { const d = await existing.json(); sha = d.sha; }
+  } catch {}
+  await fetch("https://api.github.com/repos/" + GITHUB_REPO + "/contents/download-logs/job-applications.json", {
+    method: "PUT",
+    headers: { "Authorization": "Bearer " + env.GITHUB_READ_TOKEN, "Content-Type": "application/json", "User-Agent": "ResumeTrackerBot/1.0" },
+    body: JSON.stringify({ message: "chore: update job applications", content: btoa(JSON.stringify(apps, null, 2)), ...(sha ? { sha } : {}) })
+  });
 }
 
 async function sendMessage(token, chatId, text) {
