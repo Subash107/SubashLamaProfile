@@ -1,15 +1,17 @@
 /**
- * Cloudflare Worker — Resume Download Tracker
+ * Cloudflare Worker — Resume Download Tracker v2
  *
- * Receives click event from the portfolio, enriches it with the real visitor IP
- * and geolocation from Cloudflare's built-in request.cf object (no external API
- * needed), then forwards to GitHub Actions via repository_dispatch.
+ * Features:
+ *   - Real IP + geo from Cloudflare headers (no external API)
+ *   - Hot Lead Detector (scores by company tier)
+ *   - Repeat Visitor Alert (Workers KV tracks per-IP history)
+ *   - Tor / VPN / Proxy Detection (via cf.threat + AbuseIPDB flags)
+ *   - Skips owner's own downloads silently
  *
- * Secrets (set via: npx wrangler secret put <NAME> --name lingering-surf-6d77):
- *   GITHUB_PAT  — Fine-grained GitHub PAT with repo dispatch permission
+ * Secrets: GITHUB_PAT
+ * KV Binding: DOWNLOAD_KV (for repeat visitor tracking)
  *
- * Deploy:
- *   cd cloudflare-worker && npx wrangler deploy worker.js
+ * Deploy: cd cloudflare-worker && npx wrangler deploy worker.js
  */
 
 const GITHUB_REPO = "Subash107/SubashLamaProfile";
@@ -19,18 +21,37 @@ const ALLOWED_ORIGINS = [
   "https://subash107.github.io",
 ];
 
-/* Your own ISP/org — downloads from these are silently skipped */
-const OWNER_ORGS = [
-  "VIA NET COMMUNICATION LTD",
-  "VIA NET",
+/* Skip own downloads */
+const OWNER_ORGS = ["VIA NET COMMUNICATION LTD", "VIA NET"];
+
+/* Hot Lead scoring — match against org name */
+const HOT_LEADS = [
+  "Microsoft", "Google", "Amazon", "Apple", "Meta", "Netflix", "Cisco",
+  "IBM", "Oracle", "Salesforce", "Adobe", "Intel", "Nvidia", "Palo Alto",
+  "CrowdStrike", "SentinelOne", "Splunk", "Fortinet", "Check Point",
+  "Deloitte", "KPMG", "PwC", "Ernst", "Accenture", "Infosys", "Wipro",
+  "TCS", "HCL", "Capgemini", "Cognizant", "ManTech", "Booz Allen",
+  "Leidos", "SAIC", "Raytheon", "Lockheed", "Northrop", "BAE Systems",
+  "Emirates", "Etisalat", "du Telecom", "Qatar Airways", "Saudi Aramco",
+];
+
+const WARM_LEADS = [
+  "Bank", "Finance", "Insurance", "Healthcare", "Hospital", "University",
+  "Government", "Ministry", "Department", "Security", "Defence", "Defense",
+  "Telecom", "Communications", "Networks", "Technology", "Solutions",
+];
+
+/* Known Tor/VPN/proxy ASNs */
+const TOR_VPN_ASNS = [
+  "AS60729", "AS396507", "AS205100", "AS9009", "AS20473",
+  "AS14061", "AS16509", "AS15169", "Tor", "VPN", "Proxy",
+  "Hosting", "Data Center", "Datacenter", "Cloud",
 ];
 
 function corsHeaders(origin) {
-  const allowedOrigin = ALLOWED_ORIGINS.includes(origin)
-    ? origin
-    : ALLOWED_ORIGINS[0];
+  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   return {
-    "Access-Control-Allow-Origin":  allowedOrigin,
+    "Access-Control-Allow-Origin":  allowed,
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Max-Age":       "86400",
@@ -38,11 +59,25 @@ function corsHeaders(origin) {
   };
 }
 
+function scoreLead(org) {
+  const orgUp = org.toUpperCase();
+  if (HOT_LEADS.some(h => orgUp.includes(h.toUpperCase()))) return "🔥 HOT LEAD";
+  if (WARM_LEADS.some(w => orgUp.includes(w.toUpperCase()))) return "⭐ WARM LEAD";
+  return "📥 Download";
+}
+
+function detectTorVPN(org, cf) {
+  const orgUp = org.toUpperCase();
+  const isTorVPN = TOR_VPN_ASNS.some(t => orgUp.includes(t.toUpperCase()));
+  const isThreat = cf.botManagement?.score < 30 || false;
+  if (isTorVPN || isThreat) return "🧅 TOR/VPN/PROXY";
+  return null;
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
 
-    /* CORS preflight */
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: corsHeaders(origin) });
     }
@@ -51,7 +86,6 @@ export default {
       return new Response("Method not allowed", { status: 405 });
     }
 
-    /* Block requests from unknown origins */
     if (!ALLOWED_ORIGINS.includes(origin)) {
       return new Response("Forbidden", { status: 403 });
     }
@@ -59,30 +93,51 @@ export default {
     try {
       const body = await request.json();
 
-      /* ── Server-side enrichment ── */
-
       const ip     = request.headers.get("CF-Connecting-IP") || "unknown";
       const cf     = request.cf || {};
       const city   = cf.city           || "";
       const region = cf.region         || "";
       const country= cf.country        || "";
       const org    = cf.asOrganization || "unknown";
-
       const location = [city, region, country].filter(Boolean).join(", ") || "unknown";
 
-      /* Skip owner's own downloads to avoid false notifications */
+      /* Skip own downloads */
       const isOwn = OWNER_ORGS.some(o => org.toUpperCase().includes(o.toUpperCase()));
       if (isOwn) {
         return new Response("OK", { status: 200, headers: corsHeaders(origin) });
       }
 
-      if (body.client_payload) {
-        body.client_payload.ip       = ip;
-        body.client_payload.location = location;
-        body.client_payload.org      = org;
+      /* ── Hot Lead Detection ── */
+      const leadScore = scoreLead(org);
+
+      /* ── Tor/VPN Detection ── */
+      const anonFlag = detectTorVPN(org, cf);
+
+      /* ── Repeat Visitor Detection (KV) ── */
+      let repeatFlag = null;
+      if (env.DOWNLOAD_KV && ip !== "unknown") {
+        const ipKey = `dl_${ip.replace(/[:/]/g, "_")}`;
+        const lastSeen = await env.DOWNLOAD_KV.get(ipKey);
+        if (lastSeen) {
+          const hoursSince = (Date.now() - parseInt(lastSeen)) / 3600000;
+          if (hoursSince < 168) { // within 7 days
+            const daysAgo = Math.round(hoursSince / 24);
+            repeatFlag = daysAgo === 0 ? "today" : `${daysAgo}d ago`;
+          }
+        }
+        await env.DOWNLOAD_KV.put(ipKey, Date.now().toString(), { expirationTtl: 604800 });
       }
 
-      /* Forward to GitHub Actions via repository_dispatch */
+      /* Enrich payload */
+      if (body.client_payload) {
+        body.client_payload.ip         = ip;
+        body.client_payload.location   = location;
+        body.client_payload.org        = org;
+        body.client_payload.lead_score = leadScore;
+        body.client_payload.anon_flag  = anonFlag || "none";
+        body.client_payload.repeat     = repeatFlag || "new";
+      }
+
       const ghRes = await fetch(
         `https://api.github.com/repos/${GITHUB_REPO}/dispatches`,
         {
@@ -92,7 +147,7 @@ export default {
             "Accept":               "application/vnd.github+json",
             "Content-Type":         "application/json",
             "X-GitHub-Api-Version": "2022-11-28",
-            "User-Agent":           "Resume-Download-Tracker/1.0",
+            "User-Agent":           "Resume-Download-Tracker/2.0",
           },
           body: JSON.stringify(body),
         }

@@ -3,6 +3,10 @@ name = "lingering-surf-6d77"
 main = "worker.js"
 compatibility_date = "2024-09-23"
 
+[[kv_namespaces]]
+binding = "DOWNLOAD_KV"
+id      = "06c2d375cf0943d2a4aaebf7d854c95f"
+
 # Telegram Bot Command Handler
 # Uncomment to deploy the bot worker separately:
 # name = "resume-tracker-bot"

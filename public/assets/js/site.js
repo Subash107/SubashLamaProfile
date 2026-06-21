@@ -3115,7 +3115,9 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
           device:    /Mobi|Android|iPhone|iPad/.test(ua) ? "Mobile" : "Desktop",
           referrer:  document.referrer || "direct",
           tz:        Intl.DateTimeFormat().resolvedOptions().timeZone || "unknown",
-          lang:      navigator.language || "unknown"
+          lang:      navigator.language || "unknown",
+          utm_source: new URLSearchParams(window.location.search).get("utm_source") || "direct",
+          utm_medium: new URLSearchParams(window.location.search).get("utm_medium") || "none"
           /* ip, location, org are enriched server-side by the Cloudflare Worker */
         }
       };

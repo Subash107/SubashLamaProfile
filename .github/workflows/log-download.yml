@@ -73,7 +73,22 @@ jobs:
           TS="${{ github.event.client_payload.timestamp }}"
           IP="${{ github.event.client_payload.ip }}"
           REF="${{ github.event.client_payload.referrer }}"
-          MSG=$(printf '📥 Resume Downloaded!\n\n📍 Location : %s\n🏢 Company  : %s\n💻 Device   : %s / %s / %s\n🌐 IP       : %s\n🔗 Referrer : %s\n🕐 Time     : %s\n\n📋 Log: https://github.com/Subash107/SubashLamaProfile/blob/main/download-logs/resume-downloads.txt' "$LOC" "$ORG" "$DEVICE" "$OS" "$BROWSER" "$IP" "$REF" "$TS")
+          LEAD="${{ github.event.client_payload.lead_score }}"
+          ANON="${{ github.event.client_payload.anon_flag }}"
+          REPEAT="${{ github.event.client_payload.repeat }}"
+
+          REPEAT_LINE=""
+          if [ "$REPEAT" != "new" ] && [ -n "$REPEAT" ]; then
+            REPEAT_LINE=$(printf '\n🔁 REPEAT VISITOR (last: %s)' "$REPEAT")
+          fi
+
+          ANON_LINE=""
+          if [ "$ANON" != "none" ] && [ -n "$ANON" ]; then
+            ANON_LINE=$(printf '\n%s' "$ANON")
+          fi
+
+          MSG=$(printf '%s Resume Downloaded!%s%s\n\n📍 Location : %s\n🏢 Company  : %s\n💻 Device   : %s / %s / %s\n🌐 IP       : %s\n🔗 Referrer : %s\n🕐 Time     : %s\n\n📋 Log: https://github.com/Subash107/SubashLamaProfile/blob/main/download-logs/resume-downloads.txt' \
+            "$LEAD" "$REPEAT_LINE" "$ANON_LINE" "$LOC" "$ORG" "$DEVICE" "$OS" "$BROWSER" "$IP" "$REF" "$TS")
           curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
             -H "Content-Type: application/json" \
             -d "{\"chat_id\":\"${{ secrets.TELEGRAM_CHAT_ID }}\",\"text\":\"${MSG}\"}"
