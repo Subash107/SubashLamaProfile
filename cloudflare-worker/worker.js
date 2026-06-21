@@ -77,6 +77,38 @@ function detectTorVPN(org, cf) {
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
+    const url    = new URL(request.url);
+
+    /* ── Canary Token endpoint ── */
+    /* Embed https://lingering-surf-6d77.lamasubash107.workers.dev/canary */
+    /* as an invisible 1x1 image link inside your resume PDF.             */
+    /* Fires when anyone opens the PDF — even if forwarded internally.    */
+    if (url.pathname === "/canary") {
+      const ip        = request.headers.get("CF-Connecting-IP") || "unknown";
+      const cf        = request.cf || {};
+      const city      = cf.city           || "";
+      const country   = cf.country        || "";
+      const org       = cf.asOrganization || "unknown";
+      const location  = [city, country].filter(Boolean).join(", ") || "unknown";
+      const ua        = request.headers.get("User-Agent") || "unknown";
+      const ts        = new Date().toISOString();
+
+      await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: env.TELEGRAM_CHAT_ID,
+          text: `🕵️ CANARY TOKEN FIRED!\n\nYour resume PDF was OPENED!\n\n📍 Location : ${location}\n🏢 Org      : ${org}\n🌐 IP       : ${ip}\n🖥️ App      : ${ua.slice(0,80)}\n🕐 Time     : ${ts}\n\n⚠️ This may be someone who received your resume by email or file share.`,
+        }),
+      }).catch(() => {});
+
+      /* Return a transparent 1x1 pixel GIF */
+      const pixel = new Uint8Array([71,73,70,56,57,97,1,0,1,0,128,0,0,255,255,255,0,0,0,33,249,4,0,0,0,0,0,44,0,0,0,0,1,0,1,0,0,2,2,68,1,0,59]);
+      return new Response(pixel, {
+        status: 200,
+        headers: { "Content-Type": "image/gif", "Cache-Control": "no-store" },
+      });
+    }
 
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: corsHeaders(origin) });

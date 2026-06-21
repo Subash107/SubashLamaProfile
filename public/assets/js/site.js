@@ -3155,8 +3155,21 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
     if (countUp) countUp.setAttribute("data-target", yearsIT);
   }
 
+  function initDownloadCounter() {
+    const badge = document.getElementById("resumeDownloadCount");
+    if (!badge) return;
+    fetch("https://raw.githubusercontent.com/Subash107/SubashLamaProfile/main/download-logs/resume-downloads.txt")
+      .then(r => r.text())
+      .then(text => {
+        const count = (text.match(/^\d{4}/gm) || []).length;
+        if (count > 0) badge.textContent = "(" + count + " downloads)";
+      })
+      .catch(() => {});
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     initResumeTracking();
+    initDownloadCounter();
     initDynamicDates();
     initAudioToggle();
     initScrollReveal();
