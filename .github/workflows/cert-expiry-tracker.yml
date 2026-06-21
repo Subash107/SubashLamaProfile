@@ -1,0 +1,55 @@
+name: Certification Expiry Tracker
+
+on:
+  schedule:
+    - cron: '0 3 * * 1'   # Every Monday 8:45 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cert-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Check certification expiry dates
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          TODAY=$(date +%s)
+          ALERTS=""
+          ALL=""
+
+          check_cert() {
+            NAME="$1"
+            EXPIRY_DATE="$2"
+            EXPIRY_EPOCH=$(date -d "$EXPIRY_DATE" +%s 2>/dev/null || echo 0)
+            DAYS_LEFT=$(( (EXPIRY_EPOCH - TODAY) / 86400 ))
+            if [ "$DAYS_LEFT" -lt 0 ]; then
+              ALERTS="${ALERTS}EXPIRED: ${NAME} (expired ${EXPIRY_DATE})\n"
+            elif [ "$DAYS_LEFT" -le 60 ]; then
+              ALERTS="${ALERTS}EXPIRING SOON: ${NAME} — ${DAYS_LEFT} days left (${EXPIRY_DATE})\n"
+            fi
+            ALL="${ALL}  ${NAME}: ${DAYS_LEFT} days (${EXPIRY_DATE})\n"
+          }
+
+          # Subash's certifications — update expiry dates as needed
+          check_cert "Cisco Endpoint Security"        "2026-12-01"
+          check_cert "Cisco Ethical Hacker"           "2026-12-01"
+          check_cert "Cisco Intro to Cybersecurity"   "2026-12-01"
+          check_cert "IBM Cybersecurity Fundamentals" "2027-01-01"
+          check_cert "IBM Python for Data Science"    "2027-01-01"
+          check_cert "Google Ads Video"               "2026-09-01"
+          check_cert "Kubernetes Security (studying)" "2027-06-01"
+
+          if [ -n "$ALERTS" ]; then
+            MSG="CERTIFICATION EXPIRY ALERT!\n\n${ALERTS}\nRenew soon to keep your profile strong."
+            printf "$MSG" | curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "{\"chat_id\":\"${CHAT}\",\"text\":$(python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"
+          else
+            echo "All certifications valid."
+            echo -e "$ALL"
+          fi

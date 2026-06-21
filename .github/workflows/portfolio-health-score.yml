@@ -1,0 +1,114 @@
+name: Portfolio Health Score
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'   # Every Sunday 8:45 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  health-score:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Calculate and send health score
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          LOG="download-logs/resume-downloads.txt"
+          DOMAIN="subashlamaprofile.pages.dev"
+          SCORE=0
+          NOTES=""
+
+          # 1. Site uptime check (20 points)
+          HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "https://${DOMAIN}" || echo "000")
+          if [ "$HTTP" = "200" ]; then
+            SCORE=$((SCORE + 20))
+            NOTES="${NOTES}[+20] Site is online (HTTP 200)\n"
+          else
+            NOTES="${NOTES}[+0]  Site issue detected (HTTP ${HTTP})\n"
+          fi
+
+          # 2. Downloads this week (20 points)
+          WEEK=0
+          for i in $(seq 0 6); do
+            DAY=$(date -u -d "-${i} days" +"%Y-%m-%d")
+            C=$(grep -c "^${DAY}" "$LOG" 2>/dev/null || echo 0)
+            WEEK=$((WEEK + C))
+          done
+          if [ "$WEEK" -ge 5 ]; then
+            SCORE=$((SCORE + 20))
+            NOTES="${NOTES}[+20] Excellent: ${WEEK} downloads this week\n"
+          elif [ "$WEEK" -ge 2 ]; then
+            SCORE=$((SCORE + 12))
+            NOTES="${NOTES}[+12] Good: ${WEEK} downloads this week\n"
+          elif [ "$WEEK" -ge 1 ]; then
+            SCORE=$((SCORE + 6))
+            NOTES="${NOTES}[+6]  Low: ${WEEK} download(s) this week\n"
+          else
+            NOTES="${NOTES}[+0]  No downloads this week\n"
+          fi
+
+          # 3. HOT leads this week (20 points)
+          HOT=0
+          for i in $(seq 0 6); do
+            DAY=$(date -u -d "-${i} days" +"%Y-%m-%d")
+            H=$(grep "^${DAY}" "$LOG" 2>/dev/null | grep -iE "microsoft|google|amazon|cisco|ibm|deloitte|accenture|crowdstrike|palo alto" | wc -l || echo 0)
+            HOT=$((HOT + H))
+          done
+          if [ "$HOT" -ge 2 ]; then
+            SCORE=$((SCORE + 20))
+            NOTES="${NOTES}[+20] ${HOT} HOT leads this week!\n"
+          elif [ "$HOT" -eq 1 ]; then
+            SCORE=$((SCORE + 12))
+            NOTES="${NOTES}[+12] 1 HOT lead this week\n"
+          else
+            NOTES="${NOTES}[+0]  No HOT leads this week\n"
+          fi
+
+          # 4. SSL certificate health (20 points)
+          EXPIRY=$(echo | openssl s_client -servername "$DOMAIN" -connect "$DOMAIN:443" 2>/dev/null \
+            | openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2)
+          EXPIRY_EPOCH=$(date -d "$EXPIRY" +%s 2>/dev/null || echo 0)
+          SSL_DAYS=$(( (EXPIRY_EPOCH - $(date +%s)) / 86400 ))
+          if [ "$SSL_DAYS" -gt 60 ]; then
+            SCORE=$((SCORE + 20))
+            NOTES="${NOTES}[+20] SSL healthy: ${SSL_DAYS} days remaining\n"
+          elif [ "$SSL_DAYS" -gt 30 ]; then
+            SCORE=$((SCORE + 10))
+            NOTES="${NOTES}[+10] SSL OK: ${SSL_DAYS} days remaining\n"
+          else
+            NOTES="${NOTES}[+0]  SSL warning: only ${SSL_DAYS} days left!\n"
+          fi
+
+          # 5. GitHub activity this week (20 points)
+          COMMITS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/Subash107/SubashLamaProfile/commits?since=$(date -u -d '-7 days' +%Y-%m-%dT%H:%M:%SZ)&per_page=10" | \
+            python3 -c "import json,sys; data=json.load(sys.stdin); print(len(data) if isinstance(data,list) else 0)" 2>/dev/null || echo 0)
+          if [ "$COMMITS" -ge 5 ]; then
+            SCORE=$((SCORE + 20))
+            NOTES="${NOTES}[+20] Active: ${COMMITS} commits this week\n"
+          elif [ "$COMMITS" -ge 1 ]; then
+            SCORE=$((SCORE + 10))
+            NOTES="${NOTES}[+10] ${COMMITS} commit(s) this week\n"
+          else
+            NOTES="${NOTES}[+0]  No GitHub commits this week\n"
+          fi
+
+          # Grade
+          if [ "$SCORE" -ge 80 ]; then GRADE="A - Excellent"
+          elif [ "$SCORE" -ge 60 ]; then GRADE="B - Good"
+          elif [ "$SCORE" -ge 40 ]; then GRADE="C - Average"
+          else GRADE="D - Needs improvement"; fi
+
+          MSG="PORTFOLIO HEALTH SCORE\n$(date -u +"%Y-%m-%d")\n\nScore : ${SCORE}/100 — ${GRADE}\n\nBreakdown:\n${NOTES}\nKeep pushing! Consistency wins."
+
+          printf "$MSG" | curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"

@@ -1,0 +1,44 @@
+name: Portfolio Response Time Monitor
+
+on:
+  schedule:
+    - cron: '0 5 * * *'   # Daily 10:45 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  response-time:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check response time from multiple regions
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          DOMAIN="https://subashlamaprofile.pages.dev"
+          ALERT=0
+          REPORT=""
+
+          for i in 1 2 3; do
+            TIME=$(curl -s -o /dev/null -w "%{time_total}" --max-time 15 "$DOMAIN" 2>/dev/null || echo "timeout")
+            if [ "$TIME" = "timeout" ]; then
+              REPORT="${REPORT}Run ${i}: TIMEOUT\n"
+              ALERT=1
+            else
+              MS=$(echo "$TIME" | awk '{printf "%.0f", $1 * 1000}')
+              REPORT="${REPORT}Run ${i}: ${MS}ms\n"
+              if [ "$MS" -gt 3000 ]; then ALERT=1; fi
+            fi
+            sleep 2
+          done
+
+          if [ "$ALERT" -eq 1 ]; then
+            curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "{\"chat_id\":\"${CHAT}\",\"text\":\"SLOW PORTFOLIO ALERT!\n\nYour portfolio is responding slowly or timing out.\n\n${REPORT}\nCheck: ${DOMAIN}\"}"
+          else
+            echo "Response time OK: ${REPORT}"
+          fi

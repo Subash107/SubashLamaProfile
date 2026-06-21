@@ -1,0 +1,44 @@
+name: GitHub Inactivity Alert
+
+on:
+  schedule:
+    - cron: '30 3 * * *'   # Daily 9:15 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  activity-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check GitHub commit activity
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          GH_TOKEN="${{ secrets.GITHUB_TOKEN }}"
+          USERNAME="Subash107"
+
+          # Check commits in last 3 days across all repos
+          SINCE=$(date -u -d '-3 days' +%Y-%m-%dT%H:%M:%SZ)
+          EVENTS=$(curl -s -H "Authorization: Bearer ${GH_TOKEN}" \
+            "https://api.github.com/users/${USERNAME}/events?per_page=30" | \
+            python3 -c "
+import json, sys
+from datetime import datetime, timedelta, timezone
+events = json.load(sys.stdin)
+cutoff = datetime.now(timezone.utc) - timedelta(days=3)
+recent = [e for e in events if isinstance(e, dict) and e.get('type') == 'PushEvent'
+          and datetime.fromisoformat(e['created_at'].replace('Z','+00:00')) > cutoff]
+print(len(recent))
+" 2>/dev/null || echo 0)
+
+          if [ "$EVENTS" -eq 0 ]; then
+            curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "{\"chat_id\":\"${CHAT}\",\"text\":\"GITHUB INACTIVITY ALERT!\n\nYou have not pushed any commits in the last 3 days.\n\nStay active on GitHub — recruiters check your contribution graph!\n\nProfile: https://github.com/${USERNAME}\"}"
+          else
+            echo "GitHub activity OK: ${EVENTS} push event(s) in last 3 days."
+          fi

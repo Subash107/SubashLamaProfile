@@ -1,0 +1,38 @@
+name: Daily Study Reminder
+
+on:
+  schedule:
+    - cron: '0 2 * * 1-5'   # Weekdays 7:45 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  study-reminder:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Send study reminder
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          DAY=$(date -u +"%A")
+          DATE=$(date -u +"%Y-%m-%d")
+
+          MSG="STUDY REMINDER — ${DAY} ${DATE}
+
+Currently studying: Kubernetes Security
+
+Today's goal:
+  - 30 mins of Kubernetes Security study
+  - Practice one lab or concept
+  - Update your notes
+
+Remember: Every skill you add makes you more hireable.
+Keep going!"
+
+          curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"
