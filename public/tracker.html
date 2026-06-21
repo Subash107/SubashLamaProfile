@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CyberSec Portfolio Tracker | Subash Lama</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07111c;--bg2:#0d1b2a;--bg3:#112233;
+  --b:rgba(255,255,255,0.08);--bh:rgba(138,232,255,0.28);
+  --t:#e0e8f0;--td:rgba(255,255,255,0.55);--tm:rgba(255,255,255,0.28);
+  --cy:#8ae8ff;--gr:#50fa7b;--or:#ffb86c;--re:#ff5555;--pu:#bd93f9;--ye:#f1fa8c;
+  --sw:230px;--hh:54px;--r:10px;--rs:6px
+}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--t);min-height:100vh;display:flex;font-size:14px;line-height:1.6}
+
+/* SIDEBAR */
+#sb{width:var(--sw);min-height:100vh;background:rgba(0,0,0,0.35);border-right:1px solid var(--b);display:flex;flex-direction:column;position:fixed;left:0;top:0;z-index:100}
+.sb-brand{padding:1.1rem 1.1rem 0.9rem;border-bottom:1px solid var(--b)}
+.sb-brand-t{font-size:0.8rem;font-weight:900;color:var(--cy);letter-spacing:0.05em;text-transform:uppercase}
+.sb-brand-s{font-size:0.62rem;color:var(--tm);margin-top:0.1rem}
+.sb-nav{flex:1;padding:0.6rem 0;overflow-y:auto}
+.sb-lbl{font-size:0.58rem;font-weight:800;color:var(--tm);text-transform:uppercase;letter-spacing:0.1em;padding:0.65rem 1.1rem 0.2rem}
+.sb-a{display:flex;align-items:center;gap:0.55rem;padding:0.5rem 1.1rem;color:var(--td);font-size:0.8rem;font-weight:500;border-left:2px solid transparent;transition:all 0.14s;cursor:pointer;user-select:none}
+.sb-a:hover{color:var(--t);background:var(--bg3)}
+.sb-a.on{color:var(--cy);border-left-color:var(--cy);background:rgba(138,232,255,0.06)}
+.sb-a-i{width:15px;text-align:center;font-size:0.85rem}
+.sb-foot{padding:0.75rem 1.1rem;border-top:1px solid var(--b)}
+.sb-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.28rem}
+.sb-rl{font-size:0.62rem;color:var(--tm)}
+.sb-rv{font-size:0.68rem;font-weight:700;font-family:monospace}
+
+/* MAIN */
+#main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100vh}
+#hdr{height:var(--hh);background:rgba(0,0,0,0.25);border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;position:sticky;top:0;z-index:50;backdrop-filter:blur(8px)}
+#hdr-t{font-size:0.95rem;font-weight:700}
+.hdr-acts{display:flex;gap:0.5rem}
+#cnt{padding:1.4rem 1.5rem;flex:1}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:0.35rem;padding:0.42rem 0.85rem;border-radius:var(--rs);font-size:0.76rem;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all 0.14s;font-family:inherit;white-space:nowrap}
+.bp{background:rgba(138,232,255,0.1);border-color:rgba(138,232,255,0.32);color:var(--cy)}
+.bp:hover{background:rgba(138,232,255,0.18);border-color:var(--cy)}
+.bg{background:transparent;border-color:var(--b);color:var(--td)}
+.bg:hover{border-color:var(--bh);color:var(--t)}
+.bd{background:rgba(255,85,85,0.08);border-color:rgba(255,85,85,0.28);color:var(--re)}
+.bd:hover{background:rgba(255,85,85,0.15)}
+.bs{background:rgba(80,250,123,0.08);border-color:rgba(80,250,123,0.28);color:var(--gr)}
+.bs:hover{background:rgba(80,250,123,0.15)}
+.btn-sm{padding:0.28rem 0.6rem;font-size:0.7rem}
+.btn-i{padding:0.3rem 0.4rem}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--b);border-radius:var(--r);padding:1.1rem;transition:border-color 0.18s}
+.card:hover{border-color:var(--bh)}
+.c-lbl{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--tm);margin-bottom:0.4rem}
+.c-val{font-size:1.9rem;font-weight:900;font-family:monospace;line-height:1}
+.c-sub{font-size:0.67rem;color:var(--tm);margin-top:0.3rem}
+
+/* GRIDS */
+.stat-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem;margin-bottom:1.4rem}
+.two-c{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+
+/* SECTION HDR */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.85rem;flex-wrap:wrap;gap:0.4rem}
+.sh-t{font-size:0.85rem;font-weight:700}
+
+/* FILTER BAR */
+.fb{display:flex;gap:0.55rem;margin-bottom:0.85rem;flex-wrap:wrap}
+input[type=text],input[type=date],input[type=number],input[type=url],input[type=search],select,textarea{background:rgba(255,255,255,0.04);border:1px solid var(--b);border-radius:var(--rs);color:var(--t);padding:0.42rem 0.7rem;font-size:0.77rem;font-family:inherit;outline:none;transition:border-color 0.14s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--bh)}
+select option{background:#0d1b2a}
+textarea{resize:vertical;min-height:72px}
+.si{min-width:190px;width:auto}
+.fs{width:auto}
+
+/* TABLE */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.78rem}
+thead th{text-align:left;padding:0.55rem 0.7rem;font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--tm);border-bottom:1px solid var(--b);white-space:nowrap}
+tbody tr{border-bottom:1px solid rgba(255,255,255,0.04);transition:background 0.1s}
+tbody tr:hover{background:var(--bg3)}
+tbody td{padding:0.65rem 0.7rem;vertical-align:middle}
+tbody tr:last-child{border:none}
+
+/* BADGES */
+.b{display:inline-flex;align-items:center;padding:0.16rem 0.5rem;border-radius:4px;font-size:0.62rem;font-weight:700;white-space:nowrap}
+.bc{background:rgba(255,85,85,0.14);color:#ff5555;border:1px solid rgba(255,85,85,0.28)}
+.bh2{background:rgba(255,184,108,0.14);color:#ffb86c;border:1px solid rgba(255,184,108,0.28)}
+.bm{background:rgba(241,250,140,0.1);color:#f1fa8c;border:1px solid rgba(241,250,140,0.22)}
+.bl{background:rgba(80,250,123,0.1);color:#50fa7b;border:1px solid rgba(80,250,123,0.22)}
+.bi{background:rgba(138,232,255,0.1);color:#8ae8ff;border:1px solid rgba(138,232,255,0.22)}
+.bpu{background:rgba(189,147,249,0.1);color:#bd93f9;border:1px solid rgba(189,147,249,0.22)}
+.bgr{background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.35);border:1px solid rgba(255,255,255,0.08)}
+
+/* SKILL BARS */
+.sk-row{display:flex;align-items:center;gap:0.65rem;padding:0.45rem 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.sk-n{min-width:150px;font-size:0.78rem;font-weight:500}
+.sk-t{flex:1;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden}
+.sk-f{height:100%;border-radius:2px;transition:width 0.5s ease}
+.sk-lv{min-width:95px;font-size:0.65rem;text-align:right}
+.sk-ev{font-size:0.6rem;color:var(--tm);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-b{background:linear-gradient(90deg,#556677,#667788)}
+.p-i{background:linear-gradient(90deg,#ffb86c,#ffd080)}
+.p-a{background:linear-gradient(90deg,#50fa7b,#8ae8ff)}
+.p-e{background:linear-gradient(90deg,#8ae8ff,#bd93f9)}
+
+/* CERT CARDS */
+.cg{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:0.75rem}
+.cc{background:var(--bg2);border:1px solid var(--b);border-radius:var(--r);padding:1rem;transition:border-color 0.18s;border-left-width:3px}
+.cc:hover{border-color:var(--bh)}
+.cc-n{font-size:0.85rem;font-weight:700;margin:0.4rem 0 0.2rem}
+.cc-i{font-size:0.7rem;color:var(--tm);margin-bottom:0.55rem}
+.cc-f{display:flex;justify-content:space-between;align-items:center;margin-top:0.7rem;padding-top:0.7rem;border-top:1px solid var(--b)}
+.cc-d{font-size:0.62rem;color:var(--tm);font-family:monospace}
+
+/* MITRE */
+.mg{display:grid;grid-template-columns:repeat(7,1fr);gap:0.35rem;margin-bottom:0.85rem}
+.mt{background:var(--bg2);border:1px solid var(--b);border-radius:var(--rs);overflow:hidden}
+.mt-h{background:rgba(255,255,255,0.03);padding:0.35rem 0.45rem;font-size:0.58rem;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;color:var(--td);border-bottom:1px solid var(--b);text-align:center;line-height:1.3}
+.mt-b{display:flex;flex-direction:column;gap:2px;padding:0.28rem}
+.mt-c{padding:0.28rem 0.38rem;border-radius:3px;font-size:0.55rem;cursor:pointer;transition:opacity 0.12s;line-height:1.3}
+.mt-c:hover{opacity:0.78}
+.mt-id{font-family:monospace;opacity:0.65;font-size:0.52rem}
+.mt-nm{font-weight:600}
+.s-detected{background:rgba(80,250,123,0.2);color:#50fa7b}
+.s-tested{background:rgba(138,232,255,0.15);color:#8ae8ff}
+.s-in-progress{background:rgba(255,184,108,0.15);color:#ffb86c}
+.s-not-covered{background:rgba(255,255,255,0.04);color:#445566}
+.ml{display:flex;gap:1rem;flex-wrap:wrap;font-size:0.68rem;margin-bottom:0.75rem}
+.ml-i{display:flex;align-items:center;gap:0.35rem}
+.ml-d{width:9px;height:9px;border-radius:2px}
+
+/* MODAL */
+#mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+#mo.open{display:flex}
+#mb{background:#0d1b2a;border:1px solid var(--bh);border-radius:var(--r);width:100%;max-width:540px;max-height:90vh;overflow-y:auto;padding:1.4rem;position:relative}
+.m-t{font-size:0.95rem;font-weight:700;color:var(--cy);margin-bottom:1.1rem;padding-bottom:0.65rem;border-bottom:1px solid var(--b)}
+.m-x{position:absolute;top:0.9rem;right:0.9rem;background:none;border:none;color:var(--td);font-size:1.1rem;cursor:pointer;padding:0.2rem 0.35rem;border-radius:4px}
+.m-x:hover{color:var(--t);background:rgba(255,255,255,0.06)}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem}
+.fgf{grid-column:1/-1}
+.fl{font-size:0.65rem;font-weight:600;color:var(--td);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:0.25rem}
+.fa{display:flex;justify-content:flex-end;gap:0.5rem;margin-top:1.1rem;padding-top:0.65rem;border-top:1px solid var(--b)}
+
+/* TOAST */
+#toast{position:fixed;bottom:1.25rem;right:1.25rem;background:var(--bg2);border:1px solid var(--gr);border-radius:var(--rs);padding:0.6rem 0.9rem;font-size:0.76rem;color:var(--gr);z-index:999;transform:translateY(80px);opacity:0;transition:all 0.22s;pointer-events:none}
+#toast.on{transform:translateY(0);opacity:1}
+
+/* EMPTY */
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--tm)}
+.empty-i{font-size:2rem;margin-bottom:0.6rem;opacity:0.35}
+
+/* TOOL TAG */
+.tt{display:inline-flex;padding:0.12rem 0.4rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);border-radius:3px;font-size:0.6rem;color:var(--td);margin:0.1rem}
+
+/* RECENT */
+.ri{display:flex;align-items:center;gap:0.65rem;padding:0.55rem 0.7rem;background:rgba(255,255,255,0.02);border-radius:var(--rs);border:1px solid var(--b);font-size:0.77rem;margin-bottom:0.4rem}
+.ri-i{font-size:0.95rem;flex-shrink:0}
+.ri-body{flex:1;min-width:0}
+.ri-t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ri-m{font-size:0.63rem;color:var(--tm)}
+.ri-d{font-size:0.62rem;color:var(--tm);font-family:monospace;white-space:nowrap}
+
+/* DOMAIN HDR */
+.dh{font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--cy);margin-bottom:0.5rem;padding-bottom:0.35rem;border-bottom:1px solid var(--b)}
+
+@media(max-width:900px){#sb{transform:translateX(-100%)}#sb.open{transform:translateX(0)}#main{margin-left:0}.mg{grid-template-columns:repeat(4,1fr)}.two-c{grid-template-columns:1fr}.fg{grid-template-columns:1fr}}
+@media(max-width:600px){#cnt{padding:1rem}.mg{grid-template-columns:repeat(2,1fr)}.stat-g{grid-template-columns:repeat(2,1fr)}}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
+</style>
+</head>
+<body>
+
+<nav id="sb">
+  <div class="sb-brand">
+    <div class="sb-brand-t">⬡ CyberSec Tracker</div>
+    <div class="sb-brand-s">Portfolio Intelligence System</div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-lbl">Overview</div>
+    <div class="sb-a on" data-p="dashboard"><span class="sb-a-i">⊞</span>Dashboard</div>
+    <div class="sb-lbl">Work</div>
+    <div class="sb-a" data-p="projects"><span class="sb-a-i">◈</span>Projects</div>
+    <div class="sb-a" data-p="findings"><span class="sb-a-i">⚠</span>Findings</div>
+    <div class="sb-lbl">Profile</div>
+    <div class="sb-a" data-p="skills"><span class="sb-a-i">◎</span>Skills Matrix</div>
+    <div class="sb-a" data-p="certs"><span class="sb-a-i">✦</span>Certifications</div>
+    <div class="sb-lbl">Intelligence</div>
+    <div class="sb-a" data-p="mitre"><span class="sb-a-i">⬡</span>MITRE ATT&CK</div>
+  </div>
+  <div class="sb-foot" id="sb-foot"></div>
+</nav>
+
+<div id="main">
+  <header id="hdr">
+    <div id="hdr-t">Dashboard</div>
+    <div class="hdr-acts">
+      <button class="btn bg btn-sm" id="exp-btn">↓ Export</button>
+      <button class="btn bg btn-sm" id="imp-btn">↑ Import</button>
+      <input type="file" id="imp-file" accept=".json" style="display:none">
+    </div>
+  </header>
+  <main id="cnt"></main>
+</div>
+
+<div id="mo">
+  <div id="mb">
+    <button class="m-x" id="m-close">✕</button>
+    <div class="m-t" id="m-title"></div>
+    <div id="m-body"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ── DATA ─────────────────────────────────────────────── */
+const TACTICS=[
+  {id:'TA0043',n:'Recon',tech:[{id:'T1595',n:'Active Scanning'},{id:'T1592',n:'Gather Host Info'},{id:'T1589',n:'Gather Identity'},{id:'T1591',n:'Gather Org Info'}]},
+  {id:'TA0042',n:'Resource Dev',tech:[{id:'T1583',n:'Acquire Infra'},{id:'T1588',n:'Obtain Capabilities'},{id:'T1585',n:'Establish Accounts'}]},
+  {id:'TA0001',n:'Initial Access',tech:[{id:'T1190',n:'Exploit Public App'},{id:'T1078',n:'Valid Accounts'},{id:'T1566',n:'Phishing'},{id:'T1133',n:'External Remote Svc'}]},
+  {id:'TA0002',n:'Execution',tech:[{id:'T1059',n:'Cmd/Scripting'},{id:'T1204',n:'User Execution'},{id:'T1047',n:'WMI'},{id:'T1053',n:'Scheduled Task'}]},
+  {id:'TA0003',n:'Persistence',tech:[{id:'T1547',n:'Boot Autostart'},{id:'T1543',n:'Create Service'},{id:'T1546',n:'Event Triggered'},{id:'T1053',n:'Scheduled Task'}]},
+  {id:'TA0004',n:'Priv Esc',tech:[{id:'T1134',n:'Token Manip'},{id:'T1055',n:'Process Inject'},{id:'T1068',n:'Exploit Priv'},{id:'T1548',n:'Bypass UAC'}]},
+  {id:'TA0005',n:'Def Evasion',tech:[{id:'T1070',n:'Indicator Removal'},{id:'T1027',n:'Obfuscation'},{id:'T1562',n:'Impair Defenses'},{id:'T1055',n:'Process Inject'}]},
+  {id:'TA0006',n:'Cred Access',tech:[{id:'T1003',n:'OS Cred Dump'},{id:'T1110',n:'Brute Force'},{id:'T1552',n:'Unsecured Creds'},{id:'T1558',n:'Steal Kerb Tkts'}]},
+  {id:'TA0007',n:'Discovery',tech:[{id:'T1046',n:'Network Scan'},{id:'T1082',n:'System Info'},{id:'T1069',n:'Permission Groups'},{id:'T1083',n:'File Discovery'}]},
+  {id:'TA0008',n:'Lateral Move',tech:[{id:'T1021',n:'Remote Services'},{id:'T1570',n:'Lateral Tool Xfer'},{id:'T1550',n:'Alt Auth Material'}]},
+  {id:'TA0009',n:'Collection',tech:[{id:'T1560',n:'Archive Collected'},{id:'T1005',n:'Local Data'},{id:'T1114',n:'Email Collection'},{id:'T1056',n:'Input Capture'}]},
+  {id:'TA0011',n:'C2',tech:[{id:'T1071',n:'App Layer Proto'},{id:'T1573',n:'Encrypted Channel'},{id:'T1095',n:'Non-App Proto'},{id:'T1090',n:'Proxy'}]},
+  {id:'TA0010',n:'Exfiltration',tech:[{id:'T1048',n:'Alt Protocol Exfil'},{id:'T1041',n:'Exfil over C2'},{id:'T1567',n:'Exfil to Web Svc'}]},
+  {id:'TA0040',n:'Impact',tech:[{id:'T1485',n:'Data Destruction'},{id:'T1490',n:'Inhibit Recovery'},{id:'T1489',n:'Service Stop'},{id:'T1486',n:'Data Encrypted'}]},
+];
+const SEVS=['critical','high','medium','low','info'];
+const CATS=['SOC','IAM','GRC','Bug Bounty','Pentest','Detection Eng','Cloud Security','Other'];
+const PSTATS=['Planning','Active','Completed','On Hold'];
+const FSTATS=['Open','In Progress','Resolved','Accepted','False Positive'];
+const CSTATS=['Earned','In Progress','Planned','Expired'];
+const DOMS=['SOC / Detection','GRC / Compliance','IAM','Network Security','Cloud Security','Scripting / Automation','Tools & Platforms'];
+const PROFS=['Beginner','Intermediate','Advanced','Expert'];
+const SRCS=['DefectDojo','VECTR','Bug Bounty','Pentest','Lab / Home','Dependency-Track','Other'];
+const MSTATUSES=['not-covered','detected','tested','in-progress'];
+
+function mkMitre(){
+  const m={
+    'TA0043:T1595':'in-progress','TA0043:T1592':'in-progress',
+    'TA0042:T1583':'in-progress','TA0042:T1588':'in-progress',
+    'TA0001:T1190':'detected','TA0001:T1078':'detected','TA0001:T1566':'detected',
+    'TA0002:T1059':'detected','TA0002:T1204':'detected','TA0002:T1047':'detected','TA0002:T1053':'detected',
+    'TA0003:T1547':'detected','TA0003:T1543':'detected',
+    'TA0004:T1134':'detected','TA0004:T1055':'detected','TA0004:T1068':'detected',
+    'TA0005:T1070':'in-progress','TA0005:T1027':'in-progress','TA0005:T1562':'in-progress',
+    'TA0006:T1003':'detected','TA0006:T1110':'detected','TA0006:T1552':'detected',
+    'TA0007:T1046':'in-progress','TA0007:T1082':'in-progress',
+    'TA0008:T1021':'in-progress',
+    'TA0011:T1071':'in-progress','TA0011:T1573':'in-progress',
+    'TA0010:T1048':'in-progress',
+    'TA0040:T1485':'detected','TA0040:T1490':'detected','TA0040:T1489':'detected',
+  };
+  return m;
+}
+
+const DEFAULTS={
+  projects:[
+    {id:'p1',title:'Personal SOC Lab',category:'SOC',description:'Wazuh SIEM + Suricata IDS + Sysmon endpoint telemetry for real detection engineering.',status:'Active',tools:['Wazuh','Suricata','Sysmon','Docker'],link:'https://github.com/Subash107',date:'2025-03-01',notes:'Custom MITRE ATT&CK detection rules built.'},
+    {id:'p2',title:'Secure Virtual Lab Automation',category:'SOC',description:'Docker templates, bootstrap scripts, and CI checks for consistent lab environments.',status:'Completed',tools:['Docker','GitHub Actions','Linux','Bash'],link:'https://github.com/Subash107',date:'2025-06-01',notes:'Cut setup time by ~70%.'},
+    {id:'p3',title:'Portfolio CI/CD Pipeline',category:'Other',description:'36-workflow GitHub Actions automation — uptime, SSL, MITRE watchdog, job tracker.',status:'Active',tools:['GitHub Actions','Cloudflare','Python','PowerShell'],link:'https://subashlamaprofile.pages.dev',date:'2026-01-01',notes:'Fully automated.'},
+  ],
+  findings:[
+    {id:'f1',title:'SSH Brute Force Detected',severity:'high',status:'Resolved',source:'Lab / Home',description:'Multiple failed SSH logins from external IP. Wazuh Rule 5710 triggered.',cve:'',cvss:'7.5',date:'2026-05-10',notes:'Firewall rule applied. T1110.001.'},
+    {id:'f2',title:'Outdated OpenSSL in Container',severity:'critical',status:'Resolved',source:'Dependency-Track',description:'OpenSSL 1.1.1 EOL detected in lab container image.',cve:'CVE-2022-0778',cvss:'9.1',date:'2026-04-20',notes:'Updated to OpenSSL 3.x.'},
+    {id:'f3',title:'Weak Password Policy — Lab AD',severity:'medium',status:'Open',source:'VECTR',description:'AD lab allows passwords under 8 characters without complexity.',cve:'',cvss:'5.3',date:'2026-06-01',notes:'Policy update planned.'},
+  ],
+  skills:[
+    {id:'s1',domain:'SOC / Detection',skill:'Wazuh SIEM',level:'Advanced',evidence:'Self-built SOC lab, custom detection rules',notes:''},
+    {id:'s2',domain:'SOC / Detection',skill:'Suricata IDS/IPS',level:'Advanced',evidence:'Custom rules, alert correlation, Tor detection',notes:''},
+    {id:'s3',domain:'SOC / Detection',skill:'Sysmon',level:'Advanced',evidence:'Windows telemetry, process injection detection',notes:''},
+    {id:'s4',domain:'SOC / Detection',skill:'Log Analysis / SIEM',level:'Advanced',evidence:'Wazuh dashboards, alert triage',notes:''},
+    {id:'s5',domain:'SOC / Detection',skill:'Incident Response',level:'Intermediate',evidence:'SOC lab exercises, NIST 800-61 study',notes:''},
+    {id:'s6',domain:'IAM',skill:'Active Directory',level:'Expert',evidence:'SBI Bank 200+ staff AD admin, Unilever AD migration',notes:''},
+    {id:'s7',domain:'IAM',skill:'RBAC / Group Policy',level:'Expert',evidence:'Enterprise AD administration 5+ years',notes:''},
+    {id:'s8',domain:'IAM',skill:'MFA / SSO / PAM',level:'Advanced',evidence:'Enterprise deployments',notes:''},
+    {id:'s9',domain:'GRC / Compliance',skill:'MITRE ATT&CK',level:'Advanced',evidence:'14-tactic coverage map, custom Wazuh rules',notes:''},
+    {id:'s10',domain:'GRC / Compliance',skill:'NIST 800-53',level:'Intermediate',evidence:'Study and lab implementation',notes:''},
+    {id:'s11',domain:'GRC / Compliance',skill:'ISO 27001',level:'Intermediate',evidence:'Self-study, GRC cert in progress',notes:''},
+    {id:'s12',domain:'Network Security',skill:'Cisco Networking',level:'Expert',evidence:'Unilever network design, Cisco certified',notes:''},
+    {id:'s13',domain:'Network Security',skill:'Firewall / IDS',level:'Advanced',evidence:'pfSense, Suricata in production lab',notes:''},
+    {id:'s14',domain:'Scripting / Automation',skill:'Python',level:'Advanced',evidence:'IBM cert, GitHub Actions scripts',notes:''},
+    {id:'s15',domain:'Scripting / Automation',skill:'Bash / PowerShell',level:'Expert',evidence:'12+ years, 36 automation workflows',notes:''},
+    {id:'s16',domain:'Tools & Platforms',skill:'Docker',level:'Advanced',evidence:'Lab containerisation, CI pipelines',notes:''},
+    {id:'s17',domain:'Tools & Platforms',skill:'GitHub Actions',level:'Advanced',evidence:'36 production workflows',notes:''},
+  ],
+  certs:[
+    {id:'c1',name:'Cisco Endpoint Security',issuer:'Cisco',status:'Earned',earned:'2026-06-01',expiry:'',target:'',badge:''},
+    {id:'c2',name:'Cisco Ethical Hacker',issuer:'Cisco',status:'Earned',earned:'2026-04-01',expiry:'',target:'',badge:''},
+    {id:'c3',name:'Cisco Introduction to Cybersecurity',issuer:'Cisco',status:'Earned',earned:'2026-03-01',expiry:'',target:'',badge:''},
+    {id:'c4',name:'IBM Cybersecurity Fundamentals',issuer:'IBM',status:'Earned',earned:'2026-03-01',expiry:'',target:'',badge:''},
+    {id:'c5',name:'IBM Python for Data Science',issuer:'IBM SkillsBuild',status:'Earned',earned:'2026-03-01',expiry:'',target:'',badge:''},
+    {id:'c6',name:'IBM Data Analysis with Python',issuer:'IBM SkillsBuild',status:'Earned',earned:'2026-03-01',expiry:'',target:'',badge:''},
+    {id:'c7',name:'Google Ads Video Certification',issuer:'Google Skillshop',status:'Earned',earned:'2026-05-01',expiry:'2027-05-01',target:'',badge:'https://skillshop.credential.net/182626545'},
+    {id:'c8',name:'CompTIA Security+',issuer:'CompTIA',status:'In Progress',earned:'',expiry:'',target:'2026-12-31',badge:''},
+    {id:'c9',name:'GRC Certification',issuer:'TBD',status:'Planned',earned:'',expiry:'',target:'2027-06-01',badge:''},
+  ],
+  mitre:{},
+};
+
+/* ── STATE ──────────────────────────────────────────────── */
+const KEY='cst_v1';
+let S={}, page='dashboard';
+
+function load(){
+  try{
+    const r=localStorage.getItem(KEY);
+    S=r?JSON.parse(r):JSON.parse(JSON.stringify(DEFAULTS));
+    if(!S.mitre||!Object.keys(S.mitre).length) S.mitre=mkMitre();
+  }catch(e){S=JSON.parse(JSON.stringify(DEFAULTS));S.mitre=mkMitre();}
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(S));sbFoot();}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+
+/* ── SIDEBAR FOOTER ─────────────────────────────────────── */
+function sbFoot(){
+  const tot=TACTICS.reduce((a,t)=>a+t.tech.length,0);
+  const cov=Object.values(S.mitre).filter(v=>v==='detected'||v==='tested').length;
+  const pct=Math.round(cov/tot*100);
+  const open=S.findings.filter(f=>f.status==='Open').length;
+  document.getElementById('sb-foot').innerHTML=`
+    <div class="sb-row"><span class="sb-rl">Active Projects</span><span class="sb-rv" style="color:var(--cy)">${S.projects.filter(p=>p.status==='Active').length}</span></div>
+    <div class="sb-row"><span class="sb-rl">Open Findings</span><span class="sb-rv" style="color:${open?'var(--re)':'var(--gr)'}">${open}</span></div>
+    <div class="sb-row"><span class="sb-rl">Certs Earned</span><span class="sb-rv" style="color:var(--gr)">${S.certs.filter(c=>c.status==='Earned').length}</span></div>
+    <div class="sb-row"><span class="sb-rl">ATT&CK Coverage</span><span class="sb-rv" style="color:var(--cy)">${pct}%</span></div>`;
+}
+
+/* ── TOAST ──────────────────────────────────────────────── */
+let toastT;
+function toast(msg,col){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.style.color=col||'var(--gr)'; el.style.borderColor=col||'var(--gr)';
+  el.classList.add('on'); clearTimeout(toastT);
+  toastT=setTimeout(()=>el.classList.remove('on'),2400);
+}
+
+/* ── MODAL ──────────────────────────────────────────────── */
+function openM(title,body,onSave){
+  document.getElementById('m-title').textContent=title;
+  document.getElementById('m-body').innerHTML=body;
+  document.getElementById('mo').classList.add('open');
+  const sb=document.getElementById('m-save');
+  if(sb&&onSave) sb.onclick=onSave;
+}
+function closeM(){document.getElementById('mo').classList.remove('open');}
+const gv=id=>{const e=document.getElementById(id);return e?e.value.trim():'';}
+
+/* ── BADGES ─────────────────────────────────────────────── */
+function sevB(s){
+  const m={critical:'bc',high:'bh2',medium:'bm',low:'bl',info:'bi'};
+  return `<span class="b ${m[s.toLowerCase()]||'bi'}">${s}</span>`;
+}
+function stB(s){
+  const m={Open:'bc','In Progress':'bh2',Resolved:'bl',Accepted:'bpu','False Positive':'bgr',Active:'bl',Completed:'bi',Planning:'bi','On Hold':'bgr',Earned:'bl',Expired:'bc',Planned:'bi'};
+  return `<span class="b ${m[s]||'bi'}">${s}</span>`;
+}
+function catB(c){
+  const m={SOC:'bi',IAM:'bpu',GRC:'bm','Bug Bounty':'bh2',Pentest:'bc','Detection Eng':'bl','Cloud Security':'bi'};
+  return `<span class="b ${m[c]||'bi'}">${c}</span>`;
+}
+const profPct={Beginner:25,Intermediate:55,Advanced:80,Expert:100};
+const profCls={Beginner:'p-b',Intermediate:'p-i',Advanced:'p-a',Expert:'p-e'};
+const profCol={Beginner:'var(--tm)',Intermediate:'var(--or)',Advanced:'var(--gr)',Expert:'var(--cy)'};
+
+/* ── ROUTER ─────────────────────────────────────────────── */
+function nav(p){
+  page=p;
+  document.querySelectorAll('.sb-a').forEach(a=>a.classList.toggle('on',a.dataset.p===p));
+  const titles={dashboard:'Dashboard',projects:'Projects',findings:'Findings',skills:'Skills Matrix',certs:'Certifications',mitre:'MITRE ATT&CK'};
+  document.getElementById('hdr-t').textContent=titles[p]||p;
+  document.getElementById('cnt').innerHTML='';
+  ({dashboard:rDash,projects:rProj,findings:rFind,skills:rSkills,certs:rCerts,mitre:rMitre}[p]||rDash)();
+}
+
+/* ── DASHBOARD ──────────────────────────────────────────── */
+function rDash(){
+  const c=document.getElementById('cnt');
+  const tot=TACTICS.reduce((a,t)=>a+t.tech.length,0);
+  const cov=Object.values(S.mitre).filter(v=>v==='detected'||v==='tested').length;
+  const pct=Math.round(cov/tot*100);
+  const open=S.findings.filter(f=>f.status==='Open').length;
+  const ch=S.findings.filter(f=>['critical','high'].includes(f.severity.toLowerCase())).length;
+  const act=S.projects.filter(p=>p.status==='Active').length;
+  const ec=S.certs.filter(c=>c.status==='Earned').length;
+  const res=S.findings.filter(f=>f.status==='Resolved').length;
+  const risk=Math.min(100,
+    S.findings.filter(f=>f.status==='Open'&&f.severity==='critical').length*20+
+    S.findings.filter(f=>f.status==='Open'&&f.severity==='high').length*10+
+    open*2
+  );
+  const rc=[
+    ...S.projects.map(p=>({ico:'◈',t:p.title,m:p.category,d:p.date,col:'var(--cy)'})),
+    ...S.findings.map(f=>({ico:'⚠',t:f.title,m:f.severity,d:f.date,col:f.severity==='critical'?'var(--re)':f.severity==='high'?'var(--or)':'var(--ye)'})),
+  ].sort((a,b)=>b.d.localeCompare(a.d)).slice(0,5);
+
+  c.innerHTML=`
+    <div class="stat-g">
+      <div class="card"><div class="c-lbl">Active Projects</div><div class="c-val" style="color:var(--cy)">${act}</div><div class="c-sub">${S.projects.length} total</div></div>
+      <div class="card"><div class="c-lbl">Open Findings</div><div class="c-val" style="color:${open?'var(--re)':'var(--gr)'}">${open}</div><div class="c-sub">${ch} critical / high</div></div>
+      <div class="card"><div class="c-lbl">Risk Score</div><div class="c-val" style="color:${risk>60?'var(--re)':risk>30?'var(--or)':'var(--gr)'}">${risk}</div><div class="c-sub">Based on open findings</div></div>
+      <div class="card"><div class="c-lbl">ATT&CK Coverage</div><div class="c-val" style="color:var(--gr)">${pct}%</div><div class="c-sub">${cov}/${tot} techniques</div></div>
+      <div class="card"><div class="c-lbl">Certs Earned</div><div class="c-val" style="color:var(--cy)">${ec}</div><div class="c-sub">${S.certs.length} tracked</div></div>
+      <div class="card"><div class="c-lbl">Findings Resolved</div><div class="c-val" style="color:var(--gr)">${res}</div><div class="c-sub">of ${S.findings.length} total</div></div>
+    </div>
+    <div class="two-c">
+      <div>
+        <div class="sh"><span class="sh-t">Recent Activity</span></div>
+        ${rc.map(r=>`<div class="ri"><span class="ri-i" style="color:${r.col}">${r.ico}</span><div class="ri-body"><div class="ri-t">${r.t}</div><div class="ri-m">${r.m}</div></div><div class="ri-d">${r.d}</div></div>`).join('')||'<div class="empty"><div class="empty-i">○</div><p>No activity yet</p></div>'}
+      </div>
+      <div>
+        <div class="sh"><span class="sh-t">Severity Breakdown</span></div>
+        <div class="card" style="padding:1rem;">
+          ${SEVS.map(sv=>{
+            const n=S.findings.filter(f=>f.severity.toLowerCase()===sv).length;
+            const p=S.findings.length?Math.round(n/S.findings.length*100):0;
+            const col={critical:'var(--re)',high:'var(--or)',medium:'var(--ye)',low:'var(--gr)',info:'var(--cy)'}[sv];
+            return `<div style="margin-bottom:0.55rem"><div style="display:flex;justify-content:space-between;font-size:0.7rem;margin-bottom:0.2rem"><span style="text-transform:capitalize;color:${col}">${sv}</span><span style="font-family:monospace;color:var(--tm)">${n}</span></div><div style="height:3px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden"><div style="width:${p}%;height:100%;background:${col};border-radius:2px"></div></div></div>`;
+          }).join('')}
+        </div>
+        <div class="sh" style="margin-top:1rem"><span class="sh-t">ATT&CK by Tactic</span><span onclick="nav('mitre')" style="font-size:0.7rem;color:var(--cy);cursor:pointer">Full Map →</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.3rem;">
+          ${TACTICS.map(t=>{
+            const tc=t.tech.filter(x=>{const s=S.mitre[t.id+':'+x.id];return s==='detected'||s==='tested';}).length;
+            const p2=Math.round(tc/t.tech.length*100);
+            const col=p2>=75?'var(--gr)':p2>=40?'var(--or)':'var(--re)';
+            return `<div style="background:var(--bg2);border:1px solid var(--b);border-radius:6px;padding:0.4rem 0.55rem;text-align:center;cursor:pointer;min-width:72px;" onclick="nav('mitre')" title="${t.n}: ${tc}/${t.tech.length}">
+              <div style="font-size:0.58rem;color:var(--tm);margin-bottom:0.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:72px">${t.n}</div>
+              <div style="font-size:0.88rem;font-weight:800;color:${col};font-family:monospace">${p2}%</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ── PROJECTS ────────────────────────────────────────────── */
+function rProj(){
+  const c=document.getElementById('cnt');
+  c.innerHTML=`
+    <div class="fb">
+      <input type="search" class="si" id="pq" placeholder="Search projects…" oninput="rProjRows()">
+      <select class="fs" id="pcat" onchange="rProjRows()">${['<option value="">All Categories</option>',...CATS.map(x=>`<option>${x}</option>`)].join('')}</select>
+      <select class="fs" id="pst" onchange="rProjRows()">${['<option value="">All Status</option>',...PSTATS.map(x=>`<option>${x}</option>`)].join('')}</select>
+      <button class="btn bp" onclick="openProjM()">+ Add Project</button>
+    </div>
+    <div class="card" style="padding:0"><div class="tw"><table>
+      <thead><tr><th>Project</th><th>Category</th><th>Status</th><th>Tools</th><th>Date</th><th></th></tr></thead>
+      <tbody id="p-tbody"></tbody>
+    </table></div></div>`;
+  rProjRows();
+}
+function rProjRows(){
+  const q=gv('pq').toLowerCase(),cat=gv('pcat'),st=gv('pst');
+  const rows=S.projects.filter(p=>
+    (!q||p.title.toLowerCase().includes(q)||p.description.toLowerCase().includes(q))&&
+    (!cat||p.category===cat)&&(!st||p.status===st)
+  );
+  const tb=document.getElementById('p-tbody');
+  if(!tb)return;
+  if(!rows.length){tb.innerHTML=`<tr><td colspan="6"><div class="empty"><div class="empty-i">◈</div><p>No projects found</p></div></td></tr>`;return;}
+  tb.innerHTML=rows.map(p=>`
+    <tr>
+      <td><div style="font-weight:600">${p.title}</div><div style="font-size:0.67rem;color:var(--tm);max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.description}</div></td>
+      <td>${catB(p.category)}</td>
+      <td>${stB(p.status)}</td>
+      <td>${(p.tools||[]).slice(0,3).map(t=>`<span class="tt">${t}</span>`).join('')}${(p.tools||[]).length>3?`<span class="tt">+${p.tools.length-3}</span>`:''}</td>
+      <td style="font-family:monospace;font-size:0.7rem;color:var(--tm)">${p.date}</td>
+      <td><div style="display:flex;gap:0.25rem">
+        ${p.link?`<a href="${p.link}" target="_blank" class="btn bg btn-sm btn-i" title="Open">↗</a>`:''}
+        <button class="btn bg btn-sm btn-i" onclick="openProjM('${p.id}')">✎</button>
+        <button class="btn bd btn-sm btn-i" onclick="del('projects','${p.id}')">✕</button>
+      </div></td>
+    </tr>`).join('');
+}
+function openProjM(id){
+  const p=id?S.projects.find(x=>x.id===id):null;
+  openM(p?'Edit Project':'Add Project',`
+    <div class="fg">
+      <div class="fgf"><label class="fl">Title</label><input type="text" id="f-t" value="${p?.title||''}"></div>
+      <div><label class="fl">Category</label><select id="f-c">${CATS.map(x=>`<option ${p?.category===x?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div><label class="fl">Status</label><select id="f-s">${PSTATS.map(x=>`<option ${p?.status===x?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div class="fgf"><label class="fl">Description</label><textarea id="f-d">${p?.description||''}</textarea></div>
+      <div class="fgf"><label class="fl">Tools (comma-separated)</label><input type="text" id="f-to" value="${(p?.tools||[]).join(', ')}"></div>
+      <div><label class="fl">Date</label><input type="date" id="f-dt" value="${p?.date||new Date().toISOString().slice(0,10)}"></div>
+      <div><label class="fl">Link</label><input type="url" id="f-l" value="${p?.link||''}"></div>
+      <div class="fgf"><label class="fl">Notes</label><textarea id="f-n">${p?.notes||''}</textarea></div>
+    </div>
+    <div class="fa"><button class="btn bg" onclick="closeM()">Cancel</button><button class="btn bp" id="m-save">Save</button></div>`,
+  ()=>{
+    const o={id:p?.id||uid(),title:gv('f-t'),category:gv('f-c'),status:gv('f-s'),description:gv('f-d'),
+      tools:gv('f-to').split(',').map(x=>x.trim()).filter(Boolean),date:gv('f-dt'),link:gv('f-l'),notes:gv('f-n')};
+    if(!o.title){toast('Title required','var(--re)');return;}
+    if(p){S.projects[S.projects.findIndex(x=>x.id===id)]=o;}else{S.projects.unshift(o);}
+    save();closeM();rProj();toast(p?'Updated':'Added');
+  });
+}
+
+/* ── FINDINGS ────────────────────────────────────────────── */
+function rFind(){
+  const c=document.getElementById('cnt');
+  c.innerHTML=`
+    <div class="fb">
+      <input type="search" class="si" id="fq" placeholder="Search findings…" oninput="rFindRows()">
+      <select class="fs" id="fsev" onchange="rFindRows()">${['<option value="">All Severity</option>',...SEVS.map(x=>`<option value="${x}">${x.charAt(0).toUpperCase()+x.slice(1)}</option>`)].join('')}</select>
+      <select class="fs" id="fst" onchange="rFindRows()">${['<option value="">All Status</option>',...FSTATS.map(x=>`<option>${x}</option>`)].join('')}</select>
+      <select class="fs" id="fsrc" onchange="rFindRows()">${['<option value="">All Sources</option>',...SRCS.map(x=>`<option>${x}</option>`)].join('')}</select>
+      <button class="btn bp" onclick="openFindM()">+ Add Finding</button>
+    </div>
+    <div class="card" style="padding:0"><div class="tw"><table>
+      <thead><tr><th>Finding</th><th>Severity</th><th>Status</th><th>Source</th><th>CVSS</th><th>Date</th><th></th></tr></thead>
+      <tbody id="f-tbody"></tbody>
+    </table></div></div>`;
+  rFindRows();
+}
+function rFindRows(){
+  const q=gv('fq').toLowerCase(),sv=gv('fsev'),st=gv('fst'),sr=gv('fsrc');
+  const rows=S.findings.filter(f=>
+    (!q||f.title.toLowerCase().includes(q)||f.description.toLowerCase().includes(q))&&
+    (!sv||f.severity.toLowerCase()===sv)&&(!st||f.status===st)&&(!sr||f.source===sr)
+  ).sort((a,b)=>SEVS.indexOf(a.severity.toLowerCase())-SEVS.indexOf(b.severity.toLowerCase()));
+  const tb=document.getElementById('f-tbody');
+  if(!tb)return;
+  if(!rows.length){tb.innerHTML=`<tr><td colspan="7"><div class="empty"><div class="empty-i">⚠</div><p>No findings</p></div></td></tr>`;return;}
+  tb.innerHTML=rows.map(f=>`
+    <tr>
+      <td><div style="font-weight:600">${f.title}</div><div style="font-size:0.67rem;color:var(--tm)">${f.cve?`<span style="font-family:monospace">${f.cve}</span> · `:''} ${f.description.slice(0,70)}${f.description.length>70?'…':''}</div></td>
+      <td>${sevB(f.severity)}</td>
+      <td>${stB(f.status)}</td>
+      <td style="font-size:0.7rem;color:var(--tm)">${f.source}</td>
+      <td style="font-family:monospace;font-size:0.7rem;color:${parseFloat(f.cvss)>=9?'var(--re)':parseFloat(f.cvss)>=7?'var(--or)':parseFloat(f.cvss)>=4?'var(--ye)':'var(--gr)'}">${f.cvss||'—'}</td>
+      <td style="font-family:monospace;font-size:0.7rem;color:var(--tm)">${f.date}</td>
+      <td><div style="display:flex;gap:0.25rem">
+        <button class="btn bg btn-sm btn-i" onclick="openFindM('${f.id}')">✎</button>
+        <button class="btn bd btn-sm btn-i" onclick="del('findings','${f.id}')">✕</button>
+      </div></td>
+    </tr>`).join('');
+}
+function openFindM(id){
+  const f=id?S.findings.find(x=>x.id===id):null;
+  openM(f?'Edit Finding':'Add Finding',`
+    <div class="fg">
+      <div class="fgf"><label class="fl">Title</label><input type="text" id="f-t" value="${f?.title||''}"></div>
+      <div><label class="fl">Severity</label><select id="f-sv">${SEVS.map(x=>`<option value="${x}" ${f?.severity.toLowerCase()===x?'selected':''}>${x.charAt(0).toUpperCase()+x.slice(1)}</option>`).join('')}</select></div>
+      <div><label class="fl">Status</label><select id="f-s">${FSTATS.map(x=>`<option ${f?.status===x?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div><label class="fl">Source</label><select id="f-src">${SRCS.map(x=>`<option ${f?.source===x?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div><label class="fl">CVSS Score</label><input type="number" id="f-cv" value="${f?.cvss||''}" min="0" max="10" step="0.1"></div>
+      <div><label class="fl">CVE ID</label><input type="text" id="f-cve" value="${f?.cve||''}" placeholder="CVE-2024-XXXXX"></div>
+      <div><label class="fl">Date Found</label><input type="date" id="f-dt" value="${f?.date||new Date().toISOString().slice(0,10)}"></div>
+      <div class="fgf"><label class="fl">Description</label><textarea id="f-d">${f?.description||''}</textarea></div>
+      <div class="fgf"><label class="fl">Notes / Remediation</label><textarea id="f-n">${f?.notes||''}</textarea></div>
+    </div>
+    <div class="fa"><button class="btn bg" onclick="closeM()">Cancel</button><button class="btn bp" id="m-save">Save</button></div>`,
+  ()=>{
+    const o={id:f?.id||uid(),title:gv('f-t'),severity:gv('f-sv'),status:gv('f-s'),source:gv('f-src'),
+      cvss:gv('f-cv'),cve:gv('f-cve'),date:gv('f-dt'),description:gv('f-d'),notes:gv('f-n')};
+    if(!o.title){toast('Title required','var(--re)');return;}
+    if(f){S.findings[S.findings.findIndex(x=>x.id===id)]=o;}else{S.findings.unshift(o);}
+    save();closeM();rFind();toast(f?'Updated':'Added');
+  });
+}
+
+/* ── SKILLS ─────────────────────────────────────────────── */
+function rSkills(){
+  const c=document.getElementById('cnt');
+  c.innerHTML=`
+    <div class="fb">
+      <input type="search" class="si" id="sq" placeholder="Search skills…" oninput="rSkillRows()">
+      <select class="fs" id="sdom" onchange="rSkillRows()">${['<option value="">All Domains</option>',...DOMS.map(x=>`<option>${x}</option>`)].join('')}</select>
+      <select class="fs" id="slv" onchange="rSkillRows()">${['<option value="">All Levels</option>',...PROFS.map(x=>`<option>${x}</option>`)].join('')}</select>
+      <button class="btn bp" onclick="openSkillM()">+ Add Skill</button>
+    </div>
+    <div class="card"><div id="sk-rows"></div></div>`;
+  rSkillRows();
+}
+function rSkillRows(){
+  const q=gv('sq').toLowerCase(),dom=gv('sdom'),lv=gv('slv');
+  const rows=S.skills.filter(s=>
+    (!q||s.skill.toLowerCase().includes(q))&&(!dom||s.domain===dom)&&(!lv||s.level===lv)
+  );
+  const el=document.getElementById('sk-rows');
+  if(!el)return;
+  if(!rows.length){el.innerHTML=`<div class="empty"><div class="empty-i">◎</div><p>No skills found</p></div>`;return;}
+  const grp={};
+  rows.forEach(s=>{if(!grp[s.domain])grp[s.domain]=[];grp[s.domain].push(s);});
+  el.innerHTML=Object.entries(grp).map(([dom,skills])=>`
+    <div style="margin-bottom:1.1rem">
+      <div class="dh">${dom}</div>
+      ${skills.map(s=>`
+        <div class="sk-row">
+          <div class="sk-n">${s.skill}</div>
+          <div class="sk-t"><div class="sk-f ${profCls[s.level]}" style="width:${profPct[s.level]}%"></div></div>
+          <div class="sk-lv" style="color:${profCol[s.level]}">${s.level}</div>
+          <div class="sk-ev" title="${s.evidence}">${s.evidence}</div>
+          <div style="display:flex;gap:0.25rem;flex-shrink:0">
+            <button class="btn bg btn-sm btn-i" onclick="openSkillM('${s.id}')">✎</button>
+            <button class="btn bd btn-sm btn-i" onclick="del('skills','${s.id}')">✕</button>
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+function openSkillM(id){
+  const s=id?S.skills.find(x=>x.id===id):null;
+  openM(s?'Edit Skill':'Add Skill',`
+    <div class="fg">
+      <div class="fgf"><label class="fl">Skill Name</label><input type="text" id="f-sk" value="${s?.skill||''}"></div>
+      <div><label class="fl">Domain</label><select id="f-dom">${DOMS.map(x=>`<option ${s?.domain===x?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div><label class="fl">Proficiency</label><select id="f-lv">${PROFS.map(x=>`<option ${s?.level===x?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div class="fgf"><label class="fl">Evidence / Where Used</label><input type="text" id="f-ev" value="${s?.evidence||''}"></div>
+      <div class="fgf"><label class="fl">Notes</label><textarea id="f-n">${s?.notes||''}</textarea></div>
+    </div>
+    <div class="fa"><button class="btn bg" onclick="closeM()">Cancel</button><button class="btn bp" id="m-save">Save</button></div>`,
+  ()=>{
+    const o={id:s?.id||uid(),skill:gv('f-sk'),domain:gv('f-dom'),level:gv('f-lv'),evidence:gv('f-ev'),notes:gv('f-n')};
+    if(!o.skill){toast('Skill name required','var(--re)');return;}
+    if(s){S.skills[S.skills.findIndex(x=>x.id===id)]=o;}else{S.skills.push(o);}
+    save();closeM();rSkills();toast(s?'Updated':'Added');
+  });
+}
+
+/* ── CERTIFICATIONS ─────────────────────────────────────── */
+function rCerts(){
+  const c=document.getElementById('cnt');
+  c.innerHTML=`
+    <div class="fb">
+      <select class="fs" id="cst" onchange="rCertCards()">${['<option value="">All Status</option>',...CSTATS.map(x=>`<option>${x}</option>`)].join('')}</select>
+      <button class="btn bp" onclick="openCertM()">+ Add Certification</button>
+    </div>
+    <div class="cg" id="cert-grid"></div>`;
+  rCertCards();
+}
+function rCertCards(){
+  const st=gv('cst');
+  const ord={Earned:0,'In Progress':1,Planned:2,Expired:3};
+  const rows=[...S.certs.filter(c=>!st||c.status===st)].sort((a,b)=>ord[a.status]-ord[b.status]);
+  const el=document.getElementById('cert-grid');
+  if(!el)return;
+  if(!rows.length){el.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="empty-i">✦</div><p>No certs found</p></div>`;return;}
+  const cols={Earned:'var(--gr)','In Progress':'var(--or)',Planned:'var(--cy)',Expired:'var(--re)'};
+  el.innerHTML=rows.map(ct=>`
+    <div class="cc" style="border-left-color:${cols[ct.status]||'var(--b)'}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        ${stB(ct.status)}
+        <div style="display:flex;gap:0.25rem">
+          <button class="btn bg btn-sm btn-i" onclick="openCertM('${ct.id}')">✎</button>
+          <button class="btn bd btn-sm btn-i" onclick="del('certs','${ct.id}')">✕</button>
+        </div>
+      </div>
+      <div class="cc-n">${ct.name}</div>
+      <div class="cc-i">${ct.issuer}</div>
+      <div class="cc-f">
+        <div class="cc-d">${ct.earned?'Earned: '+ct.earned:ct.target?'Target: '+ct.target:'No date set'}${ct.expiry?'<br>Expires: '+ct.expiry:''}</div>
+        ${ct.badge?`<a href="${ct.badge}" target="_blank" class="btn bg btn-sm">Verify ↗</a>`:''}
+      </div>
+    </div>`).join('');
+}
+function openCertM(id){
+  const ct=id?S.certs.find(x=>x.id===id):null;
+  openM(ct?'Edit Certification':'Add Certification',`
+    <div class="fg">
+      <div class="fgf"><label class="fl">Certification Name</label><input type="text" id="f-n" value="${ct?.name||''}"></div>
+      <div><label class="fl">Issuer</label><input type="text" id="f-i" value="${ct?.issuer||''}"></div>
+      <div><label class="fl">Status</label><select id="f-s">${CSTATS.map(x=>`<option ${ct?.status===x?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div><label class="fl">Earned Date</label><input type="date" id="f-e" value="${ct?.earned||''}"></div>
+      <div><label class="fl">Expiry Date</label><input type="date" id="f-ex" value="${ct?.expiry||''}"></div>
+      <div><label class="fl">Target Date</label><input type="date" id="f-tg" value="${ct?.target||''}"></div>
+      <div class="fgf"><label class="fl">Badge / Credly URL</label><input type="url" id="f-b" value="${ct?.badge||''}"></div>
+    </div>
+    <div class="fa"><button class="btn bg" onclick="closeM()">Cancel</button><button class="btn bp" id="m-save">Save</button></div>`,
+  ()=>{
+    const o={id:ct?.id||uid(),name:gv('f-n'),issuer:gv('f-i'),status:gv('f-s'),earned:gv('f-e'),expiry:gv('f-ex'),target:gv('f-tg'),badge:gv('f-b')};
+    if(!o.name){toast('Name required','var(--re)');return;}
+    if(ct){S.certs[S.certs.findIndex(x=>x.id===id)]=o;}else{S.certs.unshift(o);}
+    save();closeM();rCerts();toast(ct?'Updated':'Added');
+  });
+}
+
+/* ── MITRE ──────────────────────────────────────────────── */
+function rMitre(){
+  const c=document.getElementById('cnt');
+  const tot=TACTICS.reduce((a,t)=>a+t.tech.length,0);
+  const det=Object.values(S.mitre).filter(v=>v==='detected').length;
+  const tst=Object.values(S.mitre).filter(v=>v==='tested').length;
+  const inp=Object.values(S.mitre).filter(v=>v==='in-progress').length;
+  const pct=Math.round((det+tst)/tot*100);
+  c.innerHTML=`
+    <div class="stat-g" style="grid-template-columns:repeat(4,1fr);margin-bottom:1rem">
+      <div class="card"><div class="c-lbl">Coverage</div><div class="c-val" style="color:var(--gr)">${pct}%</div><div class="c-sub">${det+tst}/${tot} techniques</div></div>
+      <div class="card"><div class="c-lbl">Detected</div><div class="c-val" style="color:var(--gr)">${det}</div><div class="c-sub">Wazuh · Suricata · Sysmon</div></div>
+      <div class="card"><div class="c-lbl">Tested</div><div class="c-val" style="color:var(--cy)">${tst}</div><div class="c-sub">Purple team / VECTR</div></div>
+      <div class="card"><div class="c-lbl">In Progress</div><div class="c-val" style="color:var(--or)">${inp}</div><div class="c-sub">Being implemented</div></div>
+    </div>
+    <div class="ml">
+      <div class="ml-i"><div class="ml-d" style="background:rgba(80,250,123,0.4)"></div><span style="color:var(--gr)">Detected</span></div>
+      <div class="ml-i"><div class="ml-d" style="background:rgba(138,232,255,0.3)"></div><span style="color:var(--cy)">Tested (Purple Team)</span></div>
+      <div class="ml-i"><div class="ml-d" style="background:rgba(255,184,108,0.3)"></div><span style="color:var(--or)">In Progress</span></div>
+      <div class="ml-i"><div class="ml-d" style="background:rgba(255,255,255,0.06)"></div><span style="color:var(--tm)">Not Covered</span></div>
+      <span style="margin-left:auto;font-size:0.65rem;color:var(--tm)">Click technique to cycle status</span>
+    </div>
+    <div class="mg">
+      ${TACTICS.map(t=>`
+        <div class="mt">
+          <div class="mt-h">${t.n}<br><span style="opacity:0.45;font-weight:400;font-size:0.5rem">${t.id}</span></div>
+          <div class="mt-b">
+            ${t.tech.map(x=>{
+              const k=t.id+':'+x.id;
+              const st=S.mitre[k]||'not-covered';
+              return `<div class="mt-c s-${st}" onclick="cycleM('${k}')" title="${x.id} — ${x.n}&#10;Click to cycle status"><div class="mt-id">${x.id}</div><div class="mt-nm">${x.n}</div></div>`;
+            }).join('')}
+          </div>
+        </div>`).join('')}
+    </div>
+    <div style="font-size:0.67rem;color:var(--tm);margin-top:0.4rem">
+      ↗ <a href="https://mitre-attack.github.io/attack-navigator/" target="_blank" style="color:var(--cy)">Open ATT&CK Navigator</a>
+      &nbsp;·&nbsp;
+      <a href="assets/docs/mitre-layer.json" download style="color:var(--cy)">Download Navigator Layer</a>
+    </div>`;
+}
+function cycleM(k){
+  const cur=S.mitre[k]||'not-covered';
+  const next=MSTATUSES[(MSTATUSES.indexOf(cur)+1)%MSTATUSES.length];
+  if(next==='not-covered') delete S.mitre[k]; else S.mitre[k]=next;
+  save();rMitre();
+}
+
+/* ── DELETE ─────────────────────────────────────────────── */
+function del(col,id){
+  if(!confirm('Delete this item?'))return;
+  S[col]=S[col].filter(x=>x.id!==id);
+  save();nav(page);toast('Deleted','var(--re)');
+}
+
+/* ── EXPORT / IMPORT ────────────────────────────────────── */
+document.getElementById('exp-btn').onclick=()=>{
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:'application/json'}));
+  a.download='cybersec-tracker-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click(); toast('Exported!');
+};
+document.getElementById('imp-btn').onclick=()=>document.getElementById('imp-file').click();
+document.getElementById('imp-file').onchange=e=>{
+  const f=e.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(!d.projects)throw new Error();
+      S=d; if(!S.mitre||!Object.keys(S.mitre).length)S.mitre=mkMitre();
+      save(); nav(page); toast('Imported!');
+    }catch{toast('Invalid file','var(--re)');}
+  };
+  r.readAsText(f); e.target.value='';
+};
+
+/* ── EVENTS ─────────────────────────────────────────────── */
+document.querySelectorAll('.sb-a').forEach(a=>a.onclick=()=>nav(a.dataset.p));
+document.getElementById('m-close').onclick=closeM;
+document.getElementById('mo').onclick=e=>{if(e.target===document.getElementById('mo'))closeM();};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM();});
+
+/* ── INIT ───────────────────────────────────────────────── */
+load(); sbFoot(); nav('dashboard');
+</script>
+</body>
+</html>
