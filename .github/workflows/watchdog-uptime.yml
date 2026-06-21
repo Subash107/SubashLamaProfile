@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   check:
@@ -14,22 +14,39 @@ jobs:
     timeout-minutes: 2
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Check portfolio uptime
         run: |
           TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
           CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
           URL="https://subashlamaprofile.pages.dev"
           TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          STATE_FILE=".github/uptime-state.txt"
+          PREV_STATE=$(cat "$STATE_FILE" 2>/dev/null || echo "up")
 
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$URL" || echo "000")
 
           if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 400 ]; then
+            echo "up" > "$STATE_FILE"
+            if [ "$PREV_STATE" = "down" ]; then
+              curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+                -H "Content-Type: application/json" \
+                -d "{\"chat_id\":\"${CHAT}\",\"text\":\"PORTFOLIO IS BACK ONLINE!\n\nURL: ${URL}\nStatus: HTTP ${STATUS}\nTime: ${TS}\"}"
+            fi
             echo "Site is UP (HTTP $STATUS)"
           else
-            MSG=$(printf '🚨 PORTFOLIO IS DOWN!\n\nURL: %s\nStatus: HTTP %s\nTime: %s\n\nCheck immediately!' "$URL" "$STATUS" "$TS")
-            curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
-              -H "Content-Type: application/json" \
-              -d "{\"chat_id\":\"${CHAT}\",\"text\":\"${MSG}\"}"
-            echo "ALERT SENT — Site returned HTTP $STATUS"
-            exit 1
+            if [ "$PREV_STATE" = "up" ]; then
+              curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+                -H "Content-Type: application/json" \
+                -d "{\"chat_id\":\"${CHAT}\",\"text\":\"PORTFOLIO IS DOWN!\n\nURL: ${URL}\nStatus: HTTP ${STATUS}\nTime: ${TS}\n\nCheck immediately!\"}"
+              echo "ALERT SENT — Site returned HTTP $STATUS"
+            fi
+            echo "down" > "$STATE_FILE"
           fi
+
+          git config user.email "action@github.com"
+          git config user.name "GitHub Action"
+          git add "$STATE_FILE" || true
+          git diff --cached --quiet || git commit -m "chore: uptime state update" && git push || true

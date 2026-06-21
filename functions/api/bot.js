@@ -132,7 +132,6 @@ async function addApplication(env, fullText) {
   const role = words.slice(1).join(" ") || "Not specified";
   const date = new Date().toISOString().slice(0, 10);
 
-  const apps = JSON.parse(await env.TELEGRAM_BOT_TOKEN ? "{}" : "{}");
   const stored = await fetchApps(env);
   stored.push({ company, role, date, status: "APPLIED" });
   await saveApps(env, stored);
@@ -293,7 +292,12 @@ async function peakHours(env) {
     hourMap[h] = (hourMap[h] || 0) + 1;
     dayCounts[day] = (dayCounts[day] || 0) + 1;
   });
-  const topHours = Object.entries(hourMap).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([h,c])=>`  ${h}:00 UTC (${parseInt(h)+5}:45 NPT): ${c} downloads`).join("\n");
+  const topHours = Object.entries(hourMap).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([h,c])=>{
+    const nptMins = (parseInt(h)*60 + 45) % (24*60);
+    const nptH = String(Math.floor(nptMins/60)).padStart(2,"0");
+    const nptM = String(nptMins%60).padStart(2,"0");
+    return `  ${h}:00 UTC (${nptH}:${nptM} NPT): ${c} downloads`;
+  }).join("\n");
   const topDays  = Object.entries(dayCounts).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([d,c])=>`  ${dayMap[d]}: ${c} downloads`).join("\n");
   return "Peak Hours Analysis\n\nBest hours to post on LinkedIn (when recruiters download most):\n" + topHours + "\n\nBest days:\n" + topDays + "\n\nTip: Post on LinkedIn and apply for jobs during these peak hours for maximum visibility!";
 }

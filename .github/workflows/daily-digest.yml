@@ -52,9 +52,9 @@ jobs:
             tr -d ' ' | sort | uniq -c | sort -rn | head -3 | \
             awk '{print "  " $2 ": " $1}' | tr '\n' ',' | sed 's/,$//')
 
-          MSG=$(printf '📊 Daily Resume Digest - %s\n\nToday    : %s downloads\nThis week: %s downloads\nAll time : %s downloads\n\nTop countries this month:\n%s\n\n📋 Full log: https://github.com/Subash107/SubashLamaProfile/blob/main/download-logs/resume-downloads.txt' \
+          MSG=$(printf 'Daily Resume Digest - %s\n\nToday    : %s downloads\nThis week: %s downloads\nAll time : %s downloads\n\nTop countries this month:\n%s\n\nFull log: https://github.com/Subash107/SubashLamaProfile/blob/main/download-logs/resume-downloads.txt' \
             "$TODAY" "$TODAY_COUNT" "$WEEK_COUNT" "$TOTAL" "${TOP:-  No data yet}")
 
           curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
             -H "Content-Type: application/json" \
-            -d "{\"chat_id\":\"${CHAT}\",\"text\":\"${MSG}\"}"
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(printf '%s' "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"

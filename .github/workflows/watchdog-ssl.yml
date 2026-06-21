@@ -30,19 +30,19 @@ jobs:
             exit 0
           fi
 
-          EXPIRY_EPOCH=$(date -d "$EXPIRY" +%s 2>/dev/null || date -j -f "%b %d %T %Y %Z" "$EXPIRY" +%s)
+          EXPIRY_EPOCH=$(date -d "$EXPIRY" +%s 2>/dev/null || echo 0)
           NOW_EPOCH=$(date +%s)
           DAYS_LEFT=$(( (EXPIRY_EPOCH - NOW_EPOCH) / 86400 ))
           EXPIRY_DATE=$(date -d "$EXPIRY" +"%Y-%m-%d" 2>/dev/null || echo "$EXPIRY")
 
-          if [ "$DAYS_LEFT" -le 30 ]; then
+          if [ "$DAYS_LEFT" -le 7 ]; then
             curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
               -H "Content-Type: application/json" \
-              -d "{\"chat_id\":\"${CHAT}\",\"text\":\"SSL EXPIRY WARNING!\n\nDomain  : ${DOMAIN}\nExpires : ${EXPIRY_DATE}\nDays left: ${DAYS_LEFT} days\n\nRenew your SSL certificate soon!\"}"
-          elif [ "$DAYS_LEFT" -le 7 ]; then
+              -d "{\"chat_id\":\"${CHAT}\",\"text\":\"CRITICAL: SSL EXPIRES IN ${DAYS_LEFT} DAYS!\\n\\nDomain: ${DOMAIN}\\nExpiry: ${EXPIRY_DATE}\\n\\nURGENT: Renew immediately!\"}"
+          elif [ "$DAYS_LEFT" -le 30 ]; then
             curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
               -H "Content-Type: application/json" \
-              -d "{\"chat_id\":\"${CHAT}\",\"text\":\"CRITICAL: SSL EXPIRES IN ${DAYS_LEFT} DAYS!\n\nDomain: ${DOMAIN}\nExpiry: ${EXPIRY_DATE}\n\nURGENT: Renew immediately!\"}"
+              -d "{\"chat_id\":\"${CHAT}\",\"text\":\"SSL EXPIRY WARNING!\\n\\nDomain   : ${DOMAIN}\\nExpires  : ${EXPIRY_DATE}\\nDays left: ${DAYS_LEFT} days\\n\\nRenew your SSL certificate soon!\"}"
           else
             echo "SSL OK — ${DAYS_LEFT} days remaining (expires ${EXPIRY_DATE})"
           fi

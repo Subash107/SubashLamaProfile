@@ -42,7 +42,7 @@ jobs:
           check_cert "IBM Cybersecurity Fundamentals" "2027-01-01"
           check_cert "IBM Python for Data Science"    "2027-01-01"
           check_cert "Google Ads Video"               "2026-09-01"
-          check_cert "Kubernetes Security (studying)" "2027-06-01"
+          # Add real cert expiry date here when you earn Kubernetes Security cert
 
           if [ -n "$ALERTS" ]; then
             MSG="CERTIFICATION EXPIRY ALERT!\n\n${ALERTS}\nRenew soon to keep your profile strong."
