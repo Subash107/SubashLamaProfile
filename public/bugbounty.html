@@ -1005,7 +1005,7 @@ function rLearnRows(){
       <td><div style="font-weight:600;font-size:0.78rem">${l.technique}</div>${l.notes?`<div style="font-size:0.63rem;color:var(--tm);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${l.notes}</div>`:''}</td>
       <td style="font-size:0.7rem;color:var(--td)">${l.source}</td>
       <td style="font-family:monospace;font-size:0.68rem;color:var(--tm)">${l.date}</td>
-      <td><span style="color:${l.labCompleted?'var(--gr)':'var(--tm)';font-size:0.85rem">${l.labCompleted?'✓':'○'}</span></td>
+      <td><span style="color:${l.labCompleted?'var(--gr)':'var(--tm)'};font-size:0.85rem">${l.labCompleted?'✓':'○'}</span></td>
       <td>${applied}</td>
       <td>${l.writeup?`<a href="${l.writeup}" target="_blank" style="color:var(--cy);font-size:0.68rem">↗</a>`:'—'}</td>
       <td><div style="display:flex;gap:0.22rem">
