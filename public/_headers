@@ -11,7 +11,7 @@
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Embedder-Policy: credentialless
   Reporting-Endpoints: csp-endpoint="/api/csp-report"
-  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self' https://gc.zgo.at https://static.cloudflareinsights.com; style-src 'self'; img-src 'self' https://*.goatcounter.com https://ghchart.rshah.org; media-src 'self'; font-src 'self'; connect-src 'self' https://*.goatcounter.com https://api.github.com https://lingering-surf-6d77.lamasubash107.workers.dev https://urlhaus-api.abuse.ch https://check.torproject.org https://cloudflareinsights.com; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests; report-to csp-endpoint
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self' https://gc.zgo.at https://static.cloudflareinsights.com; style-src 'self'; img-src 'self' https://*.goatcounter.com https://ghchart.rshah.org; media-src 'self'; font-src 'self'; connect-src 'self' https://*.goatcounter.com https://api.github.com https://lingering-surf-6d77.lamasubash107.workers.dev https://portfolio-chat-api.lamasubash107.workers.dev https://raw.githubusercontent.com https://urlhaus-api.abuse.ch https://check.torproject.org https://cloudflareinsights.com; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests; report-to csp-endpoint
 
 # Early Hints — browser starts fetching critical assets before HTML is fully sent
 /
