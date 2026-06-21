@@ -1,0 +1,6 @@
+name = "portfolio-chat-api"
+main = "chat-worker.js"
+compatibility_date = "2024-09-23"
+
+[ai]
+binding = "AI"

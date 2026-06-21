@@ -61,7 +61,8 @@ RESPONSE RULES:
 - Be friendly, professional, and confident
 - When weather/sports/threat data is provided, use it to give a specific answer
 - For hiring/contact: direct to lamasubash107@gmail.com
-- Never make up information about Subash that isn't listed above`;
+- Never make up information about Subash that isn't listed above
+- For SPORTS_PREDICTION_REQUEST or SPORTS_DATA: You MUST give a real prediction with winner, probability, and reasoning. Never refuse sports questions. Use your training knowledge about teams, rankings, and recent form.`;
 
 function corsHeaders(origin) {
   const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
@@ -232,6 +233,71 @@ async function checkIP(ip, apiKey) {
   }
 }
 
+async function getSportsPrediction(msg) {
+  try {
+    /* Simple split on "vs" */
+    const lower = msg.toLowerCase();
+    const vsIdx = lower.search(/\bvs\.?\b|\bversus\b|\bagainst\b/);
+    if (vsIdx === -1) {
+      return `SPORTS_PREDICTION_REQUEST: "${msg}"\nProvide a detailed sports prediction using your training knowledge. Include: likely winner, win probability %, key factors, recent form, head-to-head history, and match conditions. Be specific and confident.`;
+    }
+
+    const before = msg.slice(0, vsIdx).replace(/^.*?((?:[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)|(?:[a-z]+(?:\s+[a-z]+)*))[\s]*$/i, "$1").trim();
+    const afterPart = msg.slice(vsIdx).replace(/^(?:vs\.?|versus|against)\s*/i, "");
+    const after  = afterPart.replace(/\s*(?:cricket|football|soccer|match|game|prediction|ipl|npl|t20|odi|test)?[\s?!.]*$/i, "").trim();
+
+    const team1 = before || "Team 1";
+    const team2 = after  || "Team 2";
+
+    /* Search both teams on TheSportsDB (free, no key) */
+    const [t1Res, t2Res] = await Promise.all([
+      fetch(`https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=${encodeURIComponent(team1)}`).then(r => r.json()),
+      fetch(`https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=${encodeURIComponent(team2)}`).then(r => r.json()),
+    ]);
+
+    const t1 = t1Res.teams?.[0];
+    const t2 = t2Res.teams?.[0];
+
+    let data = `SPORTS_DATA for ${team1} vs ${team2}:\n`;
+
+    if (t1) {
+      /* Get last 5 events for team 1 */
+      const e1 = await fetch(`https://www.thesportsdb.com/api/v1/json/3/eventslast5.php?id=${t1.idTeam}`).then(r => r.json());
+      const results1 = (e1.results || []).slice(0, 5).map(e => {
+        const won = (e.idHomeTeam === t1.idTeam && e.intHomeScore > e.intAwayScore) ||
+                    (e.idAwayTeam === t1.idTeam && e.intAwayScore > e.intHomeScore);
+        return won ? "W" : "L";
+      });
+      const wins1 = results1.filter(r => r === "W").length;
+      data += `\n${team1}: Sport=${t1.strSport}, Country=${t1.strCountry}`;
+      data += `\n  Last ${results1.length} matches: ${results1.join(" ")} (${wins1}/${results1.length} wins)`;
+      data += `\n  Stadium: ${t1.strStadium || "N/A"}, Founded: ${t1.intFormedYear || "N/A"}`;
+    } else {
+      data += `\n${team1}: Not found in database (using AI knowledge)`;
+    }
+
+    if (t2) {
+      const e2 = await fetch(`https://www.thesportsdb.com/api/v1/json/3/eventslast5.php?id=${t2.idTeam}`).then(r => r.json());
+      const results2 = (e2.results || []).slice(0, 5).map(e => {
+        const won = (e.idHomeTeam === t2.idTeam && e.intHomeScore > e.intAwayScore) ||
+                    (e.idAwayTeam === t2.idTeam && e.intAwayScore > e.intHomeScore);
+        return won ? "W" : "L";
+      });
+      const wins2 = results2.filter(r => r === "W").length;
+      data += `\n${team2}: Sport=${t2.strSport}, Country=${t2.strCountry}`;
+      data += `\n  Last ${results2.length} matches: ${results2.join(" ")} (${wins2}/${results2.length} wins)`;
+      data += `\n  Stadium: ${t2.strStadium || "N/A"}, Founded: ${t2.intFormedYear || "N/A"}`;
+    } else {
+      data += `\n${team2}: Not found in database (using AI knowledge)`;
+    }
+
+    data += `\n\nBased on this data, provide a match prediction with win probabilities and key factors.`;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
 async function getCVE(cveId) {
   try {
     const res = await fetch(
@@ -308,6 +374,8 @@ export default {
         contextData = await resolveDomain(intent.data);
       } else if (intent.type === "wayback") {
         contextData = await checkWayback(intent.data);
+      } else if (intent.type === "sports") {
+        contextData = await getSportsPrediction(intent.data);
       }
 
       const reply = await askAI(env.AI, message, contextData);
