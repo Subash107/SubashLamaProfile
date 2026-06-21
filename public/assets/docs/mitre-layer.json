@@ -1,0 +1,372 @@
+{
+  "name": "Subash Lama — SOC Lab Detection Coverage",
+  "versions": {
+    "attack": "14",
+    "navigator": "4.9",
+    "layer": "4.5"
+  },
+  "domain": "enterprise-attack",
+  "description": "Personal SOC lab detection coverage map — Wazuh SIEM + Suricata IDS + Sysmon endpoint telemetry. Built by Subash Lama, Cybersecurity Analyst (Kathmandu, Nepal). Profile: https://subashlamaprofile.pages.dev",
+  "filters": {
+    "platforms": ["Windows", "Linux", "Network"]
+  },
+  "sorting": 0,
+  "layout": {
+    "layout": "side",
+    "aggregateFunction": "average",
+    "showID": true,
+    "showName": true,
+    "showAggregateScores": false,
+    "countUnscored": false,
+    "expandedSubtechniques": "none"
+  },
+  "hideDisabled": false,
+  "techniques": [
+    {
+      "techniqueID": "T1595",
+      "tactic": "reconnaissance",
+      "color": "#ffb86c",
+      "comment": "Partial — Suricata active scanning signatures. T1595.001 IP scanning, T1595.002 vulnerability scanning detected.",
+      "enabled": true,
+      "score": 50,
+      "metadata": [{"name": "Tool", "value": "Suricata IDS"}, {"name": "Status", "value": "Partial"}]
+    },
+    {
+      "techniqueID": "T1592",
+      "tactic": "reconnaissance",
+      "color": "#ffb86c",
+      "comment": "Partial — Suricata network signatures for host info gathering.",
+      "enabled": true,
+      "score": 50,
+      "metadata": [{"name": "Tool", "value": "Suricata IDS"}, {"name": "Status", "value": "Partial"}]
+    },
+    {
+      "techniqueID": "T1583",
+      "tactic": "resource-development",
+      "color": "#ffb86c",
+      "comment": "Partial — Threat intelligence feeds (URLhaus, CISA KEV) monitored via GitHub Actions watchdog.",
+      "enabled": true,
+      "score": 50,
+      "metadata": [{"name": "Tool", "value": "Threat Intel Feeds"}, {"name": "Status", "value": "Partial"}]
+    },
+    {
+      "techniqueID": "T1588",
+      "tactic": "resource-development",
+      "color": "#ffb86c",
+      "comment": "Partial — CISA KEV and CVE watchdog monitors newly obtained attacker capabilities.",
+      "enabled": true,
+      "score": 50,
+      "metadata": [{"name": "Tool", "value": "CISA KEV Watchdog"}, {"name": "Status", "value": "Partial"}]
+    },
+    {
+      "techniqueID": "T1190",
+      "tactic": "initial-access",
+      "color": "#50fa7b",
+      "comment": "Detected — Suricata exploit signatures + Wazuh web attack rules. Covers public-facing app exploitation.",
+      "enabled": true,
+      "score": 100,
+      "metadata": [{"name": "Tool", "value": "Suricata + Wazuh"}, {"name": "Status", "value": "Detected"}]
+    },
+    {
+      "techniqueID": "T1078",
+      "tactic": "initial-access",
+      "color": "#50fa7b",
+      "comment": "Detected — Wazuh authentication anomaly rules detect valid account abuse. IAM background (AD, RBAC) informs detection logic.",
+      "enabled": true,
+      "score": 100,
+      "metadata": [{"name": "Tool", "value": "Wazuh SIEM"}, {"name": "Status", "value": "Detected"}]
+    },
+    {
+      "techniqueID": "T1566",
+      "tactic": "initial-access",
+      "color": "#50fa7b",
+      "comment": "Detected — Wazuh email attachment rules + Suricata phishing URL signatures.",
+      "enabled": true,
+      "score": 100,
+      "metadata": [{"name": "Tool", "value": "Wazuh + Suricata"}, {"name": "Status", "value": "Detected"}]
+    },
+    {
+      "techniqueID": "T1059",
+      "tactic": "execution",
+      "color": "#50fa7b",
+      "comment": "Detected — Sysmon process creation events + Wazuh command execution rules. Covers PowerShell, cmd, bash.",
+      "enabled": true,
+      "score": 100,
+      "metadata": [{"name": "Tool", "value": "Sysmon + Wazuh"}, {"name": "Status", "value": "Detected"}]
+    },
+    {
+      "techniqueID": "T1204",
+      "tactic": "execution",
+      "color": "#50fa7b",
+      "comment": "Detected — Sysmon file execution events flag suspicious user-initiated execution.",
+      "enabled": true,
+      "score": 100,
+      "metadata": [{"name": "Tool", "value": "Sysmon"}, {"name": "Status", "value": "Detected"}]
+    },
+    {
+      "techniqueID": "T1047",
+      "tactic": "execution",
+      "color": "#50fa7b",
+      "comment": "Detected — Sysmon WMI event subscription monitoring + Wazuh WMI rules.",
+      "enabled": true,
+      "score": 100,
+      "metadata": [{"name": "Tool", "value": "Sysmon + Wazuh"}, {"name": "Status", "value": "Detected"}]
+    },
+    {
+      "techniqueID": "T1547",
+      "tactic": "persistence",
+      "color": "#50fa7b",
+      "comment": "Detected — Sysmon registry autostart + Wazuh FIM on startup locations.",
+      "enabled": true,
+      "score": 100,
+      "metadata": [{"name": "Tool", "value": "Sysmon + Wazuh FIM"}, {"name": "Status", "value": "Detected"}]
+    },
+    {
+      "techniqueID": "T1053",
+      "tactic": "persistence",
+      "color": "#50fa7b",
+      "comment": "Detected — Sysmon scheduled task creation events monitored.",
+      "enabled": true,
+      "score": 100,
+      "metadata": [{"name": "Tool", "value": "Sysmon"}, {"name": "Status", "value": "Detected"}]
+    },
+    {
+      "techniqueID": "T1543",
+      "tactic": "persistence",
+      "color": "#50fa7b",
+      "comment": "Detected — Wazuh service creation rules + Sysmon service events.",
+      "enabled": true,
+      "score": 100,
+      "metadata": [{"name": "Tool", "value": "Wazuh + Sysmon"}, {"name": "Status", "value": "Detected"}]
+    },
+    {
+      "techniqueID": "T1134",
+      "tactic": "privilege-escalation",
+      "color": "#50fa7b",
+      "comment": "Detected — Wazuh token manipulation rules + Sysmon process injection events.",
+      "enabled": true,
+      "score": 100,
+      "metadata": [{"name": "Tool", "value": "Wazuh + Sysmon"}, {"name": "Status", "value": "Detected"}]
+    },
+    {
+      "techniqueID": "T1055",
+      "tactic": "privilege-escalation",
+      "color": "#50fa7b",
+      "comment": "Detected — Sysmon process injection events (CreateRemoteThread, WriteProcessMemory).",
+      "enabled": true,
+      "score": 100,
+      "metadata": [{"name": "Tool", "value": "Sysmon"}, {"name": "Status", "value": "Detected"}]
+    },
+    {
+      "techniqueID": "T1068",
+      "tactic": "privilege-escalation",
+      "color": "#50fa7b",
+      "comment": "Detected — Wazuh privilege escalation rules on Linux and Windows.",
+      "enabled": true,
+      "score": 100,
+      "metadata": [{"name": "Tool", "value": "Wazuh"}, {"name": "Status", "value": "Detected"}]
+    },
+    {
+      "techniqueID": "T1070",
+      "tactic": "defense-evasion",
+      "color": "#ffb86c",
+      "comment": "Partial — Wazuh FIM detects log and indicator removal. Obfuscation detection limited.",
+      "enabled": true,
+      "score": 50,
+      "metadata": [{"name": "Tool", "value": "Wazuh FIM"}, {"name": "Status", "value": "Partial"}]
+    },
+    {
+      "techniqueID": "T1027",
+      "tactic": "defense-evasion",
+      "color": "#ffb86c",
+      "comment": "Partial — Wazuh detects some obfuscated file execution; deep deobfuscation not yet implemented.",
+      "enabled": true,
+      "score": 50,
+      "metadata": [{"name": "Tool", "value": "Wazuh"}, {"name": "Status", "value": "Partial"}]
+    },
+    {
+      "techniqueID": "T1562",
+      "tactic": "defense-evasion",
+      "color": "#ffb86c",
+      "comment": "Partial — Wazuh monitors security tool tampering and firewall disable events.",
+      "enabled": true,
+      "score": 50,
+      "metadata": [{"name": "Tool", "value": "Wazuh"}, {"name": "Status", "value": "Partial"}]
+    },
+    {
+      "techniqueID": "T1003",
+      "tactic": "credential-access",
+      "color": "#50fa7b",
+      "comment": "Detected — Wazuh credential dumping rules (LSASS, SAM) + Sysmon process access events.",
+      "enabled": true,
+      "score": 100,
+      "metadata": [{"name": "Tool", "value": "Wazuh + Sysmon"}, {"name": "Status", "value": "Detected"}]
+    },
+    {
+      "techniqueID": "T1110",
+      "tactic": "credential-access",
+      "color": "#50fa7b",
+      "comment": "Detected — Wazuh brute force rules (SSH, RDP, web auth). Rule 5710 active in lab — Multiple failed SSH logins.",
+      "enabled": true,
+      "score": 100,
+      "metadata": [{"name": "Tool", "value": "Wazuh"}, {"name": "Status", "value": "Detected"}]
+    },
+    {
+      "techniqueID": "T1552",
+      "tactic": "credential-access",
+      "color": "#50fa7b",
+      "comment": "Detected — Wazuh FIM monitors credential file access + Sysmon file read events.",
+      "enabled": true,
+      "score": 100,
+      "metadata": [{"name": "Tool", "value": "Wazuh FIM + Sysmon"}, {"name": "Status", "value": "Detected"}]
+    },
+    {
+      "techniqueID": "T1046",
+      "tactic": "discovery",
+      "color": "#ffb86c",
+      "comment": "Partial — Suricata detects network scanning (nmap signatures). Host-based scanning detection partial.",
+      "enabled": true,
+      "score": 50,
+      "metadata": [{"name": "Tool", "value": "Suricata"}, {"name": "Status", "value": "Partial"}]
+    },
+    {
+      "techniqueID": "T1082",
+      "tactic": "discovery",
+      "color": "#ffb86c",
+      "comment": "Partial — Sysmon system info queries logged but correlation rules incomplete.",
+      "enabled": true,
+      "score": 50,
+      "metadata": [{"name": "Tool", "value": "Sysmon"}, {"name": "Status", "value": "Partial"}]
+    },
+    {
+      "techniqueID": "T1069",
+      "tactic": "discovery",
+      "color": "#ffb86c",
+      "comment": "Partial — Sysmon logs group enumeration commands. Full coverage expanding.",
+      "enabled": true,
+      "score": 50,
+      "metadata": [{"name": "Tool", "value": "Sysmon"}, {"name": "Status", "value": "Partial"}]
+    },
+    {
+      "techniqueID": "T1021",
+      "tactic": "lateral-movement",
+      "color": "#ffb86c",
+      "comment": "Partial — Wazuh monitors remote service use (SSH, RDP, SMB). Lateral movement correlation rules in progress.",
+      "enabled": true,
+      "score": 50,
+      "metadata": [{"name": "Tool", "value": "Wazuh"}, {"name": "Status", "value": "Partial"}]
+    },
+    {
+      "techniqueID": "T1570",
+      "tactic": "lateral-movement",
+      "color": "#ffb86c",
+      "comment": "Partial — Sysmon file transfer events and Wazuh FIM cover some lateral tool transfer.",
+      "enabled": true,
+      "score": 50,
+      "metadata": [{"name": "Tool", "value": "Wazuh FIM + Sysmon"}, {"name": "Status", "value": "Partial"}]
+    },
+    {
+      "techniqueID": "T1560",
+      "tactic": "collection",
+      "color": "#ffb86c",
+      "comment": "Partial — Sysmon file events detect archive creation. Full collection correlation expanding.",
+      "enabled": true,
+      "score": 50,
+      "metadata": [{"name": "Tool", "value": "Sysmon"}, {"name": "Status", "value": "Partial"}]
+    },
+    {
+      "techniqueID": "T1005",
+      "tactic": "collection",
+      "color": "#ffb86c",
+      "comment": "Partial — Wazuh FIM monitors sensitive file access on local storage.",
+      "enabled": true,
+      "score": 50,
+      "metadata": [{"name": "Tool", "value": "Wazuh FIM"}, {"name": "Status", "value": "Partial"}]
+    },
+    {
+      "techniqueID": "T1071",
+      "tactic": "command-and-control",
+      "color": "#ff5555",
+      "comment": "In Progress — Suricata C2 beacon signatures active. Tor exit node detection live. Expanding encrypted channel coverage.",
+      "enabled": true,
+      "score": 25,
+      "metadata": [{"name": "Tool", "value": "Suricata"}, {"name": "Status", "value": "In Progress"}]
+    },
+    {
+      "techniqueID": "T1573",
+      "tactic": "command-and-control",
+      "color": "#ff5555",
+      "comment": "In Progress — Suricata TLS anomaly detection expanding. Encrypted C2 channel detection incomplete.",
+      "enabled": true,
+      "score": 25,
+      "metadata": [{"name": "Tool", "value": "Suricata"}, {"name": "Status", "value": "In Progress"}]
+    },
+    {
+      "techniqueID": "T1048",
+      "tactic": "exfiltration",
+      "color": "#ffb86c",
+      "comment": "Partial — Suricata rules detect unusual outbound protocols (DNS, ICMP exfil patterns).",
+      "enabled": true,
+      "score": 50,
+      "metadata": [{"name": "Tool", "value": "Suricata"}, {"name": "Status", "value": "Partial"}]
+    },
+    {
+      "techniqueID": "T1041",
+      "tactic": "exfiltration",
+      "color": "#ffb86c",
+      "comment": "Partial — Suricata C2 channel exfiltration rules partially cover exfil over C2.",
+      "enabled": true,
+      "score": 50,
+      "metadata": [{"name": "Tool", "value": "Suricata"}, {"name": "Status", "value": "Partial"}]
+    },
+    {
+      "techniqueID": "T1485",
+      "tactic": "impact",
+      "color": "#50fa7b",
+      "comment": "Detected — Wazuh FIM detects data destruction and mass file deletion events.",
+      "enabled": true,
+      "score": 100,
+      "metadata": [{"name": "Tool", "value": "Wazuh FIM"}, {"name": "Status", "value": "Detected"}]
+    },
+    {
+      "techniqueID": "T1490",
+      "tactic": "impact",
+      "color": "#50fa7b",
+      "comment": "Detected — Wazuh alerts on backup deletion and shadow copy removal commands.",
+      "enabled": true,
+      "score": 100,
+      "metadata": [{"name": "Tool", "value": "Wazuh"}, {"name": "Status", "value": "Detected"}]
+    },
+    {
+      "techniqueID": "T1489",
+      "tactic": "impact",
+      "color": "#50fa7b",
+      "comment": "Detected — Wazuh service stop monitoring + Sysmon service state change events.",
+      "enabled": true,
+      "score": 100,
+      "metadata": [{"name": "Tool", "value": "Wazuh + Sysmon"}, {"name": "Status", "value": "Detected"}]
+    }
+  ],
+  "gradient": {
+    "colors": ["#ff5555", "#ffb86c", "#50fa7b"],
+    "minValue": 0,
+    "maxValue": 100
+  },
+  "legendItems": [
+    {"label": "Detected (Wazuh / Suricata / Sysmon)", "color": "#50fa7b"},
+    {"label": "Partial coverage — expanding", "color": "#ffb86c"},
+    {"label": "In Progress", "color": "#ff5555"}
+  ],
+  "metadata": [
+    {"name": "Author", "value": "Subash Lama"},
+    {"name": "Role", "value": "Cybersecurity Analyst"},
+    {"name": "Lab Tools", "value": "Wazuh SIEM, Suricata IDS/IPS, Sysmon"},
+    {"name": "Portfolio", "value": "https://subashlamaprofile.pages.dev"},
+    {"name": "Last Updated", "value": "2026-06-21"}
+  ],
+  "showTacticRowBackground": true,
+  "tacticRowBackground": "#07111c",
+  "selectTechniquesAcrossTactics": false,
+  "selectSubtechniquesWithParent": false,
+  "selectVisibleTechniques": false
+}

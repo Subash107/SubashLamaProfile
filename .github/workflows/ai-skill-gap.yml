@@ -1,0 +1,180 @@
+name: AI Skill Gap Analyzer
+
+on:
+  workflow_dispatch:
+    inputs:
+      job_description:
+        description: 'Paste the full job description here'
+        required: true
+        type: string
+      job_title:
+        description: 'Job title (optional, for context)'
+        required: false
+        default: 'Cybersecurity Role'
+        type: string
+      company:
+        description: 'Company name (optional)'
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Analyze skill gap with Claude AI
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
+          CLAUDE_KEY:     ${{ secrets.ANTHROPIC_API_KEY }}
+          JOB_DESC:       ${{ inputs.job_description }}
+          JOB_TITLE:      ${{ inputs.job_title }}
+          COMPANY:        ${{ inputs.company }}
+        run: |
+          python3 << 'PYEOF'
+import os, json, urllib.request, urllib.error, sys
+from datetime import datetime
+
+token     = os.environ.get('TELEGRAM_TOKEN', '')
+chat_id   = os.environ.get('TELEGRAM_CHAT', '')
+api_key   = os.environ.get('CLAUDE_KEY', '')
+job_desc  = os.environ.get('JOB_DESC', '')
+job_title = os.environ.get('JOB_TITLE', 'Cybersecurity Role')
+company   = os.environ.get('COMPANY', '')
+today     = datetime.utcnow().strftime('%Y-%m-%d')
+
+def send_telegram(msg):
+    if not (token and chat_id):
+        print(msg)
+        return
+    payload = json.dumps({'chat_id': chat_id, 'text': msg}).encode()
+    req = urllib.request.Request(
+        f'https://api.telegram.org/bot{token}/sendMessage',
+        data=payload,
+        headers={'Content-Type': 'application/json'}
+    )
+    try:
+        urllib.request.urlopen(req, timeout=10)
+    except Exception as e:
+        print(f'Telegram error: {e}')
+
+SUBASH_PROFILE = """
+CERTIFICATIONS:
+- Cisco Endpoint Security (Jun 2026)
+- Cisco Ethical Hacker (Apr 2026)
+- Cisco Introduction to Cybersecurity (Mar 2026)
+- IBM Cybersecurity Fundamentals (Mar 2026)
+- IBM Python for Data Science (Mar 2026)
+- IBM Data Analysis with Python (Mar 2026)
+- Google Ads Video Certification (May 2026)
+
+CORE SKILLS:
+SOC Operations, Wazuh SIEM (self-built lab, custom detection rules), Suricata IDS/IPS,
+Sysmon endpoint telemetry, IAM, Active Directory, RBAC, MFA, SSO, PAM,
+Docker, GitHub Actions CI/CD, Terraform, Ansible, Python, Bash, PowerShell,
+MITRE ATT&CK (14-tactic coverage map built), NIST 800-53, NIST 800-61, ISO 27001,
+CIS Controls, GRC, Vulnerability Management, Incident Response, Network Monitoring,
+Ethical Hacking, Endpoint Hardening, Log Analysis, Threat Intelligence (CISA KEV, URLhaus)
+
+EXPERIENCE: 12+ years enterprise IT
+- Cybersecurity Researcher / SOC Analyst (Mar 2025–Present): Personal SOC lab,
+  custom MITRE ATT&CK detection rules, bug bounty (HackerOne/Intigriti/Bugcrowd)
+- IT & Network Admin at Primuson Pvt. Ltd. (2020–2025): 150+ endpoints, IAM, firewall,
+  network monitoring, IDS deployment, patch management
+- IT Specialist at State Bank of India (2018–2020): AD 200+ staff, proxy hardening,
+  endpoint compliance
+- Support Engineer at Green IT Solutions (2016–2019): 20+ enterprise clients, Linux/storage
+- IT Consultant at Unilever Nepal (2017): Cisco networking, AD migration, IT governance
+
+CURRENTLY STUDYING: Elastic Stack (ELK), GRC certification, Kubernetes security
+
+EDUCATION: Bachelor of Business Studies — Nepal Mega College (2015–2022)
+LOCATION: Kathmandu, Nepal — open to remote worldwide, hybrid, or on-site
+"""
+
+if not api_key:
+    send_telegram(
+        '❌ AI Skill Gap Analyzer\n\n'
+        'ANTHROPIC_API_KEY secret is not set.\n'
+        'Add it: GitHub repo → Settings → Secrets → Actions → New secret\n'
+        'Name: ANTHROPIC_API_KEY\n'
+        'Value: sk-ant-api03-...\n\n'
+        'Then re-run this workflow.'
+    )
+    sys.exit(1)
+
+prompt = f"""Analyze this job description and compare it to the candidate profile below.
+
+Return a concise, actionable report with exactly these sections:
+
+MATCH SCORE: X/100
+ROLE FIT: [one sentence on overall fit]
+
+TOP MATCHING KEYWORDS (5 max):
+- [keyword] — [where it appears in profile]
+
+SKILL GAPS (5 max):
+- [missing skill/keyword] — [how serious / how to address]
+
+QUICK WIN:
+[One specific, actionable recommendation to improve fit for this exact role]
+
+---
+Job Title: {job_title}
+Company: {company if company else 'Not specified'}
+Date: {today}
+
+JOB DESCRIPTION:
+{job_desc[:3000]}
+
+CANDIDATE PROFILE:
+{SUBASH_PROFILE}
+"""
+
+payload = json.dumps({
+    'model': 'claude-haiku-4-5-20251001',
+    'max_tokens': 700,
+    'messages': [{'role': 'user', 'content': prompt}]
+}).encode()
+
+req = urllib.request.Request(
+    'https://api.anthropic.com/v1/messages',
+    data=payload,
+    headers={
+        'x-api-key': api_key,
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json'
+    }
+)
+
+try:
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        result = json.loads(resp.read())
+    analysis = result.get('content', [{}])[0].get('text', 'No response received.')
+except urllib.error.HTTPError as e:
+    body = e.read().decode()
+    send_telegram(f'❌ Claude API error {e.code}: {body[:300]}')
+    sys.exit(1)
+except Exception as e:
+    send_telegram(f'❌ Request failed: {str(e)[:200]}')
+    sys.exit(1)
+
+header = f'🤖 AI Skill Gap Analysis\n📅 {today}\n💼 {job_title}'
+if company:
+    header += f'\n🏢 {company}'
+header += '\n' + '─' * 30
+
+msg = f'{header}\n\n{analysis}'
+
+# Telegram has 4096 char limit per message
+if len(msg) > 4000:
+    msg = msg[:3997] + '...'
+
+send_telegram(msg)
+print('Analysis sent to Telegram.')
+PYEOF

@@ -1149,3 +1149,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
       syncAllFlipCardHeights();
     });
+
+/* ── Live Dashboard & Platform Profiles — fetch stats.json ───────── */
+(function initLiveDashboard() {
+  const set = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
+
+  fetch('/stats.json')
+    .then(r => r.ok ? r.json() : Promise.reject(r.status))
+    .then(s => {
+      /* Dashboard cards */
+      set('ldCommits',  s.github?.commits_week ?? '—');
+      set('ldDownloads', s.resume?.downloads_week ?? '—');
+      set('ldApps',     s.jobs?.applications_week ?? '—');
+      set('ldCerts',    s.certs ?? '7');
+
+      /* HTB rank */
+      const htbRank = s.htb?.rank;
+      set('ldHTBRank', htbRank ? '#' + htbRank : '—');
+
+      /* Last active — show relative label */
+      const lastActive = s.last_active;
+      if (lastActive) {
+        const diffDays = Math.floor((Date.now() - new Date(lastActive).getTime()) / 86400000);
+        set('ldActivity', diffDays === 0 ? 'Today' : diffDays === 1 ? 'Yesterday' : diffDays + 'd ago');
+      }
+
+      /* Platform profile badges */
+      const ppHTBStat = document.getElementById('ppHTBStat');
+      if (ppHTBStat) {
+        ppHTBStat.textContent = htbRank
+          ? 'Rank #' + htbRank + (s.htb?.rank_text ? ' · ' + s.htb.rank_text : '')
+          : 'Profile active';
+      }
+
+      /* Update HTB card href if we have a real profile URL */
+      if (s.htb?.profile && s.htb.profile !== 'https://app.hackthebox.com') {
+        const card = document.getElementById('ppHTBCard');
+        if (card) card.href = s.htb.profile;
+      }
+
+      const ppGHStat = document.getElementById('ppGHStat');
+      if (ppGHStat) {
+        const c = s.github?.commits_week ?? 0;
+        ppGHStat.textContent = c + ' commit' + (c !== 1 ? 's' : '') + ' this week';
+      }
+    })
+    .catch(() => {
+      /* Silently degrade — values stay as em-dash placeholders */
+    });
+}());

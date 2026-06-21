@@ -6402,3 +6402,154 @@
   #hackerScore  { top: 0.35rem; left: 0.35rem; font-size: 0.58rem; padding: 0.2rem 0.45rem; }
 }
 
+
+/* =====================================================================
+   LIVE ACTIVITY DASHBOARD
+   ===================================================================== */
+.live-dashboard-section {
+  max-width: 900px;
+  margin: 0 auto 2rem;
+  padding: 1.25rem 1.5rem 1rem;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(114,239,255,0.12);
+  border-radius: 16px;
+  position: relative;
+  z-index: 1;
+}
+.ld-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.ld-live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #50fa7b;
+  flex-shrink: 0;
+  animation: ld-blink 2s ease-in-out infinite;
+}
+@keyframes ld-blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+.ld-title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #8ae8ff;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+.ld-sub {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.3);
+  margin-left: auto;
+}
+.ld-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+}
+.ld-card {
+  background: rgba(0,0,0,0.22);
+  border: 1px solid rgba(255,255,255,0.065);
+  border-radius: 10px;
+  padding: 0.85rem 0.7rem 0.7rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  transition: border-color 0.2s, background 0.2s;
+  text-decoration: none;
+  color: inherit;
+}
+.ld-card:hover { border-color: rgba(114,239,255,0.28); background: rgba(114,239,255,0.04); }
+.ld-icon { font-size: 1.2rem; line-height: 1; margin-bottom: 0.1rem; }
+.ld-val {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #8ae8ff;
+  font-family: "Cascadia Code","Fira Code",monospace;
+  line-height: 1.1;
+  min-height: 1.6rem;
+}
+.ld-lbl {
+  font-size: 0.64rem;
+  color: rgba(255,255,255,0.4);
+  text-align: center;
+  line-height: 1.35;
+}
+.ld-footer {
+  margin: 0.75rem 0 0;
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.2);
+  text-align: center;
+}
+@media (max-width: 600px) {
+  .ld-grid { grid-template-columns: repeat(2, 1fr); }
+  .live-dashboard-section { padding: 1rem 0.9rem 0.8rem; margin-bottom: 1.25rem; }
+  .ld-sub { display: none; }
+  .ld-val { font-size: 1.2rem; }
+}
+
+/* =====================================================================
+   PLATFORM PROFILES (HTB / TryHackMe / GitHub)
+   ===================================================================== */
+.platform-profiles {
+  margin: 1.25rem 0 0;
+  padding: 1rem 0 0;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.pp-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.pp-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+}
+.pp-card {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.75rem;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s, background 0.2s;
+}
+.pp-card:hover { border-color: rgba(114,239,255,0.3); background: rgba(114,239,255,0.04); color: inherit; }
+.pp-logo {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.62rem; font-weight: 900; letter-spacing: 0;
+  flex-shrink: 0;
+}
+.pp-logo--htb { background: rgba(159,239,0,0.1); border: 1px solid rgba(159,239,0,0.28); color: #9fef00; }
+.pp-logo--thm { background: rgba(255,99,71,0.1); border: 1px solid rgba(255,99,71,0.28); color: #ff6347; }
+.pp-logo--gh  { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); color: #e0e0e0; }
+.pp-info { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; flex: 1; }
+.pp-name { font-size: 0.76rem; font-weight: 700; color: rgba(255,255,255,0.85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pp-stat { font-size: 0.63rem; color: rgba(255,255,255,0.38); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pp-arrow { font-size: 0.72rem; color: rgba(255,255,255,0.22); margin-left: auto; flex-shrink: 0; }
+@media (max-width: 700px) { .pp-grid { grid-template-columns: 1fr; } }
+
+/* MITRE Navigator download link */
+.mitre-nav-link {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-size: 0.72rem; font-weight: 700;
+  color: #50fa7b;
+  text-decoration: none;
+  border: 1px solid rgba(80,250,123,0.3);
+  border-radius: 6px;
+  padding: 0.3rem 0.7rem;
+  transition: background 0.18s, border-color 0.18s;
+  margin-left: 0.5rem;
+}
+.mitre-nav-link:hover { background: rgba(80,250,123,0.08); border-color: rgba(80,250,123,0.5); }
