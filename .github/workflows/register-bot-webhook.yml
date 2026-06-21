@@ -1,0 +1,27 @@
+name: Register Telegram Bot Webhook
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Register webhook pointing to Cloudflare Pages Function
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          WEBHOOK="https://subashlamaprofile.pages.dev/api/bot"
+
+          echo "Registering webhook: $WEBHOOK"
+          curl -s -X POST "https://api.telegram.org/bot${TOKEN}/setWebhook" \
+            -H "Content-Type: application/json" \
+            -d "{\"url\":\"${WEBHOOK}\"}"
+
+          echo ""
+          echo "Webhook info:"
+          curl -s "https://api.telegram.org/bot${TOKEN}/getWebhookInfo"
