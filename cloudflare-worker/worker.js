@@ -48,6 +48,31 @@ const TOR_VPN_ASNS = [
   "Hosting", "Data Center", "Datacenter", "Cloud",
 ];
 
+/* Known datacenter/cloud orgs — visits from these are likely bots */
+const DATACENTER_KEYWORDS = [
+  "microsoft azure", "amazon", "google cloud", "digitalocean", "linode",
+  "vultr", "ovh", "hetzner", "cloudflare", "akamai", "fastly", "rackspace",
+  "leaseweb", "choopa", "psychz", "server", "hosting", "datacenter",
+  "data center", "colocation", "colo", "cdn", "content delivery",
+];
+
+const BOT_UA_KEYWORDS = [
+  "bot", "crawler", "spider", "slurp", "googlebot", "bingbot", "yahoo",
+  "duckduck", "baidu", "yandex", "semrush", "ahrefs", "moz", "pingdom",
+  "uptimerobot", "monitor", "curl", "python", "java/", "go-http", "wget",
+];
+
+function detectBot(org, ua, cf) {
+  const orgLow = (org || "").toLowerCase();
+  const uaLow  = (ua  || "").toLowerCase();
+  const botScore = cf.botManagement?.score;
+
+  if (BOT_UA_KEYWORDS.some(k => uaLow.includes(k))) return "BOT (suspicious user-agent)";
+  if (botScore !== undefined && botScore < 30) return `BOT (CF bot score: ${botScore})`;
+  if (DATACENTER_KEYWORDS.some(k => orgLow.includes(k))) return "BOT (datacenter IP)";
+  return null;
+}
+
 function corsHeaders(origin) {
   const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   return {
@@ -147,11 +172,26 @@ export default {
         const sections   = payload.top_sections|| "none";
         const ref        = payload.ref_source  || "direct";
         const ip         = request.headers.get("CF-Connecting-IP") || "unknown";
+        const ua         = request.headers.get("User-Agent") || "";
         const cf         = request.cf || {};
         const org        = cf.asOrganization || "unknown";
         const country    = cf.country        || "";
         const city       = cf.city           || "";
         const location   = [city, country].filter(Boolean).join(", ") || "unknown";
+
+        /* Deduplicate — only send one alert per IP per 2 minutes */
+        if (env.DOWNLOAD_KV && ip !== "unknown") {
+          const dedupKey = `behavior_${ip.replace(/[:/]/g, "_")}`;
+          const lastSent = await env.DOWNLOAD_KV.get(dedupKey);
+          if (lastSent && Date.now() - parseInt(lastSent) < 120000) {
+            return new Response("OK", { status: 200, headers: corsHeaders(origin) });
+          }
+          await env.DOWNLOAD_KV.put(dedupKey, Date.now().toString(), { expirationTtl: 120 });
+        }
+
+        /* Bot detection */
+        const botReason = detectBot(org, ua, cf);
+        const visitorType = botReason ? `🤖 BOT — ${botReason}` : "✅ HUMAN VISITOR";
 
         if (parseInt(totalTime) >= 15) {
           await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
@@ -159,7 +199,7 @@ export default {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               chat_id: env.TELEGRAM_CHAT_ID,
-              text: `👁️ PORTFOLIO VISIT REPORT\n\n📍 Location   : ${location}\n🏢 Company    : ${org}\n⏱️ Time spent : ${totalTime}\n📖 Read most  : ${sections}\n📌 Source     : ${ref}\n🌐 IP         : ${ip}\n🕐 Time       : ${payload.timestamp || new Date().toISOString()}`,
+              text: `👁️ PORTFOLIO VISIT REPORT\n\n${visitorType}\n\n📍 Location   : ${location}\n🏢 Company    : ${org}\n⏱️ Time spent : ${totalTime}\n📖 Read most  : ${sections}\n📌 Source     : ${ref}\n🌐 IP         : ${ip}\n🕐 Time       : ${payload.timestamp || new Date().toISOString()}`,
             }),
           }).catch(() => {});
         }
