@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Bug Bounty Tracker</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07111c;--bg2:#0c1825;--bg3:#112233;--bg4:#0a1520;
+  --b:rgba(255,255,255,0.07);--bh:rgba(255,184,108,0.35);
+  --t:#e0e8f0;--td:rgba(255,255,255,0.55);--tm:rgba(255,255,255,0.28);
+  --cy:#8ae8ff;--gr:#50fa7b;--or:#ffb86c;--re:#ff5555;--pu:#bd93f9;--ye:#f1fa8c;--pk:#ff79c6;
+  --p1:#ff5555;--p2:#ffb86c;--p3:#f1fa8c;--p4:#50fa7b;
+  --sw:235px;--hh:52px;--r:10px;--rs:6px
+}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--t);min-height:100vh;display:flex;font-size:14px;line-height:1.6}
+
+/* SIDEBAR */
+#sb{width:var(--sw);min-height:100vh;background:rgba(0,0,0,0.4);border-right:1px solid var(--b);display:flex;flex-direction:column;position:fixed;left:0;top:0;z-index:100}
+.sb-brand{padding:1rem 1rem 0.85rem;border-bottom:1px solid var(--b)}
+.sb-logo{font-size:1.1rem;margin-bottom:0.15rem}
+.sb-t{font-size:0.78rem;font-weight:900;color:var(--or);letter-spacing:0.04em;text-transform:uppercase}
+.sb-s{font-size:0.61rem;color:var(--tm);margin-top:0.05rem}
+.sb-nav{flex:1;padding:0.55rem 0;overflow-y:auto}
+.sb-lbl{font-size:0.57rem;font-weight:800;color:var(--tm);text-transform:uppercase;letter-spacing:0.1em;padding:0.6rem 1rem 0.18rem}
+.sb-a{display:flex;align-items:center;gap:0.5rem;padding:0.48rem 1rem;color:var(--td);font-size:0.79rem;font-weight:500;border-left:2px solid transparent;cursor:pointer;transition:all 0.13s;user-select:none}
+.sb-a:hover{color:var(--t);background:var(--bg3)}
+.sb-a.on{color:var(--or);border-left-color:var(--or);background:rgba(255,184,108,0.07)}
+.sb-a-i{width:14px;text-align:center;font-size:0.82rem}
+.sb-foot{padding:0.65rem 1rem;border-top:1px solid var(--b);font-size:0.67rem}
+.sf-row{display:flex;justify-content:space-between;margin-bottom:0.22rem}
+.sf-l{color:var(--tm)}
+.sf-v{font-family:monospace;font-weight:700}
+
+/* MAIN */
+#main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100vh}
+#hdr{height:var(--hh);background:rgba(0,0,0,0.28);border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;padding:0 1.4rem;position:sticky;top:0;z-index:50;backdrop-filter:blur(8px)}
+#hdr-t{font-size:0.92rem;font-weight:700}
+.hdr-acts{display:flex;gap:0.45rem}
+#cnt{padding:1.3rem 1.4rem;flex:1}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:0.32rem;padding:0.4rem 0.8rem;border-radius:var(--rs);font-size:0.75rem;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all 0.13s;font-family:inherit;white-space:nowrap}
+.bo{background:rgba(255,184,108,0.1);border-color:rgba(255,184,108,0.32);color:var(--or)}
+.bo:hover{background:rgba(255,184,108,0.18);border-color:var(--or)}
+.bp{background:rgba(138,232,255,0.09);border-color:rgba(138,232,255,0.3);color:var(--cy)}
+.bp:hover{background:rgba(138,232,255,0.17);border-color:var(--cy)}
+.bg2{background:transparent;border-color:var(--b);color:var(--td)}
+.bg2:hover{border-color:rgba(255,255,255,0.2);color:var(--t)}
+.bd{background:rgba(255,85,85,0.08);border-color:rgba(255,85,85,0.26);color:var(--re)}
+.bd:hover{background:rgba(255,85,85,0.15)}
+.bs{background:rgba(80,250,123,0.08);border-color:rgba(80,250,123,0.26);color:var(--gr)}
+.bs:hover{background:rgba(80,250,123,0.15)}
+.btn-sm{padding:0.26rem 0.58rem;font-size:0.69rem}
+.btn-i{padding:0.28rem 0.38rem}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--b);border-radius:var(--r);padding:1rem;transition:border-color 0.17s}
+.card:hover{border-color:var(--bh)}
+.c-lbl{font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--tm);margin-bottom:0.35rem}
+.c-val{font-size:1.85rem;font-weight:900;font-family:monospace;line-height:1}
+.c-sub{font-size:0.65rem;color:var(--tm);margin-top:0.28rem}
+
+/* GRIDS */
+.stat-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.7rem;margin-bottom:1.3rem}
+.two-c{display:grid;grid-template-columns:1fr 1fr;gap:0.95rem}
+.three-c{display:grid;grid-template-columns:repeat(3,1fr);gap:0.95rem}
+
+/* SECTION HDR */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.35rem}
+.sh-t{font-size:0.83rem;font-weight:700}
+
+/* FILTER BAR */
+.fb{display:flex;gap:0.5rem;margin-bottom:0.8rem;flex-wrap:wrap}
+input,select,textarea{background:rgba(255,255,255,0.04);border:1px solid var(--b);border-radius:var(--rs);color:var(--t);padding:0.4rem 0.65rem;font-size:0.76rem;font-family:inherit;outline:none;transition:border-color 0.13s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:rgba(255,184,108,0.45)}
+select option{background:#0c1825}
+textarea{resize:vertical;min-height:70px}
+.si{min-width:185px;width:auto}
+.fs{width:auto}
+
+/* TABLE */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.77rem}
+thead th{text-align:left;padding:0.5rem 0.65rem;font-size:0.61rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--tm);border-bottom:1px solid var(--b);white-space:nowrap}
+tbody tr{border-bottom:1px solid rgba(255,255,255,0.04);transition:background 0.1s}
+tbody tr:hover{background:var(--bg3)}
+tbody td{padding:0.6rem 0.65rem;vertical-align:middle}
+tbody tr:last-child{border:none}
+
+/* BADGES */
+.b{display:inline-flex;align-items:center;padding:0.14rem 0.48rem;border-radius:4px;font-size:0.61rem;font-weight:700;white-space:nowrap}
+.bP1{background:rgba(255,85,85,0.16);color:var(--p1);border:1px solid rgba(255,85,85,0.3)}
+.bP2{background:rgba(255,184,108,0.14);color:var(--p2);border:1px solid rgba(255,184,108,0.3)}
+.bP3{background:rgba(241,250,140,0.1);color:var(--p3);border:1px solid rgba(241,250,140,0.22)}
+.bP4{background:rgba(80,250,123,0.1);color:var(--p4);border:1px solid rgba(80,250,123,0.22)}
+.b-draft{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.1)}
+.b-sub{background:rgba(138,232,255,0.1);color:var(--cy);border:1px solid rgba(138,232,255,0.25)}
+.b-tri{background:rgba(255,184,108,0.12);color:var(--or);border:1px solid rgba(255,184,108,0.28)}
+.b-res{background:rgba(80,250,123,0.1);color:var(--gr);border:1px solid rgba(80,250,123,0.25)}
+.b-dup{background:rgba(189,147,249,0.1);color:var(--pu);border:1px solid rgba(189,147,249,0.22)}
+.b-na{background:rgba(255,255,255,0.05);color:var(--tm);border:1px solid rgba(255,255,255,0.09)}
+.b-paid{background:rgba(80,250,123,0.18);color:#00ff88;border:1px solid rgba(80,250,123,0.4)}
+.b-act{background:rgba(80,250,123,0.1);color:var(--gr);border:1px solid rgba(80,250,123,0.22)}
+.b-pau{background:rgba(255,184,108,0.1);color:var(--or);border:1px solid rgba(255,184,108,0.22)}
+.b-end{background:rgba(255,85,85,0.08);color:var(--re);border:1px solid rgba(255,85,85,0.2)}
+.b-h1{background:rgba(255,79,79,0.1);color:#ff4f4f;border:1px solid rgba(255,79,79,0.25)}
+.b-bc{background:rgba(0,114,255,0.1);color:#3d9bff;border:1px solid rgba(0,114,255,0.25)}
+.b-in{background:rgba(255,79,122,0.1);color:#ff4f7a;border:1px solid rgba(255,79,122,0.25)}
+.b-gen{background:rgba(138,232,255,0.08);color:var(--cy);border:1px solid rgba(138,232,255,0.2)}
+
+/* SCOPE TAGS */
+.scope-in{background:rgba(80,250,123,0.08);border:1px solid rgba(80,250,123,0.2);color:var(--gr);padding:0.12rem 0.4rem;border-radius:3px;font-size:0.6rem;font-family:monospace;margin:0.1rem;display:inline-block}
+.scope-out{background:rgba(255,85,85,0.08);border:1px solid rgba(255,85,85,0.2);color:var(--re);padding:0.12rem 0.4rem;border-radius:3px;font-size:0.6rem;font-family:monospace;margin:0.1rem;display:inline-block}
+.tag{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--td);padding:0.1rem 0.38rem;border-radius:3px;font-size:0.6rem;margin:0.1rem;display:inline-block;cursor:pointer}
+.tag:hover{border-color:rgba(255,184,108,0.3);color:var(--or)}
+
+/* MODAL */
+#mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+#mo.open{display:flex}
+#mb{background:#0c1825;border:1px solid var(--bh);border-radius:var(--r);width:100%;max-width:680px;max-height:92vh;overflow-y:auto;padding:1.3rem;position:relative}
+#mb.wide{max-width:860px}
+.m-t{font-size:0.92rem;font-weight:700;color:var(--or);margin-bottom:1rem;padding-bottom:0.6rem;border-bottom:1px solid var(--b)}
+.m-x{position:absolute;top:0.85rem;right:0.85rem;background:none;border:none;color:var(--td);font-size:1.05rem;cursor:pointer;padding:0.18rem 0.32rem;border-radius:4px}
+.m-x:hover{color:var(--t);background:rgba(255,255,255,0.07)}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:0.7rem}
+.fgf{grid-column:1/-1}
+.fl{font-size:0.63rem;font-weight:700;color:var(--td);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:0.22rem}
+.fa{display:flex;justify-content:flex-end;gap:0.45rem;margin-top:1rem;padding-top:0.6rem;border-top:1px solid var(--b)}
+
+/* CVSS CALCULATOR */
+.cvss-wrap{background:rgba(0,0,0,0.25);border:1px solid rgba(255,184,108,0.18);border-radius:8px;padding:0.9rem;margin-top:0.85rem}
+.cvss-title{font-size:0.68rem;font-weight:800;color:var(--or);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.65rem}
+.cvss-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;margin-bottom:0.65rem}
+.cvss-group label{font-size:0.59rem;font-weight:700;color:var(--tm);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:0.18rem}
+.cvss-score-bar{display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0.9rem;background:rgba(0,0,0,0.3);border-radius:6px;border:1px solid var(--b)}
+.cvss-score-num{font-size:2rem;font-weight:900;font-family:monospace;min-width:52px}
+.cvss-score-info{flex:1}
+.cvss-score-rating{font-size:0.8rem;font-weight:700;margin-bottom:0.1rem}
+.cvss-vector{font-size:0.6rem;font-family:monospace;color:var(--tm);word-break:break-all;margin-top:0.15rem}
+.cvss-p{font-size:0.7rem;font-weight:800;padding:0.1rem 0.45rem;border-radius:4px;border:1px solid currentColor}
+
+/* REPORT */
+.report-area{background:rgba(0,0,0,0.3);border:1px solid var(--b);border-radius:8px;padding:1rem;font-family:monospace;font-size:0.73rem;color:var(--td);white-space:pre-wrap;max-height:420px;overflow-y:auto;line-height:1.65}
+.report-actions{display:flex;gap:0.5rem;margin-top:0.75rem}
+
+/* RECON */
+.recon-card{background:var(--bg2);border:1px solid var(--b);border-radius:var(--r);padding:1rem;margin-bottom:0.65rem;transition:border-color 0.17s}
+.recon-card:hover{border-color:var(--bh)}
+.recon-prog{font-size:0.68rem;font-weight:700;color:var(--or);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.05em}
+.recon-section{margin-bottom:0.55rem}
+.recon-section-t{font-size:0.62rem;font-weight:700;color:var(--tm);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.2rem}
+.recon-item{font-size:0.72rem;color:var(--t);font-family:monospace;background:rgba(255,255,255,0.03);border-radius:4px;padding:0.15rem 0.4rem;margin:0.1rem;display:inline-block;border:1px solid rgba(255,255,255,0.06)}
+
+/* LEARN */
+.learn-row{display:flex;align-items:center;gap:0.65rem;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.learn-tech{font-weight:600;min-width:160px;font-size:0.78rem}
+.learn-src{font-size:0.65rem;color:var(--tm);min-width:100px}
+.learn-tags{flex:1;display:flex;flex-wrap:wrap;gap:0.2rem}
+.learn-date{font-family:monospace;font-size:0.65rem;color:var(--tm);white-space:nowrap}
+
+/* SCOPE WARNING */
+.scope-warn{background:rgba(255,85,85,0.08);border:1px solid rgba(255,85,85,0.25);border-radius:6px;padding:0.45rem 0.65rem;font-size:0.7rem;color:var(--re);margin-top:0.35rem;display:none}
+.scope-ok{background:rgba(80,250,123,0.07);border:1px solid rgba(80,250,123,0.22);border-radius:6px;padding:0.45rem 0.65rem;font-size:0.7rem;color:var(--gr);margin-top:0.35rem;display:none}
+
+/* TABS */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--b);margin-bottom:1rem}
+.tab{padding:0.5rem 1rem;font-size:0.76rem;font-weight:600;color:var(--td);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.13s}
+.tab:hover{color:var(--t)}
+.tab.on{color:var(--or);border-bottom-color:var(--or)}
+
+/* TOAST */
+#toast{position:fixed;bottom:1.2rem;right:1.2rem;background:var(--bg2);border:1px solid var(--gr);border-radius:var(--rs);padding:0.55rem 0.85rem;font-size:0.74rem;color:var(--gr);z-index:999;transform:translateY(70px);opacity:0;transition:all 0.2s;pointer-events:none}
+#toast.on{transform:translateY(0);opacity:1}
+
+/* EMPTY */
+.empty{text-align:center;padding:2.2rem 1rem;color:var(--tm)}
+.empty-i{font-size:1.9rem;margin-bottom:0.55rem;opacity:0.3}
+
+/* MISC */
+.mono{font-family:monospace}
+.dim{color:var(--tm)}
+.mt1{margin-top:0.5rem}.mt2{margin-top:1rem}
+.divider{border:none;border-top:1px solid var(--b);margin:0.85rem 0}
+.pill{display:inline-flex;padding:0.12rem 0.45rem;border-radius:999px;font-size:0.6rem;font-weight:700;white-space:nowrap}
+
+@media(max-width:900px){#sb{transform:translateX(-100%)}#sb.open{transform:translateX(0)}#main{margin-left:0}.two-c,.three-c{grid-template-columns:1fr}.fg{grid-template-columns:1fr}.cvss-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){#cnt{padding:0.9rem}.stat-g{grid-template-columns:repeat(2,1fr)}}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.09);border-radius:2px}
+</style>
+</head>
+<body>
+
+<nav id="sb">
+  <div class="sb-brand">
+    <div class="sb-logo">🎯</div>
+    <div class="sb-t">Bug Bounty Tracker</div>
+    <div class="sb-s">HackerOne · Intigriti · Bugcrowd</div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-lbl">Overview</div>
+    <div class="sb-a on" data-p="dash"><span class="sb-a-i">⊞</span>Dashboard</div>
+    <div class="sb-lbl">Programs</div>
+    <div class="sb-a" data-p="programs"><span class="sb-a-i">◈</span>Program Manager</div>
+    <div class="sb-a" data-p="findings"><span class="sb-a-i">⚠</span>Findings Tracker</div>
+    <div class="sb-lbl">Tools</div>
+    <div class="sb-a" data-p="report"><span class="sb-a-i">📄</span>Report Builder</div>
+    <div class="sb-a" data-p="recon"><span class="sb-a-i">🔍</span>Recon Notes</div>
+    <div class="sb-lbl">Growth</div>
+    <div class="sb-a" data-p="learn"><span class="sb-a-i">📚</span>Learning Tracker</div>
+  </div>
+  <div class="sb-foot" id="sb-foot"></div>
+</nav>
+
+<div id="main">
+  <header id="hdr">
+    <div id="hdr-t">Dashboard</div>
+    <div class="hdr-acts">
+      <button class="btn bo btn-sm" onclick="openFindM()">+ Quick Finding</button>
+      <button class="btn bg2 btn-sm" id="exp-btn">↓ Export</button>
+      <button class="btn bg2 btn-sm" id="imp-btn">↑ Import</button>
+      <input type="file" id="imp-file" accept=".json" style="display:none">
+    </div>
+  </header>
+  <main id="cnt"></main>
+</div>
+
+<div id="mo"><div id="mb">
+  <button class="m-x" id="m-close">✕</button>
+  <div class="m-t" id="m-title"></div>
+  <div id="m-body"></div>
+</div></div>
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   CONSTANTS
+═══════════════════════════════════════════════════════ */
+const PLATFORMS=['HackerOne','Intigriti','Bugcrowd','YesWeHack','Synack','Open Bug Bounty','Private','Other'];
+const PSTATUS=['Active','Paused','Ended'];
+const VTYPES=['XSS','IDOR','SSRF','SQLi','Auth Bypass','Business Logic','RCE','CSRF','Open Redirect','Information Disclosure','Broken Auth','Privilege Escalation','Race Condition','XXE','Path Traversal','SSTI','Subdomain Takeover','API Misconfiguration','CORS','Clickjacking','Other'];
+const SEVS=['P1 - Critical','P2 - High','P3 - Medium','P4 - Low'];
+const FSTATUS=['Draft','Submitted','Triaged','Resolved','Duplicate','N/A','Bounty Paid'];
+const SOURCES=['PortSwigger Web Academy','HackTheBox','TryHackMe','Blog Writeup','YouTube','Book','Conference Talk','Bug Report (Public)','Research Paper','Other'];
+const SCOPE_TYPES=['Web','API','Mobile (iOS)','Mobile (Android)','Network/Infrastructure','Other'];
+const KEY='bbt_v2';
+
+/* ═══════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════ */
+const DEMO={
+  programs:[
+    {id:'pg1',name:'Acme Corp',platform:'HackerOne',inScope:[{url:'*.acmecorp.com',type:'Web'},{url:'api.acmecorp.com',type:'API'}],outScope:['blog.acmecorp.com','status.acmecorp.com'],payoutMin:100,payoutMax:10000,status:'Active',policyUrl:'https://hackerone.com/acmecorp',notes:'Good response times. Focus on IDOR and auth.',added:'2026-01-15'},
+    {id:'pg2',name:'TechStart',platform:'Intigriti',inScope:[{url:'app.techstart.io',type:'Web'},{url:'api.techstart.io',type:'API'}],outScope:['docs.techstart.io'],payoutMin:50,payoutMax:5000,status:'Active',policyUrl:'https://intigriti.com/techstart',notes:'New program — less competition.',added:'2026-03-10'},
+  ],
+  findings:[
+    {id:'f1',programId:'pg1',title:'Stored XSS in user profile bio field',type:'XSS',endpoint:'https://app.acmecorp.com/profile/edit',severity:'P2 - High',cvss:'8.1',cvssVector:'CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:C/C:H/I:L/A:N',status:'Triaged',poc:'<script>alert(document.cookie)<\/script>',steps:'1. Go to profile edit\n2. Enter XSS payload in bio\n3. Save and view another user\'s profile',impact:'Attacker can steal session cookies of any user who views the affected profile.',suggestedFix:'Implement HTML encoding on output. Use DOMPurify for sanitisation.',submittedDate:'2026-05-10',responseDate:'2026-05-12',resolvedDate:'',bountyAmount:'',notes:'Triage confirmed. Waiting for fix.'},
+    {id:'f2',programId:'pg1',title:'IDOR — access other users\' private invoices',type:'IDOR',endpoint:'https://api.acmecorp.com/v1/invoices/{id}',severity:'P1 - Critical',cvss:'9.1',cvssVector:'CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N',status:'Bounty Paid',poc:'GET /v1/invoices/1337 — replace ID with victim ID',steps:'1. Login as user A\n2. Create invoice, note ID\n3. Login as user B\n4. Request /v1/invoices/{user_A_id}',impact:'Full read/write access to all customer financial data.',suggestedFix:'Enforce object-level authorisation on all invoice endpoints.',submittedDate:'2026-04-01',responseDate:'2026-04-02',resolvedDate:'2026-04-15',bountyAmount:'1500',notes:'Fast response. Great program.'},
+    {id:'f3',programId:'pg2',title:'SSRF via PDF generation endpoint',type:'SSRF',endpoint:'https://api.techstart.io/generate-pdf',severity:'P2 - High',cvss:'7.5',cvssVector:'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N',status:'Submitted',poc:'POST /generate-pdf {"url":"http://169.254.169.254/latest/meta-data/"}',steps:'1. Send POST request with AWS metadata URL as target\n2. Receive internal metadata in PDF response',impact:'Full read access to AWS instance metadata including IAM credentials.',suggestedFix:'Whitelist allowed URL schemes and block internal IP ranges.',submittedDate:'2026-06-01',responseDate:'',resolvedDate:'',bountyAmount:'',notes:'Submitted 3 weeks ago, no response yet.'},
+  ],
+  recon:[
+    {id:'r1',programId:'pg1',techStack:['React','Node.js','AWS','Nginx'],endpoints:['https://app.acmecorp.com/api/v2/users','https://app.acmecorp.com/admin','https://api.acmecorp.com/graphql'],parameters:['user_id','invoice_id','redirect_url','file','callback'],jsFiles:['https://app.acmecorp.com/static/js/main.abc123.js'],tags:['graphql','aws','admin-panel'],notes:'GraphQL endpoint has introspection enabled. Admin panel returns 403 but leaks server header.',date:'2026-05-01'},
+  ],
+  learning:[
+    {id:'l1',technique:'GraphQL Introspection & Injection',source:'PortSwigger Web Academy',date:'2026-04-10',labCompleted:true,writeup:'https://portswigger.net/web-security/graphql',appliedIn:[],notes:'Need to check if batch queries are enabled.'},
+    {id:'l2',technique:'SSRF via URL parsers',source:'Blog Writeup',date:'2026-05-28',labCompleted:true,writeup:'',appliedIn:['f3'],notes:'urllib.parse vs urllib.request inconsistency — great for bypasses.'},
+    {id:'l3',technique:'JWT Algorithm Confusion (RS256→HS256)',source:'PortSwigger Web Academy',date:'2026-06-05',labCompleted:true,writeup:'https://portswigger.net/web-security/jwt',appliedIn:[],notes:'Need to test against acmecorp auth endpoints.'},
+  ],
+};
+
+let S={}, page='dash';
+
+function load(){
+  try{
+    const r=localStorage.getItem(KEY);
+    S=r?JSON.parse(r):JSON.parse(JSON.stringify(DEMO));
+  }catch{S=JSON.parse(JSON.stringify(DEMO));}
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(S));sbFoot();}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+
+/* ═══════════════════════════════════════════════════════
+   SIDEBAR FOOTER
+═══════════════════════════════════════════════════════ */
+function sbFoot(){
+  const tot=S.findings.length;
+  const paid=S.findings.filter(f=>f.status==='Bounty Paid');
+  const earned=paid.reduce((a,f)=>a+(parseFloat(f.bountyAmount)||0),0);
+  const sub=S.findings.filter(f=>!['Draft'].includes(f.status)).length;
+  const won=S.findings.filter(f=>['Resolved','Bounty Paid'].includes(f.status)).length;
+  const wr=sub?Math.round(won/sub*100):0;
+  document.getElementById('sb-foot').innerHTML=`
+    <div class="sf-row"><span class="sf-l">Total Findings</span><span class="sf-v" style="color:var(--or)">${tot}</span></div>
+    <div class="sf-row"><span class="sf-l">Bounty Earned</span><span class="sf-v" style="color:var(--gr)">$${earned.toLocaleString()}</span></div>
+    <div class="sf-row"><span class="sf-l">Win Rate</span><span class="sf-v" style="color:var(--cy)">${wr}%</span></div>
+    <div class="sf-row"><span class="sf-l">Programs</span><span class="sf-v" style="color:var(--or)">${S.programs.length}</span></div>`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   TOAST & MODAL
+═══════════════════════════════════════════════════════ */
+let toastT;
+function toast(msg,col){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.style.color=col||'var(--gr)';el.style.borderColor=col||'var(--gr)';
+  el.classList.add('on');clearTimeout(toastT);
+  toastT=setTimeout(()=>el.classList.remove('on'),2500);
+}
+function openM(title,body,wide){
+  document.getElementById('m-title').textContent=title;
+  document.getElementById('m-body').innerHTML=body;
+  const mb=document.getElementById('mb');
+  mb.className=wide?'wide':'';
+  document.getElementById('mo').classList.add('open');
+}
+function closeM(){document.getElementById('mo').classList.remove('open');}
+const gv=id=>{const e=document.getElementById(id);return e?e.value.trim():'';}
+
+/* ═══════════════════════════════════════════════════════
+   BADGES
+═══════════════════════════════════════════════════════ */
+function sevB(s){
+  const m={'P1 - Critical':'bP1','P2 - High':'bP2','P3 - Medium':'bP3','P4 - Low':'bP4'};
+  return `<span class="b ${m[s]||'bP4'}">${s}</span>`;
+}
+function stB(s){
+  const m={Draft:'b-draft',Submitted:'b-sub',Triaged:'b-tri',Resolved:'b-res',Duplicate:'b-dup','N/A':'b-na','Bounty Paid':'b-paid'};
+  return `<span class="b ${m[s]||'b-gen'}">${s}</span>`;
+}
+function platB(p){
+  const m={HackerOne:'b-h1',Intigriti:'b-in',Bugcrowd:'b-bc'};
+  return `<span class="b ${m[p]||'b-gen'}">${p}</span>`;
+}
+function pstatB(s){
+  const m={Active:'b-act',Paused:'b-pau',Ended:'b-end'};
+  return `<span class="b ${m[s]||'b-gen'}">${s}</span>`;
+}
+function progName(id){const p=S.programs.find(x=>x.id===id);return p?p.name:'Unknown';}
+
+/* ═══════════════════════════════════════════════════════
+   CVSS 3.1 CALCULATOR
+═══════════════════════════════════════════════════════ */
+function calcCVSS(av,ac,pr,ui,s,c,i,a){
+  const AV={N:0.85,A:0.62,L:0.55,P:0.2};
+  const AC={L:0.77,H:0.44};
+  const PRu={N:0.85,L:0.62,H:0.27};
+  const PRc={N:0.85,L:0.68,H:0.5};
+  const UI={N:0.85,R:0.62};
+  const CIA={N:0,L:0.22,H:0.56};
+  const prVal=s==='C'?PRc[pr]:PRu[pr];
+  const expl=8.22*AV[av]*AC[ac]*prVal*UI[ui];
+  const iscBase=1-(1-CIA[c])*(1-CIA[i])*(1-CIA[a]);
+  let imp=0;
+  if(s==='U') imp=6.42*iscBase;
+  else imp=7.52*(iscBase-0.029)-3.25*Math.pow(iscBase-0.02,15);
+  if(imp<=0)return{score:0,rating:'None',color:'var(--tm)',p:'N/A'};
+  let raw=s==='U'?Math.min(10,imp+expl):Math.min(10,1.08*(imp+expl));
+  const score=Math.ceil(raw*10)/10;
+  let rating,color,p;
+  if(score===0){rating='None';color='var(--tm)';p='N/A';}
+  else if(score<4){rating='Low';color='var(--p4)';p='P4';}
+  else if(score<7){rating='Medium';color='var(--p3)';p='P3';}
+  else if(score<9){rating='High';color='var(--p2)';p='P2';}
+  else{rating='Critical';color='var(--p1)';p='P1';}
+  return{score,rating,color,p};
+}
+
+function cvssVector(av,ac,pr,ui,s,c,i,a){
+  return `CVSS:3.1/AV:${av}/AC:${ac}/PR:${pr}/UI:${ui}/S:${s}/C:${c}/I:${i}/A:${a}`;
+}
+
+function updateCVSS(){
+  const av=gv('cv-av'),ac=gv('cv-ac'),pr=gv('cv-pr'),ui=gv('cv-ui');
+  const s=gv('cv-s'),c=gv('cv-c'),i=gv('cv-i'),a=gv('cv-a');
+  if(!av)return;
+  const r=calcCVSS(av,ac,pr,ui,s,c,i,a);
+  const sn=document.getElementById('cv-score-num');
+  const sr=document.getElementById('cv-score-rating');
+  const sv=document.getElementById('cv-score-vector');
+  const sp=document.getElementById('cv-score-p');
+  if(sn)sn.textContent=r.score.toFixed(1);
+  if(sn)sn.style.color=r.color;
+  if(sr){sr.textContent=r.rating;sr.style.color=r.color;}
+  if(sv)sv.textContent=cvssVector(av,ac,pr,ui,s,c,i,a);
+  if(sp){sp.textContent=r.p;sp.style.color=r.color;sp.style.borderColor=r.color;}
+  // copy values to main form if present
+  const fcvss=document.getElementById('f-cvss');
+  const fvec=document.getElementById('f-cvss-vector');
+  const fsev=document.getElementById('f-sev');
+  if(fcvss)fcvss.value=r.score.toFixed(1);
+  if(fvec)fvec.value=cvssVector(av,ac,pr,ui,s,c,i,a);
+  if(fsev&&r.p!=='N/A'){
+    const map={'P1':'P1 - Critical','P2':'P2 - High','P3':'P3 - Medium','P4':'P4 - Low'};
+    const opt=map[r.p];
+    if(opt)fsev.value=opt;
+  }
+}
+
+function cvssHTML(vals){
+  const d=vals||{av:'N',ac:'L',pr:'N',ui:'N',s:'U',c:'N',i:'N',a:'N'};
+  const sel=(id,name,opts,cur)=>`<div class="cvss-group"><label>${name}</label><select id="${id}" onchange="updateCVSS()">${opts.map(([v,l])=>`<option value="${v}"${cur===v?' selected':''}>${l}</option>`).join('')}</select></div>`;
+  return `<div class="cvss-wrap">
+    <div class="cvss-title">⚡ CVSS 3.1 Calculator</div>
+    <div class="cvss-grid">
+      ${sel('cv-av','Attack Vector',[['N','Network'],['A','Adjacent'],['L','Local'],['P','Physical']],d.av)}
+      ${sel('cv-ac','Attack Complexity',[['L','Low'],['H','High']],d.ac)}
+      ${sel('cv-pr','Privileges Req.',[['N','None'],['L','Low'],['H','High']],d.pr)}
+      ${sel('cv-ui','User Interaction',[['N','None'],['R','Required']],d.ui)}
+      ${sel('cv-s','Scope',[['U','Unchanged'],['C','Changed']],d.s)}
+      ${sel('cv-c','Confidentiality',[['N','None'],['L','Low'],['H','High']],d.c)}
+      ${sel('cv-i','Integrity',[['N','None'],['L','Low'],['H','High']],d.i)}
+      ${sel('cv-a','Availability',[['N','None'],['L','Low'],['H','High']],d.a)}
+    </div>
+    <div class="cvss-score-bar">
+      <div class="cvss-score-num" id="cv-score-num">0.0</div>
+      <div class="cvss-score-info">
+        <div style="display:flex;align-items:center;gap:0.5rem">
+          <div class="cvss-score-rating" id="cv-score-rating">None</div>
+          <div class="cvss-p" id="cv-score-p" style="color:var(--tm);border-color:var(--tm)">N/A</div>
+        </div>
+        <div class="cvss-vector" id="cv-score-vector">CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ROUTER
+═══════════════════════════════════════════════════════ */
+function nav(p){
+  page=p;
+  document.querySelectorAll('.sb-a').forEach(a=>a.classList.toggle('on',a.dataset.p===p));
+  const titles={dash:'Dashboard',programs:'Program Manager',findings:'Findings Tracker',report:'Report Builder',recon:'Recon Notes',learn:'Learning Tracker'};
+  document.getElementById('hdr-t').textContent=titles[p]||p;
+  document.getElementById('cnt').innerHTML='';
+  ({dash:rDash,programs:rProgs,findings:rFind,report:rReport,recon:rRecon,learn:rLearn}[p]||rDash)();
+}
+
+/* ═══════════════════════════════════════════════════════
+   DASHBOARD
+═══════════════════════════════════════════════════════ */
+function rDash(){
+  const c=document.getElementById('cnt');
+  const all=S.findings;
+  const paid=all.filter(f=>f.status==='Bounty Paid');
+  const earned=paid.reduce((a,f)=>a+(parseFloat(f.bountyAmount)||0),0);
+  const sub=all.filter(f=>f.status!=='Draft');
+  const won=all.filter(f=>['Resolved','Bounty Paid'].includes(f.status));
+  const wr=sub.length?Math.round(won.length/sub.length*100):0;
+  const open=all.filter(f=>['Submitted','Triaged'].includes(f.status));
+
+  // Average response time (submitted → first response in days)
+  const withResp=all.filter(f=>f.submittedDate&&f.responseDate);
+  const avgResp=withResp.length?Math.round(withResp.reduce((a,f)=>{
+    return a+(new Date(f.responseDate)-new Date(f.submittedDate))/86400000;
+  },0)/withResp.length):null;
+
+  // Type breakdown
+  const typeCount={};
+  all.forEach(f=>{typeCount[f.type]=(typeCount[f.type]||0)+1;});
+  const topTypes=Object.entries(typeCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+  // Severity breakdown
+  const sevCount={};
+  all.forEach(f=>{sevCount[f.severity]=(sevCount[f.severity]||0)+1;});
+
+  // Per-platform stats
+  const platStats={};
+  S.programs.forEach(p=>{
+    if(!platStats[p.platform])platStats[p.platform]={prog:0,findings:0,earned:0};
+    platStats[p.platform].prog++;
+  });
+  all.forEach(f=>{
+    const p=S.programs.find(x=>x.id===f.programId);
+    if(p&&platStats[p.platform]){
+      platStats[p.platform].findings++;
+      if(f.status==='Bounty Paid') platStats[p.platform].earned+=(parseFloat(f.bountyAmount)||0);
+    }
+  });
+
+  c.innerHTML=`
+    <div class="stat-g">
+      <div class="card"><div class="c-lbl">Bounty Earned</div><div class="c-val" style="color:var(--gr)">$${earned.toLocaleString()}</div><div class="c-sub">${paid.length} paid reports</div></div>
+      <div class="card"><div class="c-lbl">Win Rate</div><div class="c-val" style="color:${wr>=50?'var(--gr)':wr>=25?'var(--or)':'var(--re)'}">${wr}%</div><div class="c-sub">${won.length}/${sub.length} submitted</div></div>
+      <div class="card"><div class="c-lbl">Total Findings</div><div class="c-val" style="color:var(--or)">${all.length}</div><div class="c-sub">${S.programs.length} programs</div></div>
+      <div class="card"><div class="c-lbl">Avg Response</div><div class="c-val" style="color:var(--cy)">${avgResp!==null?avgResp+'d':'—'}</div><div class="c-sub">${withResp.length} data points</div></div>
+      <div class="card"><div class="c-lbl">In Pipeline</div><div class="c-val" style="color:${open.length?'var(--ye)':'var(--gr)'}">${open.length}</div><div class="c-sub">Submitted or triaged</div></div>
+      <div class="card"><div class="c-lbl">Duplicate Rate</div><div class="c-val" style="color:var(--re)">${sub.length?Math.round(all.filter(f=>f.status==='Duplicate').length/sub.length*100):0}%</div><div class="c-sub">${all.filter(f=>f.status==='Duplicate').length} duplicates</div></div>
+    </div>
+
+    <div class="two-c">
+      <div>
+        <div class="sh"><span class="sh-t">Severity Breakdown</span></div>
+        <div class="card" style="padding:1rem">
+          ${SEVS.map(sv=>{
+            const n=sevCount[sv]||0,pct=all.length?Math.round(n/all.length*100):0;
+            const col={P1:'var(--p1)',P2:'var(--p2)',P3:'var(--p3)',P4:'var(--p4)'}[sv.split(' ')[0]];
+            return `<div style="margin-bottom:0.55rem"><div style="display:flex;justify-content:space-between;font-size:0.7rem;margin-bottom:0.2rem"><span style="color:${col}">${sv}</span><span class="mono dim">${n} (${pct}%)</span></div><div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${col};border-radius:2px"></div></div></div>`;
+          }).join('')}
+        </div>
+
+        <div class="sh mt2"><span class="sh-t">Status Pipeline</span></div>
+        <div class="card" style="padding:1rem">
+          ${FSTATUS.map(st=>{
+            const n=all.filter(f=>f.status===st).length;
+            const pct=all.length?Math.round(n/all.length*100):0;
+            return `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.28rem 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.75rem">${stB(st)}<span class="mono dim">${n}</span></div>`;
+          }).join('')}
+        </div>
+      </div>
+
+      <div>
+        <div class="sh"><span class="sh-t">Top Vulnerability Types</span></div>
+        <div class="card" style="padding:1rem">
+          ${topTypes.length?topTypes.map(([t,n])=>{
+            const pct=all.length?Math.round(n/all.length*100):0;
+            return `<div style="margin-bottom:0.55rem"><div style="display:flex;justify-content:space-between;font-size:0.7rem;margin-bottom:0.2rem"><span style="color:var(--or)">${t}</span><span class="mono dim">${n}</span></div><div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden"><div style="width:${pct}%;height:100%;background:var(--or);border-radius:2px"></div></div></div>`;
+          }).join(''):'<div class="empty"><div class="empty-i">📊</div><p>No findings yet</p></div>'}
+        </div>
+
+        <div class="sh mt2"><span class="sh-t">Platform Performance</span></div>
+        <div class="card" style="padding:0">
+          <table><thead><tr><th>Platform</th><th>Programs</th><th>Findings</th><th>Earned</th></tr></thead>
+          <tbody>${Object.entries(platStats).length?Object.entries(platStats).map(([pl,d])=>`
+            <tr><td>${platB(pl)}</td><td class="mono dim">${d.prog}</td><td class="mono dim">${d.findings}</td><td class="mono" style="color:var(--gr)">$${d.earned.toLocaleString()}</td></tr>`).join(''):`<tr><td colspan="4"><div class="empty"><div class="empty-i">◈</div><p>No programs</p></div></td></tr>`}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="sh mt2"><span class="sh-t">Recent Findings</span><span onclick="nav('findings')" style="font-size:0.7rem;color:var(--or);cursor:pointer">View All →</span></div>
+    <div class="card" style="padding:0"><div class="tw"><table>
+      <thead><tr><th>Title</th><th>Program</th><th>Type</th><th>Severity</th><th>Status</th><th>Bounty</th></tr></thead>
+      <tbody>${[...S.findings].sort((a,b)=>(b.submittedDate||'').localeCompare(a.submittedDate||'')).slice(0,5).map(f=>`
+        <tr>
+          <td style="font-weight:600;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f.title}</td>
+          <td><span style="font-size:0.7rem;color:var(--or)">${progName(f.programId)}</span></td>
+          <td><span style="font-size:0.7rem;color:var(--td)">${f.type}</span></td>
+          <td>${sevB(f.severity)}</td>
+          <td>${stB(f.status)}</td>
+          <td class="mono" style="color:var(--gr)">${f.bountyAmount?'$'+f.bountyAmount:'—'}</td>
+        </tr>`).join('')||'<tr><td colspan="6"><div class="empty"><div class="empty-i">⚠</div><p>No findings yet</p></div></td></tr>'}</tbody>
+    </table></div></div>`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PROGRAM MANAGER
+═══════════════════════════════════════════════════════ */
+function rProgs(){
+  const c=document.getElementById('cnt');
+  c.innerHTML=`
+    <div class="fb">
+      <input type="search" class="si" id="pq" placeholder="Search programs…" oninput="rProgRows()">
+      <select class="fs" id="pplat" onchange="rProgRows()">${['<option value="">All Platforms</option>',...PLATFORMS.map(x=>`<option>${x}</option>`)].join('')}</select>
+      <select class="fs" id="pst" onchange="rProgRows()">${['<option value="">All Status</option>',...PSTATUS.map(x=>`<option>${x}</option>`)].join('')}</select>
+      <button class="btn bo" onclick="openProgM()">+ Add Program</button>
+    </div>
+    <div id="prog-list"></div>`;
+  rProgRows();
+}
+function rProgRows(){
+  const q=gv('pq').toLowerCase(),pl=gv('pplat'),st=gv('pst');
+  const rows=S.programs.filter(p=>
+    (!q||p.name.toLowerCase().includes(q))&&(!pl||p.platform===pl)&&(!st||p.status===st)
+  );
+  const el=document.getElementById('prog-list');
+  if(!el)return;
+  if(!rows.length){el.innerHTML=`<div class="empty"><div class="empty-i">◈</div><p>No programs found</p></div>`;return;}
+  el.innerHTML=rows.map(p=>{
+    const pf=S.findings.filter(f=>f.programId===p.id);
+    const pe=pf.filter(f=>f.status==='Bounty Paid').reduce((a,f)=>a+(parseFloat(f.bountyAmount)||0),0);
+    return `<div class="card" style="margin-bottom:0.7rem;border-left:3px solid ${p.status==='Active'?'var(--gr)':p.status==='Paused'?'var(--or)':'var(--re)'}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem">
+        <div>
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.35rem">
+            <span style="font-size:0.95rem;font-weight:700">${p.name}</span>
+            ${platB(p.platform)} ${pstatB(p.status)}
+          </div>
+          <div style="font-size:0.68rem;color:var(--tm);margin-bottom:0.5rem">
+            Payout: <span style="color:var(--gr);font-family:monospace">$${p.payoutMin}–$${p.payoutMax}</span>
+            ${p.policyUrl?` · <a href="${p.policyUrl}" target="_blank" style="color:var(--cy);font-size:0.67rem">Policy ↗</a>`:''}
+            · Added: <span class="mono">${p.added}</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:0.5rem;align-items:center">
+          <div style="text-align:right;font-size:0.68rem">
+            <div style="color:var(--gr);font-family:monospace;font-weight:700">$${pe.toLocaleString()} earned</div>
+            <div style="color:var(--tm)">${pf.length} findings</div>
+          </div>
+          <button class="btn bg2 btn-sm btn-i" onclick="openProgM('${p.id}')">✎</button>
+          <button class="btn bd btn-sm btn-i" onclick="del('programs','${p.id}')">✕</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:1.5rem;flex-wrap:wrap">
+        <div>
+          <div style="font-size:0.6rem;font-weight:700;color:var(--gr);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.2rem">✓ In Scope</div>
+          ${(p.inScope||[]).map(s=>`<span class="scope-in">${s.url} <span style="opacity:0.55">[${s.type}]</span></span>`).join('')||'<span style="font-size:0.65rem;color:var(--tm)">None defined</span>'}
+        </div>
+        ${(p.outScope||[]).length?`<div>
+          <div style="font-size:0.6rem;font-weight:700;color:var(--re);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.2rem">✕ Out of Scope</div>
+          ${p.outScope.map(s=>`<span class="scope-out">${s}</span>`).join('')}
+        </div>`:''}
+      </div>
+      ${p.notes?`<div style="margin-top:0.55rem;font-size:0.72rem;color:var(--td);background:rgba(255,255,255,0.03);border-radius:5px;padding:0.4rem 0.6rem;border:1px solid rgba(255,255,255,0.05)">${p.notes}</div>`:''}
+    </div>`;
+  }).join('');
+}
+function openProgM(id){
+  const p=id?S.programs.find(x=>x.id===id):null;
+  const inScopeStr=(p?.inScope||[]).map(s=>`${s.url} [${s.type}]`).join('\n');
+  const outScopeStr=(p?.outScope||[]).join('\n');
+  openM(p?'Edit Program':'Add Program',`
+    <div class="fg">
+      <div><label class="fl">Program Name</label><input type="text" id="f-n" value="${p?.name||''}"></div>
+      <div><label class="fl">Platform</label><select id="f-pl">${PLATFORMS.map(x=>`<option ${p?.platform===x?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div><label class="fl">Status</label><select id="f-st">${PSTATUS.map(x=>`<option ${p?.status===x?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div><label class="fl">Policy URL</label><input type="url" id="f-url" value="${p?.policyUrl||''}"></div>
+      <div><label class="fl">Min Payout ($)</label><input type="number" id="f-min" value="${p?.payoutMin||''}"></div>
+      <div><label class="fl">Max Payout ($)</label><input type="number" id="f-max" value="${p?.payoutMax||''}"></div>
+      <div class="fgf"><label class="fl">In-Scope (one per line: url [type])</label><textarea id="f-in" style="font-family:monospace;font-size:0.72rem">${inScopeStr}</textarea></div>
+      <div class="fgf"><label class="fl">Out-of-Scope URLs (one per line)</label><textarea id="f-out" style="font-family:monospace;font-size:0.72rem">${outScopeStr}</textarea></div>
+      <div class="fgf"><label class="fl">Notes</label><textarea id="f-nt">${p?.notes||''}</textarea></div>
+    </div>
+    <div class="fa"><button class="btn bg2" onclick="closeM()">Cancel</button><button class="btn bo" id="m-save">Save Program</button></div>`);
+  document.getElementById('m-save').onclick=()=>{
+    const inRaw=gv('f-in').split('\n').filter(Boolean).map(l=>{
+      const m=l.match(/^(.+?)\s*\[([^\]]+)\]\s*$/);
+      return m?{url:m[1].trim(),type:m[2].trim()}:{url:l.trim(),type:'Web'};
+    });
+    const o={id:p?.id||uid(),name:gv('f-n'),platform:gv('f-pl'),status:gv('f-st'),
+      policyUrl:gv('f-url'),payoutMin:parseFloat(gv('f-min'))||0,payoutMax:parseFloat(gv('f-max'))||0,
+      inScope:inRaw,outScope:gv('f-out').split('\n').map(x=>x.trim()).filter(Boolean),
+      notes:gv('f-nt'),added:p?.added||new Date().toISOString().slice(0,10)};
+    if(!o.name){toast('Name required','var(--re)');return;}
+    if(p){S.programs[S.programs.findIndex(x=>x.id===id)]=o;}else{S.programs.unshift(o);}
+    save();closeM();rProgs();toast(p?'Updated':'Program added');
+  };
+}
+
+/* ═══════════════════════════════════════════════════════
+   FINDINGS TRACKER
+═══════════════════════════════════════════════════════ */
+function rFind(){
+  const c=document.getElementById('cnt');
+  c.innerHTML=`
+    <div class="fb">
+      <input type="search" class="si" id="fq" placeholder="Search findings…" oninput="rFindRows()">
+      <select class="fs" id="fprog" onchange="rFindRows()">
+        <option value="">All Programs</option>
+        ${S.programs.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}
+      </select>
+      <select class="fs" id="fsev" onchange="rFindRows()">${['<option value="">All Severity</option>',...SEVS.map(x=>`<option>${x}</option>`)].join('')}</select>
+      <select class="fs" id="fst" onchange="rFindRows()">${['<option value="">All Status</option>',...FSTATUS.map(x=>`<option>${x}</option>`)].join('')}</select>
+      <select class="fs" id="ftyp" onchange="rFindRows()">${['<option value="">All Types</option>',...VTYPES.map(x=>`<option>${x}</option>`)].join('')}</select>
+      <button class="btn bo" onclick="openFindM()">+ Add Finding</button>
+    </div>
+    <div class="card" style="padding:0"><div class="tw"><table>
+      <thead><tr><th>Finding</th><th>Program</th><th>Type</th><th>Sev</th><th>CVSS</th><th>Status</th><th>Submitted</th><th>Bounty</th><th></th></tr></thead>
+      <tbody id="f-tbody"></tbody>
+    </table></div></div>`;
+  rFindRows();
+}
+function rFindRows(){
+  const q=gv('fq').toLowerCase(),pr=gv('fprog'),sv=gv('fsev'),st=gv('fst'),ty=gv('ftyp');
+  const rows=S.findings.filter(f=>
+    (!q||f.title.toLowerCase().includes(q)||f.type.toLowerCase().includes(q))&&
+    (!pr||f.programId===pr)&&(!sv||f.severity===sv)&&(!st||f.status===st)&&(!ty||f.type===ty)
+  ).sort((a,b)=>SEVS.indexOf(a.severity)-SEVS.indexOf(b.severity));
+  const tb=document.getElementById('f-tbody');
+  if(!tb)return;
+  if(!rows.length){tb.innerHTML=`<tr><td colspan="9"><div class="empty"><div class="empty-i">⚠</div><p>No findings found</p></div></td></tr>`;return;}
+  tb.innerHTML=rows.map(f=>`
+    <tr>
+      <td style="max-width:200px"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f.title}</div><div style="font-size:0.62rem;color:var(--tm);font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px">${f.endpoint}</div></td>
+      <td><span style="font-size:0.7rem;color:var(--or)">${progName(f.programId)}</span></td>
+      <td><span style="font-size:0.7rem;color:var(--td)">${f.type}</span></td>
+      <td>${sevB(f.severity)}</td>
+      <td style="font-family:monospace;font-size:0.72rem;color:${parseFloat(f.cvss)>=9?'var(--p1)':parseFloat(f.cvss)>=7?'var(--p2)':parseFloat(f.cvss)>=4?'var(--p3)':'var(--p4)'}">${f.cvss||'—'}</td>
+      <td>${stB(f.status)}</td>
+      <td style="font-family:monospace;font-size:0.68rem;color:var(--tm)">${f.submittedDate||'—'}</td>
+      <td style="font-family:monospace;font-size:0.72rem;color:var(--gr)">${f.bountyAmount?'$'+f.bountyAmount:'—'}</td>
+      <td><div style="display:flex;gap:0.22rem">
+        <button class="btn bg2 btn-sm btn-i" onclick="openFindM('${f.id}')" title="Edit">✎</button>
+        <button class="btn bp btn-sm btn-i" onclick="openReportPreview('${f.id}')" title="Report">📄</button>
+        <button class="btn bd btn-sm btn-i" onclick="del('findings','${f.id}')" title="Delete">✕</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function openFindM(id){
+  const f=id?S.findings.find(x=>x.id===id):null;
+  // parse existing vector
+  let cvssVals={av:'N',ac:'L',pr:'N',ui:'N',s:'U',c:'N',i:'N',a:'N'};
+  if(f?.cvssVector){
+    const m=f.cvssVector.match(/AV:(\w)\/AC:(\w)\/PR:(\w)\/UI:(\w)\/S:(\w)\/C:(\w)\/I:(\w)\/A:(\w)/);
+    if(m)cvssVals={av:m[1],ac:m[2],pr:m[3],ui:m[4],s:m[5],c:m[6],i:m[7],a:m[8]};
+  }
+  openM(f?'Edit Finding':'Log Finding',`
+    <div class="fg">
+      <div class="fgf"><label class="fl">Title</label><input type="text" id="f-t" value="${f?.title||''}"></div>
+      <div><label class="fl">Program</label><select id="f-prog"><option value="">— Select Program —</option>${S.programs.map(p=>`<option value="${p.id}"${f?.programId===p.id?' selected':''}>${p.name}</option>`).join('')}</select></div>
+      <div><label class="fl">Vulnerability Type</label><select id="f-vt">${VTYPES.map(x=>`<option ${f?.type===x?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div class="fgf">
+        <label class="fl">Affected Endpoint</label>
+        <input type="text" id="f-ep" value="${f?.endpoint||''}" placeholder="https://target.com/api/endpoint" oninput="checkScope()">
+        <div id="scope-feedback" class="scope-warn"></div>
+      </div>
+      <div><label class="fl">Severity</label><select id="f-sev">${SEVS.map(x=>`<option ${f?.severity===x?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div><label class="fl">CVSS Score (auto-calculated)</label><input type="text" id="f-cvss" value="${f?.cvss||''}" placeholder="0.0 – 10.0" readonly style="cursor:not-allowed;opacity:0.7"></div>
+      <div class="fgf"><label class="fl">CVSS Vector</label><input type="text" id="f-cvss-vector" value="${f?.cvssVector||''}" style="font-family:monospace;font-size:0.67rem" readonly></div>
+    </div>
+    ${cvssHTML(cvssVals)}
+    <div class="fg" style="margin-top:0.85rem">
+      <div><label class="fl">Status</label><select id="f-st">${FSTATUS.map(x=>`<option ${f?.status===x?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div><label class="fl">Bounty Amount ($)</label><input type="number" id="f-ba" value="${f?.bountyAmount||''}" placeholder="0"></div>
+      <div><label class="fl">Submitted Date</label><input type="date" id="f-sd" value="${f?.submittedDate||''}"></div>
+      <div><label class="fl">Response Date</label><input type="date" id="f-rd" value="${f?.responseDate||''}"></div>
+      <div class="fgf"><label class="fl">Resolved Date</label><input type="date" id="f-resdate" value="${f?.resolvedDate||''}"></div>
+      <div class="fgf"><label class="fl">Steps to Reproduce</label><textarea id="f-steps" style="min-height:90px">${f?.steps||''}</textarea></div>
+      <div class="fgf"><label class="fl">Impact</label><textarea id="f-impact">${f?.impact||''}</textarea></div>
+      <div class="fgf"><label class="fl">Proof of Concept (PoC)</label><textarea id="f-poc" style="font-family:monospace;font-size:0.72rem">${f?.poc||''}</textarea></div>
+      <div class="fgf"><label class="fl">Suggested Fix</label><textarea id="f-fix">${f?.suggestedFix||''}</textarea></div>
+      <div class="fgf"><label class="fl">Notes</label><textarea id="f-nt">${f?.notes||''}</textarea></div>
+    </div>
+    <div class="fa"><button class="btn bg2" onclick="closeM()">Cancel</button><button class="btn bo" id="m-save">Save Finding</button></div>`,true);
+  setTimeout(updateCVSS,50);
+  document.getElementById('m-save').onclick=()=>{
+    const o={id:f?.id||uid(),programId:gv('f-prog'),title:gv('f-t'),type:gv('f-vt'),
+      endpoint:gv('f-ep'),severity:gv('f-sev'),cvss:gv('f-cvss'),cvssVector:gv('f-cvss-vector'),
+      status:gv('f-st'),bountyAmount:gv('f-ba'),submittedDate:gv('f-sd'),
+      responseDate:gv('f-rd'),resolvedDate:gv('f-resdate'),
+      steps:gv('f-steps'),impact:gv('f-impact'),poc:gv('f-poc'),suggestedFix:gv('f-fix'),notes:gv('f-nt')};
+    if(!o.title){toast('Title required','var(--re)');return;}
+    if(f){S.findings[S.findings.findIndex(x=>x.id===id)]=o;}else{S.findings.unshift(o);}
+    save();closeM();if(page==='findings')rFind();else rDash();toast(f?'Updated':'Finding logged');
+  };
+}
+
+function checkScope(){
+  const ep=gv('f-ep');
+  const progId=gv('f-prog');
+  const prog=S.programs.find(p=>p.id===progId);
+  const fb=document.getElementById('scope-feedback');
+  if(!fb||!ep||!prog)return;
+  const inS=prog.inScope||[];
+  const outS=prog.outScope||[];
+  const isOut=outS.some(s=>ep.includes(s));
+  if(isOut){fb.className='scope-warn';fb.style.display='block';fb.textContent='⚠ This endpoint matches the OUT-OF-SCOPE list. Do not test!';return;}
+  const isIn=inS.some(s=>{const url=s.url.replace('*.','.').replace('*.','');return ep.includes(url.replace(/^\*/,''));});
+  if(isIn){fb.className='scope-ok';fb.style.display='block';fb.textContent='✓ Endpoint is in scope.';}
+  else{fb.className='scope-warn';fb.style.display='block';fb.textContent='⚠ Endpoint not found in scope list. Verify before testing.';}
+}
+
+/* ═══════════════════════════════════════════════════════
+   REPORT BUILDER
+═══════════════════════════════════════════════════════ */
+function rReport(){
+  const c=document.getElementById('cnt');
+  c.innerHTML=`
+    <div class="sh"><span class="sh-t">Generate Bug Report</span></div>
+    <div class="two-c">
+      <div class="card">
+        <div style="font-size:0.72rem;font-weight:700;color:var(--or);margin-bottom:0.65rem;text-transform:uppercase;letter-spacing:0.05em">Select Finding</div>
+        <select id="rep-find" onchange="genReport()" style="margin-bottom:0.75rem">
+          <option value="">— Choose a finding —</option>
+          ${S.findings.map(f=>`<option value="${f.id}">[${f.severity.split(' ')[0]}] ${f.title} (${progName(f.programId)})</option>`).join('')}
+        </select>
+        <div style="font-size:0.72rem;font-weight:700;color:var(--or);margin-bottom:0.65rem;text-transform:uppercase;letter-spacing:0.05em">Or Build from Template</div>
+        <div class="fg">
+          <div><label class="fl">Title</label><input type="text" id="rt-title" oninput="genManualReport()"></div>
+          <div><label class="fl">Type</label><select id="rt-type" onchange="genManualReport()">${VTYPES.map(x=>`<option>${x}</option>`).join('')}</select></div>
+          <div><label class="fl">Severity</label><select id="rt-sev" onchange="genManualReport()">${SEVS.map(x=>`<option>${x}</option>`).join('')}</select></div>
+          <div><label class="fl">Endpoint</label><input type="text" id="rt-ep" oninput="genManualReport()" placeholder="https://target.com/…"></div>
+          <div class="fgf"><label class="fl">Steps to Reproduce</label><textarea id="rt-steps" oninput="genManualReport()" placeholder="1. Navigate to…&#10;2. …"></textarea></div>
+          <div class="fgf"><label class="fl">Impact</label><textarea id="rt-impact" oninput="genManualReport()"></textarea></div>
+          <div class="fgf"><label class="fl">PoC</label><textarea id="rt-poc" oninput="genManualReport()" style="font-family:monospace;font-size:0.72rem"></textarea></div>
+          <div class="fgf"><label class="fl">Suggested Fix</label><textarea id="rt-fix" oninput="genManualReport()"></textarea></div>
+        </div>
+        ${cvssHTML()}
+      </div>
+      <div>
+        <div style="font-size:0.72rem;font-weight:700;color:var(--or);margin-bottom:0.65rem;text-transform:uppercase;letter-spacing:0.05em">Generated Report (Markdown)</div>
+        <div class="report-area" id="report-out">Select a finding or fill the template to generate a report…</div>
+        <div class="report-actions">
+          <button class="btn bo" onclick="copyReport()">⎘ Copy Markdown</button>
+          <button class="btn bp" onclick="dlReport()">↓ Download .md</button>
+          <button class="btn bg2" onclick="copyPlainText()">⎘ Plain Text</button>
+        </div>
+      </div>
+    </div>`;
+  setTimeout(updateCVSS,50);
+}
+
+function buildReport(title,type,sev,ep,steps,impact,poc,fix,cvss,vector,prog){
+  const date=new Date().toISOString().slice(0,10);
+  return `# Bug Report: ${title||'[Title]'}
+
+**Date:** ${date}
+**Program:** ${prog||'[Program]'}
+**Severity:** ${sev||'[Severity]'}  |  **CVSS 3.1:** ${cvss||'[Score]'}
+**CVSS Vector:** \`${vector||'[Vector]'}\`
+**Vulnerability Type:** ${type||'[Type]'}
+**Affected Endpoint:** \`${ep||'[Endpoint]'}\`
+
+---
+
+## Summary
+
+${title||'[Brief description of the vulnerability]'}
+
+---
+
+## Steps to Reproduce
+
+${steps?steps.split('\n').filter(Boolean).map((l,i)=>/^\d+\./.test(l.trim())?l.trim():`${i+1}. ${l.trim()}`).join('\n'):'1. [Step 1]\n2. [Step 2]\n3. [Step 3]'}
+
+---
+
+## Proof of Concept
+
+\`\`\`
+${poc||'[PoC payload, screenshot reference, or code]'}
+\`\`\`
+
+---
+
+## Impact
+
+${impact||'[Describe the security impact and affected users/data]'}
+
+---
+
+## Suggested Remediation
+
+${fix||'[Specific remediation steps]'}
+
+---
+
+## Severity Justification
+
+**CVSS 3.1 Base Score: ${cvss||'N/A'} (${sev||'N/A'})**
+
+\`${vector||'[CVSS Vector]'}\`
+
+---
+
+*Report generated by Bug Bounty Tracker*`;
+}
+
+function genReport(){
+  const id=gv('rep-find');
+  const f=S.findings.find(x=>x.id===id);
+  if(!f){document.getElementById('report-out').textContent='Select a finding to generate a report…';return;}
+  const prog=progName(f.programId);
+  document.getElementById('report-out').textContent=buildReport(f.title,f.type,f.severity,f.endpoint,f.steps,f.impact,f.poc,f.suggestedFix,f.cvss,f.cvssVector,prog);
+}
+function genManualReport(){
+  const cv=gv('f-cvss')||gv('cv-score-num');
+  const vec=gv('f-cvss-vector')||gv('cv-score-vector');
+  document.getElementById('report-out').textContent=buildReport(gv('rt-title'),gv('rt-type'),gv('rt-sev'),gv('rt-ep'),gv('rt-steps'),gv('rt-impact'),gv('rt-poc'),gv('rt-fix'),cv,vec,'[Program]');
+}
+function copyReport(){
+  const t=document.getElementById('report-out').textContent;
+  navigator.clipboard?.writeText(t).then(()=>toast('Copied to clipboard!')).catch(()=>fallbackCopy(t));
+}
+function copyPlainText(){
+  const t=document.getElementById('report-out').textContent.replace(/#{1,3} /g,'').replace(/\*\*/g,'').replace(/`/g,'');
+  navigator.clipboard?.writeText(t).then(()=>toast('Plain text copied!')).catch(()=>fallbackCopy(t));
+}
+function dlReport(){
+  const t=document.getElementById('report-out').textContent;
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([t],{type:'text/markdown'}));
+  a.download=`bug-report-${Date.now()}.md`;a.click();toast('Downloaded!');
+}
+function fallbackCopy(t){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Copied!');}
+
+function openReportPreview(id){
+  const f=S.findings.find(x=>x.id===id);if(!f)return;
+  const prog=progName(f.programId);
+  const md=buildReport(f.title,f.type,f.severity,f.endpoint,f.steps,f.impact,f.poc,f.suggestedFix,f.cvss,f.cvssVector,prog);
+  openM(`Report: ${f.title}`,`
+    <div class="report-area" id="rp-out" style="max-height:60vh">${md}</div>
+    <div class="report-actions">
+      <button class="btn bo" onclick="navigator.clipboard?.writeText(document.getElementById('rp-out').textContent).then(()=>toast('Copied!'))">⎘ Copy</button>
+      <button class="btn bp" onclick="(()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([document.getElementById('rp-out').textContent],{type:'text/markdown'}));a.download='report.md';a.click();toast('Downloaded!')})()">↓ .md</button>
+      <button class="btn bg2" onclick="closeM()">Close</button>
+    </div>`,true);
+}
+
+/* ═══════════════════════════════════════════════════════
+   RECON NOTES
+═══════════════════════════════════════════════════════ */
+function rRecon(){
+  const c=document.getElementById('cnt');
+  c.innerHTML=`
+    <div class="fb">
+      <select class="fs" id="rc-prog" onchange="rReconList()">
+        <option value="">All Programs</option>
+        ${S.programs.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}
+      </select>
+      <input type="search" class="si" id="rc-tag" placeholder="Filter by tag…" oninput="rReconList()">
+      <button class="btn bo" onclick="openReconM()">+ Add Recon Note</button>
+    </div>
+    <div id="recon-list"></div>`;
+  rReconList();
+}
+function rReconList(){
+  const pr=gv('rc-prog'),tg=gv('rc-tag').toLowerCase();
+  const rows=S.recon.filter(r=>(!pr||r.programId===pr)&&(!tg||(r.tags||[]).some(t=>t.toLowerCase().includes(tg))||r.notes.toLowerCase().includes(tg)));
+  const el=document.getElementById('recon-list');
+  if(!el)return;
+  if(!rows.length){el.innerHTML=`<div class="empty"><div class="empty-i">🔍</div><p>No recon notes found</p></div>`;return;}
+  el.innerHTML=rows.map(r=>`
+    <div class="recon-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem">
+        <div>
+          <div class="recon-prog">${progName(r.programId)}</div>
+          <div style="font-size:0.65rem;color:var(--tm)">Last updated: <span class="mono">${r.date}</span></div>
+        </div>
+        <div style="display:flex;gap:0.3rem">
+          <button class="btn bg2 btn-sm btn-i" onclick="openReconM('${r.id}')">✎</button>
+          <button class="btn bd btn-sm btn-i" onclick="del('recon','${r.id}')">✕</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.65rem;margin-bottom:0.55rem">
+        ${r.techStack?.length?`<div class="recon-section"><div class="recon-section-t">⚙ Tech Stack</div>${r.techStack.map(x=>`<span class="recon-item">${x}</span>`).join('')}</div>`:''}
+        ${r.endpoints?.length?`<div class="recon-section"><div class="recon-section-t">🌐 Endpoints</div>${r.endpoints.map(x=>`<span class="recon-item">${x}</span>`).join('')}</div>`:''}
+        ${r.parameters?.length?`<div class="recon-section"><div class="recon-section-t">📌 Parameters</div>${r.parameters.map(x=>`<span class="recon-item">${x}</span>`).join('')}</div>`:''}
+        ${r.jsFiles?.length?`<div class="recon-section"><div class="recon-section-t">📦 JS Files</div>${r.jsFiles.map(x=>`<span class="recon-item" style="font-size:0.58rem">${x}</span>`).join('')}</div>`:''}
+      </div>
+      ${r.tags?.length?`<div style="margin-bottom:0.45rem">${r.tags.map(t=>`<span class="tag">#${t}</span>`).join('')}</div>`:''}
+      ${r.notes?`<div style="font-size:0.73rem;color:var(--td);background:rgba(255,255,255,0.02);border-radius:5px;padding:0.4rem 0.6rem;border:1px solid rgba(255,255,255,0.05);white-space:pre-wrap">${r.notes}</div>`:''}
+    </div>`).join('');
+}
+function openReconM(id){
+  const r=id?S.recon.find(x=>x.id===id):null;
+  openM(r?'Edit Recon Note':'Add Recon Note',`
+    <div class="fg">
+      <div class="fgf"><label class="fl">Program</label><select id="f-prog"><option value="">— Select —</option>${S.programs.map(p=>`<option value="${p.id}"${r?.programId===p.id?' selected':''}>${p.name}</option>`).join('')}</select></div>
+      <div class="fgf"><label class="fl">Tech Stack (comma-separated)</label><input type="text" id="f-ts" value="${(r?.techStack||[]).join(', ')}" placeholder="React, Node.js, AWS, Nginx…"></div>
+      <div class="fgf"><label class="fl">Discovered Endpoints (one per line)</label><textarea id="f-ep" style="font-family:monospace;font-size:0.72rem">${(r?.endpoints||[]).join('\n')}</textarea></div>
+      <div class="fgf"><label class="fl">Interesting Parameters (comma-separated)</label><input type="text" id="f-par" value="${(r?.parameters||[]).join(', ')}" placeholder="user_id, redirect_url, file…"></div>
+      <div class="fgf"><label class="fl">JS Files Reviewed (one per line)</label><textarea id="f-js" style="font-family:monospace;font-size:0.7rem">${(r?.jsFiles||[]).join('\n')}</textarea></div>
+      <div class="fgf"><label class="fl">Tags (comma-separated)</label><input type="text" id="f-tags" value="${(r?.tags||[]).join(', ')}" placeholder="graphql, admin-panel, api-v2…"></div>
+      <div class="fgf"><label class="fl">Notes</label><textarea id="f-nt" style="min-height:100px">${r?.notes||''}</textarea></div>
+    </div>
+    <div class="fa"><button class="btn bg2" onclick="closeM()">Cancel</button><button class="btn bo" id="m-save">Save</button></div>`);
+  document.getElementById('m-save').onclick=()=>{
+    const o={id:r?.id||uid(),programId:gv('f-prog'),
+      techStack:gv('f-ts').split(',').map(x=>x.trim()).filter(Boolean),
+      endpoints:gv('f-ep').split('\n').map(x=>x.trim()).filter(Boolean),
+      parameters:gv('f-par').split(',').map(x=>x.trim()).filter(Boolean),
+      jsFiles:gv('f-js').split('\n').map(x=>x.trim()).filter(Boolean),
+      tags:gv('f-tags').split(',').map(x=>x.trim()).filter(Boolean),
+      notes:gv('f-nt'),date:new Date().toISOString().slice(0,10)};
+    if(!o.programId){toast('Select a program','var(--re)');return;}
+    if(r){S.recon[S.recon.findIndex(x=>x.id===id)]=o;}else{S.recon.unshift(o);}
+    save();closeM();rRecon();toast(r?'Updated':'Recon note saved');
+  };
+}
+
+/* ═══════════════════════════════════════════════════════
+   LEARNING TRACKER
+═══════════════════════════════════════════════════════ */
+function rLearn(){
+  const c=document.getElementById('cnt');
+  c.innerHTML=`
+    <div class="fb">
+      <input type="search" class="si" id="lq" placeholder="Search techniques…" oninput="rLearnRows()">
+      <select class="fs" id="lsrc" onchange="rLearnRows()">${['<option value="">All Sources</option>',...SOURCES.map(x=>`<option>${x}</option>`)].join('')}</select>
+      <select class="fs" id="llab" onchange="rLearnRows()">
+        <option value="">All</option><option value="yes">Lab Completed</option><option value="no">Lab Pending</option>
+      </select>
+      <button class="btn bo" onclick="openLearnM()">+ Add Entry</button>
+    </div>
+
+    <div class="stat-g" style="grid-template-columns:repeat(4,1fr);margin-bottom:1rem">
+      <div class="card"><div class="c-lbl">Techniques</div><div class="c-val" style="color:var(--or)">${S.learning.length}</div><div class="c-sub">Studied</div></div>
+      <div class="card"><div class="c-lbl">Labs Done</div><div class="c-val" style="color:var(--gr)">${S.learning.filter(l=>l.labCompleted).length}</div><div class="c-sub">of ${S.learning.length}</div></div>
+      <div class="card"><div class="c-lbl">Applied</div><div class="c-val" style="color:var(--cy)">${S.learning.filter(l=>l.appliedIn?.length).length}</div><div class="c-sub">In real findings</div></div>
+      <div class="card"><div class="c-lbl">This Month</div><div class="c-val" style="color:var(--or)">${S.learning.filter(l=>l.date>=new Date().toISOString().slice(0,7)).length}</div><div class="c-sub">Entries</div></div>
+    </div>
+
+    <div class="card" style="padding:0"><div class="tw"><table>
+      <thead><tr><th>Technique</th><th>Source</th><th>Date</th><th>Lab</th><th>Applied In</th><th>Writeup</th><th></th></tr></thead>
+      <tbody id="l-tbody"></tbody>
+    </table></div></div>`;
+  rLearnRows();
+}
+function rLearnRows(){
+  const q=gv('lq').toLowerCase(),src=gv('lsrc'),lab=gv('llab');
+  const rows=S.learning.filter(l=>
+    (!q||l.technique.toLowerCase().includes(q)||l.notes.toLowerCase().includes(q))&&
+    (!src||l.source===src)&&
+    (!lab||(lab==='yes'?l.labCompleted:!l.labCompleted))
+  ).sort((a,b)=>b.date.localeCompare(a.date));
+  const tb=document.getElementById('l-tbody');
+  if(!tb)return;
+  if(!rows.length){tb.innerHTML=`<tr><td colspan="7"><div class="empty"><div class="empty-i">📚</div><p>No entries</p></div></td></tr>`;return;}
+  tb.innerHTML=rows.map(l=>{
+    const applied=l.appliedIn?.map(fid=>{const f=S.findings.find(x=>x.id===fid);return f?`<span class="b b-sub" style="font-size:0.58rem;cursor:pointer" onclick="openFindM('${fid}')">${f.type}</span>`:null;}).filter(Boolean).join(' ')||'—';
+    return `<tr>
+      <td><div style="font-weight:600;font-size:0.78rem">${l.technique}</div>${l.notes?`<div style="font-size:0.63rem;color:var(--tm);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${l.notes}</div>`:''}</td>
+      <td style="font-size:0.7rem;color:var(--td)">${l.source}</td>
+      <td style="font-family:monospace;font-size:0.68rem;color:var(--tm)">${l.date}</td>
+      <td><span style="color:${l.labCompleted?'var(--gr)':'var(--tm)';font-size:0.85rem">${l.labCompleted?'✓':'○'}</span></td>
+      <td>${applied}</td>
+      <td>${l.writeup?`<a href="${l.writeup}" target="_blank" style="color:var(--cy);font-size:0.68rem">↗</a>`:'—'}</td>
+      <td><div style="display:flex;gap:0.22rem">
+        <button class="btn bg2 btn-sm btn-i" onclick="openLearnM('${l.id}')">✎</button>
+        <button class="btn bd btn-sm btn-i" onclick="del('learning','${l.id}')">✕</button>
+      </div></td>
+    </tr>`;}).join('');
+}
+function openLearnM(id){
+  const l=id?S.learning.find(x=>x.id===id):null;
+  const appliedStr=(l?.appliedIn||[]).map(fid=>{const f=S.findings.find(x=>x.id===fid);return f?f.title:null;}).filter(Boolean).join(', ');
+  openM(l?'Edit Learning Entry':'Add Learning Entry',`
+    <div class="fg">
+      <div class="fgf"><label class="fl">Technique / Topic</label><input type="text" id="f-tech" value="${l?.technique||''}" placeholder="e.g. JWT Algorithm Confusion"></div>
+      <div><label class="fl">Source</label><select id="f-src">${SOURCES.map(x=>`<option ${l?.source===x?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div><label class="fl">Date Studied</label><input type="date" id="f-dt" value="${l?.date||new Date().toISOString().slice(0,10)}"></div>
+      <div><label class="fl">Lab Completed</label><select id="f-lab"><option value="true"${l?.labCompleted?' selected':''}>Yes</option><option value="false"${!l?.labCompleted?' selected':''}>No</option></select></div>
+      <div class="fgf"><label class="fl">Writeup / Reference URL</label><input type="url" id="f-url" value="${l?.writeup||''}"></div>
+      <div class="fgf">
+        <label class="fl">Applied In (select findings)</label>
+        <select id="f-applied" multiple style="min-height:80px">
+          ${S.findings.map(f=>`<option value="${f.id}"${l?.appliedIn?.includes(f.id)?' selected':''}>${f.title}</option>`).join('')}
+        </select>
+        <div style="font-size:0.62rem;color:var(--tm);margin-top:0.2rem">Hold Ctrl/Cmd to select multiple</div>
+      </div>
+      <div class="fgf"><label class="fl">Notes</label><textarea id="f-nt">${l?.notes||''}</textarea></div>
+    </div>
+    <div class="fa"><button class="btn bg2" onclick="closeM()">Cancel</button><button class="btn bo" id="m-save">Save</button></div>`);
+  document.getElementById('m-save').onclick=()=>{
+    const sel=Array.from(document.getElementById('f-applied').selectedOptions).map(o=>o.value);
+    const o={id:l?.id||uid(),technique:gv('f-tech'),source:gv('f-src'),date:gv('f-dt'),
+      labCompleted:gv('f-lab')==='true',writeup:gv('f-url'),appliedIn:sel,notes:gv('f-nt')};
+    if(!o.technique){toast('Technique required','var(--re)');return;}
+    if(l){S.learning[S.learning.findIndex(x=>x.id===id)]=o;}else{S.learning.unshift(o);}
+    save();closeM();rLearn();toast(l?'Updated':'Entry added');
+  };
+}
+
+/* ═══════════════════════════════════════════════════════
+   DELETE
+═══════════════════════════════════════════════════════ */
+function del(col,id){
+  if(!confirm('Delete this item?'))return;
+  S[col]=S[col].filter(x=>x.id!==id);
+  save();nav(page);toast('Deleted','var(--re)');
+}
+
+/* ═══════════════════════════════════════════════════════
+   EXPORT / IMPORT
+═══════════════════════════════════════════════════════ */
+document.getElementById('exp-btn').onclick=()=>{
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:'application/json'}));
+  a.download='bugbounty-tracker-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();toast('Exported!');
+};
+document.getElementById('imp-btn').onclick=()=>document.getElementById('imp-file').click();
+document.getElementById('imp-file').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{const d=JSON.parse(ev.target.result);if(!d.programs)throw 0;S=d;save();nav(page);toast('Imported!');}
+    catch{toast('Invalid file','var(--re)');}
+  };
+  r.readAsText(f);e.target.value='';
+};
+
+/* ═══════════════════════════════════════════════════════
+   EVENTS & INIT
+═══════════════════════════════════════════════════════ */
+document.querySelectorAll('.sb-a').forEach(a=>a.onclick=()=>nav(a.dataset.p));
+document.getElementById('m-close').onclick=closeM;
+document.getElementById('mo').onclick=e=>{if(e.target===document.getElementById('mo'))closeM();};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM();});
+
+load();sbFoot();nav('dash');
+</script>
+</body>
+</html>
