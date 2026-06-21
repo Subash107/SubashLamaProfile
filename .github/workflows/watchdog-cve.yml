@@ -18,38 +18,47 @@ jobs:
         run: |
           TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
           CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
-
-          TOOLS=("wazuh" "suricata" "sysmon" "docker" "active directory" "openssh" "nginx" "linux kernel")
-          SINCE=$(date -u -d "yesterday" +"%Y-%m-%dT00:00:00.000")
+          SINCE=$(date -u -d "2 days ago" +"%Y-%m-%dT00:00:00.000")
           UNTIL=$(date -u +"%Y-%m-%dT23:59:59.000")
           FOUND=""
 
-          for TOOL in "${TOOLS[@]}"; do
-            ENCODED=$(python3 -c "import urllib.parse; print(urllib.parse.quote('${TOOL}'))")
-            RESULT=$(curl -s "https://services.nvd.nist.gov/rest/json/cves/2.0?keywordSearch=${ENCODED}&pubStartDate=${SINCE}&pubEndDate=${UNTIL}&resultsPerPage=3" 2>/dev/null)
-            COUNT=$(echo "$RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('totalResults',0))" 2>/dev/null || echo "0")
+          check_tool() {
+            local TOOL="$1"
+            sleep 6   # NVD free tier: 5 req/30s
+            local ENCODED=$(python3 -c "import urllib.parse; print(urllib.parse.quote('$TOOL'))")
+            local RESULT=$(curl -s --max-time 15 \
+              -H "User-Agent: CVE-Watchdog/1.0" \
+              "https://services.nvd.nist.gov/rest/json/cves/2.0?keywordSearch=${ENCODED}&pubStartDate=${SINCE}&pubEndDate=${UNTIL}&resultsPerPage=3")
+            local COUNT=$(echo "$RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('totalResults',0))" 2>/dev/null || echo "0")
+            echo "$COUNT|$RESULT"
+          }
 
-            if [ "$COUNT" -gt 0 ]; then
+          for TOOL in "wazuh" "suricata" "sysmon" "docker" "openssh" "linux kernel"; do
+            RESULT_RAW=$(check_tool "$TOOL")
+            COUNT=$(echo "$RESULT_RAW" | cut -d'|' -f1)
+            RESULT=$(echo "$RESULT_RAW" | cut -d'|' -f2-)
+
+            if [ "${COUNT:-0}" -gt 0 ] 2>/dev/null; then
               CVES=$(echo "$RESULT" | python3 -c "
 import sys,json
 d=json.load(sys.stdin)
 for v in d.get('vulnerabilities',[])[:2]:
   cve=v['cve']
-  cid=cve['id']
-  desc=cve['descriptions'][0]['value'][:120]
-  score=cve.get('metrics',{}).get('cvssMetricV31',[{}])[0].get('cvssData',{}).get('baseScore','N/A')
-  print(f'  {cid} (CVSS:{score}) — {desc}...')
-" 2>/dev/null || echo "  Details unavailable")
-              FOUND="${FOUND}\n🔴 ${TOOL^^}: ${COUNT} new CVE(s)\n${CVES}\n"
+  cid=cve.get('id','N/A')
+  desc=cve.get('descriptions',[{}])[0].get('value','No description')[:100]
+  score=cve.get('metrics',{}).get('cvssMetricV31',[{}])[0].get('cvssData',{}).get('baseScore','N/A') if cve.get('metrics',{}).get('cvssMetricV31') else 'N/A'
+  print(f'  {cid} CVSS:{score} - {desc}')
+" 2>/dev/null || echo "  See NVD for details")
+              FOUND="${FOUND}🔴 ${TOOL^^}: ${COUNT} CVE(s)\n${CVES}\n\n"
             fi
           done
 
           if [ -n "$FOUND" ]; then
-            MSG=$(printf '🛡️ CVE WATCHDOG ALERT\n%s\nDate: %s\n\nCheck: https://nvd.nist.gov/vuln/search' "$(echo -e "$FOUND")" "$(date -u +"%Y-%m-%d")")
+            MSG=$(printf '🛡️ CVE WATCHDOG ALERT\n\n%s\nDate: %s\nFull list: https://nvd.nist.gov' "$(printf "$FOUND")" "$(date -u +"%Y-%m-%d")")
             curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
               -H "Content-Type: application/json" \
               -d "{\"chat_id\":\"${CHAT}\",\"text\":\"${MSG}\"}"
             echo "CVE alert sent"
           else
-            echo "No new CVEs found for monitored tools today"
+            echo "No new CVEs found — all clear"
           fi

@@ -345,6 +345,27 @@ export default {
     }
 
     if (request.method !== "POST") {
+      const url = new URL(request.url);
+      if (url.searchParams.get("digest") === "1") {
+        const token  = env.TELEGRAM_BOT_TOKEN;
+        const chatId = env.TELEGRAM_CHAT_ID;
+        const logRes = await fetch("https://raw.githubusercontent.com/Subash107/SubashLamaProfile/main/download-logs/resume-downloads.txt");
+        const log    = await logRes.text();
+        const lines  = log.split("\n").filter(l => /^\d{4}-\d{2}-\d{2}/.test(l));
+        const total  = lines.length;
+        const today  = new Date().toISOString().slice(0,10);
+        const todayCount = lines.filter(l => l.startsWith(today)).length;
+        const last3  = lines.slice(-3).reverse().map(l => {
+          const p = l.split("|");
+          return "  - " + (p[2]||"").trim() + " / " + (p[3]||"").trim();
+        }).join("\n");
+        const msg = "📊 Daily Resume Digest - " + today + "\n\nToday    : " + todayCount + " download(s)\nAll time : " + total + " downloads\n\nRecent:\n" + last3 + "\n\n📋 Full log: https://github.com/Subash107/SubashLamaProfile/blob/main/download-logs/resume-downloads.txt";
+        await fetch("https://api.telegram.org/bot" + token + "/sendMessage", {
+          method: "POST", headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({chat_id: chatId, text: msg})
+        });
+        return new Response("Digest sent!", { status: 200 });
+      }
       return new Response("Method not allowed", { status: 405 });
     }
 

@@ -14,31 +14,27 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - name: Check email for breaches (LeakCheck free API)
+      - name: Check email for data breaches
         run: |
           TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
           CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
           EMAIL="lamasubash107@gmail.com"
+          DATE=$(date -u +"%Y-%m-%d")
 
-          # Check via LeakCheck.io free public endpoint
-          RESULT=$(curl -s "https://leakcheck.io/api/public?check=${EMAIL}" 2>/dev/null || echo '{}')
-          FOUND=$(echo "$RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('found',0))" 2>/dev/null || echo "0")
-          SOURCES=$(echo "$RESULT" | python3 -c "
-import sys,json
-d=json.load(sys.stdin)
-sources=d.get('sources',[])
-if sources:
-    print(', '.join([s.get('name','Unknown') for s in sources[:5]]))
-else:
-    print('None')
-" 2>/dev/null || echo "Unknown")
+          RESULT=$(curl -s --max-time 10 \
+            -H "User-Agent: BreachWatchdog/1.0" \
+            "https://api.xposedornot.com/v1/check-email/${EMAIL}" 2>/dev/null || echo '{"Error":"failed"}')
 
-          if [ "$FOUND" -gt 0 ]; then
-            MSG=$(printf '🚨 BREACH ALERT!\n\nEmail: %s\nFound in: %s breach(es)\nSources: %s\n\nAction: Change passwords immediately!\nCheck: https://haveibeenpwned.com' "$EMAIL" "$FOUND" "$SOURCES")
+          COUNT=$(echo "$RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); b=d.get('breaches',[]); print(len(b) if isinstance(b,list) else len(b.keys()) if isinstance(b,dict) else 0)" 2>/dev/null || echo "0")
+          SOURCES=$(echo "$RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); b=d.get('breaches',[]); items=b if isinstance(b,list) else list(b.keys()); print(chr(10).join(items[:5]) if items else 'None')" 2>/dev/null || echo "Unknown")
+
+          if [ "${COUNT:-0}" -gt "0" ] 2>/dev/null; then
+            MSG=$(printf '🚨 BREACH ALERT!\n\nEmail: %s\nFound in: %s breach(es)\n\nSources:\n%s\n\nAction: Change passwords immediately!\nCheck: https://haveibeenpwned.com\nDate: %s' \
+              "$EMAIL" "$COUNT" "$SOURCES" "$DATE")
             curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
               -H "Content-Type: application/json" \
               -d "{\"chat_id\":\"${CHAT}\",\"text\":\"${MSG}\"}"
-            echo "Breach alert sent — found in $FOUND sources"
+            echo "Breach alert sent — found in $COUNT sources"
           else
-            echo "No breaches found for $EMAIL"
+            echo "No breaches found for $EMAIL on $DATE"
           fi
