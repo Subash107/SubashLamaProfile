@@ -3155,6 +3155,60 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
     if (countUp) countUp.setAttribute("data-target", yearsIT);
   }
 
+  function initBehaviorTracking() {
+    const TRACKER_URL = "https://lingering-surf-6d77.lamasubash107.workers.dev";
+    const startTime   = Date.now();
+    const sections    = {};
+    const pageSource  = new URLSearchParams(window.location.search).get("ref") || "direct";
+
+    /* Track which sections are viewed and for how long */
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        const id = e.target.id || e.target.className.split(" ")[0];
+        if (!id) return;
+        if (e.isIntersecting) {
+          sections[id] = sections[id] || { start: Date.now(), total: 0 };
+          sections[id].start = Date.now();
+        } else if (sections[id]?.start) {
+          sections[id].total = (sections[id].total || 0) + (Date.now() - sections[id].start);
+          sections[id].start = null;
+        }
+      });
+    }, { threshold: 0.3 });
+
+    document.querySelectorAll("section[id], div[id]").forEach(el => observer.observe(el));
+
+    /* Send behavior report when visitor leaves */
+    const sendReport = () => {
+      const totalTime = Math.round((Date.now() - startTime) / 1000);
+      if (totalTime < 5) return; /* ignore bots/accidental visits */
+
+      const topSections = Object.entries(sections)
+        .filter(([, v]) => v.total > 2000)
+        .sort(([, a], [, b]) => b.total - a.total)
+        .slice(0, 4)
+        .map(([k, v]) => `${k}(${Math.round(v.total/1000)}s)`)
+        .join(", ");
+
+      const payload = {
+        event_type: "behavior-track",
+        client_payload: {
+          total_time:   totalTime + "s",
+          top_sections: topSections || "none",
+          ref_source:   pageSource,
+          timestamp:    new Date().toISOString(),
+        }
+      };
+
+      navigator.sendBeacon
+        ? navigator.sendBeacon(TRACKER_URL + "/behavior", JSON.stringify(payload))
+        : fetch(TRACKER_URL + "/behavior", { method: "POST", body: JSON.stringify(payload), keepalive: true }).catch(() => {});
+    };
+
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") sendReport(); });
+    window.addEventListener("pagehide", sendReport);
+  }
+
   function initDownloadCounter() {
     const badge = document.getElementById("resumeDownloadCount");
     if (!badge) return;
@@ -3170,6 +3224,7 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
   document.addEventListener("DOMContentLoaded", () => {
     initResumeTracking();
     initDownloadCounter();
+    initBehaviorTracking();
     initDynamicDates();
     initAudioToggle();
     initScrollReveal();

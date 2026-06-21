@@ -79,10 +79,95 @@ export default {
     const origin = request.headers.get("Origin") || "";
     const url    = new URL(request.url);
 
+    /* ── Tracked redirect links (embed these in your PDF) ── */
+    /* Works in ALL PDF readers — fires when recruiter clicks any link    */
+    const REDIRECT_MAP = {
+      "/go/linkedin": "https://www.linkedin.com/in/subash-lama-b319a016b/",
+      "/go/github":   "https://github.com/Subash107",
+      "/go/email":    "https://subashlamaprofile.pages.dev/#contact",
+      "/go/phone":    "https://subashlamaprofile.pages.dev/#contact",
+      "/go/portfolio":"https://subashlamaprofile.pages.dev/",
+    };
+
+    if (REDIRECT_MAP[url.pathname]) {
+      const dest      = REDIRECT_MAP[url.pathname];
+      const linkName  = url.pathname.replace("/go/", "").toUpperCase();
+      const ip        = request.headers.get("CF-Connecting-IP") || "unknown";
+      const cf        = request.cf || {};
+      const city      = cf.city           || "";
+      const country   = cf.country        || "";
+      const org       = cf.asOrganization || "unknown";
+      const location  = [city, country].filter(Boolean).join(", ") || "unknown";
+      const leadScore = scoreLead(org);
+
+      await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: env.TELEGRAM_CHAT_ID,
+          text: `🔗 PDF LINK CLICKED — ${linkName}!\n\n${leadScore}\n📍 Location : ${location}\n🏢 Company  : ${org}\n🌐 IP       : ${ip}\n🕐 Time     : ${new Date().toISOString()}\n\n💡 They clicked your resume link — actively reading it!`,
+        }),
+      }).catch(() => {});
+
+      return Response.redirect(dest, 302);
+    }
+
+    /* ── Honeypot reference page ── */
+    /* Add "References: lingering-surf-6d77.lamasubash107.workers.dev/ref" to PDF */
+    /* High-intent signal — only serious recruiters click this              */
+    if (url.pathname === "/ref") {
+      const ip       = request.headers.get("CF-Connecting-IP") || "unknown";
+      const cf       = request.cf || {};
+      const city     = cf.city           || "";
+      const country  = cf.country        || "";
+      const org      = cf.asOrganization || "unknown";
+      const location = [city, country].filter(Boolean).join(", ") || "unknown";
+      const leadScore= scoreLead(org);
+
+      await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: env.TELEGRAM_CHAT_ID,
+          text: `🎯 HIGH INTENT SIGNAL!\n\nSomeone clicked your REFERENCE link in your resume!\n\n${leadScore}\n📍 Location : ${location}\n🏢 Company  : ${org}\n🌐 IP       : ${ip}\n🕐 Time     : ${new Date().toISOString()}\n\n🔥 This is a SERIOUS recruiter — they want references!`,
+        }),
+      }).catch(() => {});
+
+      return new Response(`<!DOCTYPE html><html><head><title>Subash Lama — References</title><meta charset="UTF-8"><style>body{font-family:sans-serif;max-width:600px;margin:80px auto;padding:20px;background:#07111c;color:#e0e0e0}h1{color:#00ff88}p{color:#aaa}.btn{display:inline-block;margin-top:20px;padding:12px 24px;background:#00ff88;color:#000;text-decoration:none;border-radius:6px;font-weight:bold}</style></head><body><h1>Subash Lama</h1><p>Thank you for your interest in Subash's profile.</p><p>Professional references are available upon request for serious opportunities.</p><p>Please reach out directly:</p><p>📧 lamasubash107@gmail.com<br>📱 +977 9840005771</p><a href="https://subashlamaprofile.pages.dev/#contact" class="btn">Contact Subash</a></body></html>`,
+        { status: 200, headers: { "Content-Type": "text/html" } }
+      );
+    }
+
+    /* ── Behavior tracking endpoint ── */
+    if (url.pathname === "/behavior" && request.method === "POST") {
+      try {
+        const body       = await request.json();
+        const payload    = body.client_payload || {};
+        const totalTime  = payload.total_time  || "?";
+        const sections   = payload.top_sections|| "none";
+        const ref        = payload.ref_source  || "direct";
+        const ip         = request.headers.get("CF-Connecting-IP") || "unknown";
+        const cf         = request.cf || {};
+        const org        = cf.asOrganization || "unknown";
+        const country    = cf.country        || "";
+        const city       = cf.city           || "";
+        const location   = [city, country].filter(Boolean).join(", ") || "unknown";
+
+        if (parseInt(totalTime) >= 15) {
+          await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: env.TELEGRAM_CHAT_ID,
+              text: `👁️ PORTFOLIO VISIT REPORT\n\n📍 Location   : ${location}\n🏢 Company    : ${org}\n⏱️ Time spent : ${totalTime}\n📖 Read most  : ${sections}\n📌 Source     : ${ref}\n🌐 IP         : ${ip}\n🕐 Time       : ${payload.timestamp || new Date().toISOString()}`,
+            }),
+          }).catch(() => {});
+        }
+        return new Response("OK", { status: 200, headers: corsHeaders(origin) });
+      } catch { return new Response("OK", { status: 200 }); }
+    }
+
     /* ── Canary Token endpoint ── */
-    /* Embed https://lingering-surf-6d77.lamasubash107.workers.dev/canary */
-    /* as an invisible 1x1 image link inside your resume PDF.             */
-    /* Fires when anyone opens the PDF — even if forwarded internally.    */
     if (url.pathname === "/canary") {
       const ip        = request.headers.get("CF-Connecting-IP") || "unknown";
       const cf        = request.cf || {};
