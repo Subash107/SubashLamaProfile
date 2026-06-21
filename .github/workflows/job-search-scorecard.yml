@@ -1,0 +1,124 @@
+name: Weekly Job Search Scorecard
+
+on:
+  schedule:
+    - cron: '30 3 * * 5'   # Every Friday 9:15 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scorecard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build job search scorecard
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          LOG="download-logs/resume-downloads.txt"
+          GH_TOKEN="${{ secrets.GITHUB_TOKEN }}"
+          SCORE=0
+          NOTES=""
+
+          # 1. Resume downloads this week (25 pts)
+          WEEK_DL=0
+          for i in $(seq 0 6); do
+            DAY=$(date -u -d "-${i} days" +"%Y-%m-%d")
+            C=$(grep -c "^${DAY}" "$LOG" 2>/dev/null || echo 0)
+            WEEK_DL=$((WEEK_DL + C))
+          done
+          if [ "$WEEK_DL" -ge 5 ]; then
+            SCORE=$((SCORE + 25)); NOTES="${NOTES}[+25] ${WEEK_DL} resume downloads this week\n"
+          elif [ "$WEEK_DL" -ge 2 ]; then
+            SCORE=$((SCORE + 15)); NOTES="${NOTES}[+15] ${WEEK_DL} resume downloads this week\n"
+          elif [ "$WEEK_DL" -ge 1 ]; then
+            SCORE=$((SCORE + 8));  NOTES="${NOTES}[+8]  ${WEEK_DL} resume download this week\n"
+          else
+            NOTES="${NOTES}[+0]  No resume downloads this week\n"
+          fi
+
+          # 2. GitHub commits this week (25 pts)
+          COMMITS=$(curl -s -H "Authorization: Bearer ${GH_TOKEN}" \
+            "https://api.github.com/users/Subash107/events?per_page=50" | \
+            python3 -c "
+import json,sys
+from datetime import datetime,timedelta,timezone
+events=json.load(sys.stdin)
+cutoff=datetime.now(timezone.utc)-timedelta(days=7)
+c=sum(1 for e in events if isinstance(e,dict) and e.get('type')=='PushEvent' and datetime.fromisoformat(e['created_at'].replace('Z','+00:00'))>cutoff)
+print(c)
+" 2>/dev/null || echo 0)
+          if [ "$COMMITS" -ge 7 ]; then
+            SCORE=$((SCORE + 25)); NOTES="${NOTES}[+25] Excellent: ${COMMITS} commits this week\n"
+          elif [ "$COMMITS" -ge 3 ]; then
+            SCORE=$((SCORE + 15)); NOTES="${NOTES}[+15] Good: ${COMMITS} commits this week\n"
+          elif [ "$COMMITS" -ge 1 ]; then
+            SCORE=$((SCORE + 8));  NOTES="${NOTES}[+8]  ${COMMITS} commit(s) this week\n"
+          else
+            NOTES="${NOTES}[+0]  No GitHub commits this week\n"
+          fi
+
+          # 3. HOT leads this week (25 pts)
+          HOT=0
+          for i in $(seq 0 6); do
+            DAY=$(date -u -d "-${i} days" +"%Y-%m-%d")
+            H=$(grep "^${DAY}" "$LOG" 2>/dev/null | grep -iE "microsoft|google|amazon|cisco|ibm|deloitte|accenture|crowdstrike|palo alto" | wc -l || echo 0)
+            HOT=$((HOT + H))
+          done
+          if [ "$HOT" -ge 3 ]; then
+            SCORE=$((SCORE + 25)); NOTES="${NOTES}[+25] ${HOT} HOT leads attracted this week!\n"
+          elif [ "$HOT" -ge 1 ]; then
+            SCORE=$((SCORE + 15)); NOTES="${NOTES}[+15] ${HOT} HOT lead(s) this week\n"
+          else
+            NOTES="${NOTES}[+0]  No HOT leads this week\n"
+          fi
+
+          # 4. Applications tracked (25 pts)
+          APP_FILE="download-logs/job-applications.json"
+          APPS_THIS_WEEK=0
+          if [ -f "$APP_FILE" ]; then
+            WEEK_AGO=$(date -u -d "-7 days" +"%Y-%m-%d")
+            APPS_THIS_WEEK=$(python3 -c "
+import json
+with open('${APP_FILE}') as f:
+    apps=json.load(f)
+count=sum(1 for a in apps if a.get('date','') >= '${WEEK_AGO}')
+print(count)
+" 2>/dev/null || echo 0)
+          fi
+          if [ "$APPS_THIS_WEEK" -ge 10 ]; then
+            SCORE=$((SCORE + 25)); NOTES="${NOTES}[+25] Power week: ${APPS_THIS_WEEK} applications sent!\n"
+          elif [ "$APPS_THIS_WEEK" -ge 5 ]; then
+            SCORE=$((SCORE + 15)); NOTES="${NOTES}[+15] Good: ${APPS_THIS_WEEK} applications sent\n"
+          elif [ "$APPS_THIS_WEEK" -ge 1 ]; then
+            SCORE=$((SCORE + 8));  NOTES="${NOTES}[+8]  ${APPS_THIS_WEEK} application(s) sent\n"
+          else
+            NOTES="${NOTES}[+0]  No applications tracked this week (use /apply)\n"
+          fi
+
+          if [ "$SCORE" -ge 80 ]; then GRADE="A — Outstanding week!"
+          elif [ "$SCORE" -ge 60 ]; then GRADE="B — Good effort"
+          elif [ "$SCORE" -ge 40 ]; then GRADE="C — Room to improve"
+          else GRADE="D — Push harder next week"; fi
+
+          WEEK_END=$(date -u +"%Y-%m-%d")
+
+          MSG="WEEKLY JOB SEARCH SCORECARD
+Week ending ${WEEK_END}
+
+Score : ${SCORE}/100 — ${GRADE}
+
+Breakdown:
+${NOTES}
+Tip: More applications + GitHub activity = more downloads = more interviews.
+Have a great weekend!"
+
+          printf "$MSG" | curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"

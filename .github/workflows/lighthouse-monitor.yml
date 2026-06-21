@@ -1,0 +1,68 @@
+name: Lighthouse Performance Monitor
+
+on:
+  schedule:
+    - cron: '0 4 * * 1'   # Every Monday 9:45 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check PageSpeed score
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          URL="https://subashlamaprofile.pages.dev"
+
+          RESULT=$(curl -s "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${URL}&strategy=mobile" 2>/dev/null)
+
+          PERF=$(echo "$RESULT" | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+cats=d.get('lighthouseResult',{}).get('categories',{})
+print(int(cats.get('performance',{}).get('score',0)*100))
+" 2>/dev/null || echo 0)
+
+          ACCESS=$(echo "$RESULT" | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+cats=d.get('lighthouseResult',{}).get('categories',{})
+print(int(cats.get('accessibility',{}).get('score',0)*100))
+" 2>/dev/null || echo 0)
+
+          SEO=$(echo "$RESULT" | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+cats=d.get('lighthouseResult',{}).get('categories',{})
+print(int(cats.get('seo',{}).get('score',0)*100))
+" 2>/dev/null || echo 0)
+
+          BEST=$(echo "$RESULT" | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+cats=d.get('lighthouseResult',{}).get('categories',{})
+print(int(cats.get('best-practices',{}).get('score',0)*100))
+" 2>/dev/null || echo 0)
+
+          ALERT=""
+          if [ "$PERF" -lt 70 ]; then ALERT="${ALERT}Performance is LOW (${PERF})\n"; fi
+          if [ "$SEO" -lt 80 ]; then ALERT="${ALERT}SEO needs improvement (${SEO})\n"; fi
+
+          MSG="LIGHTHOUSE REPORT — $(date -u +"%Y-%m-%d")
+
+Performance   : ${PERF}/100
+Accessibility : ${ACCESS}/100
+Best Practices: ${BEST}/100
+SEO           : ${SEO}/100
+
+${ALERT}Site: ${URL}"
+
+          curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"

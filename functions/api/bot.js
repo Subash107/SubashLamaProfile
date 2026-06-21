@@ -28,7 +28,7 @@ export async function onRequestPost(context) {
     switch (text) {
       case "/start":
       case "/help":
-        reply = "Resume Tracker Bot\n\n--- DOWNLOADS ---\n/stats      - Total downloads + top countries\n/latest     - Most recent download\n/log        - Last 5 downloads\n/week       - This week's count\n\n--- JOB APPLICATIONS ---\n/apply      - Add application (/apply Microsoft SOC Analyst)\n/apps       - List all applications\n/appstats   - Application analytics\n/hired      - Mark hired (/hired Microsoft)\n/reject     - Mark rejected (/reject Microsoft)\n/interview  - Mark interview (/interview Microsoft)\n\n--- RECRUITERS ---\n/recruiter  - Add recruiter (/recruiter John Smith Microsoft)\n/recruiters - List all recruiters\n\n--- PREP ---\n/prep       - Interview questions (/prep Microsoft)\n\n/help - Show this menu";
+        reply = "Resume Tracker Bot\n\n--- DOWNLOADS ---\n/stats      - Total downloads + top countries\n/latest     - Most recent download\n/log        - Last 5 downloads\n/week       - This week's count\n\n--- JOB APPLICATIONS ---\n/apply      - Add application (/apply Microsoft SOC Analyst)\n/apps       - List all applications\n/appstats   - Application analytics\n/hired      - Mark hired (/hired Microsoft)\n/reject     - Mark rejected (/reject Microsoft)\n/interview  - Mark interview (/interview Microsoft)\n\n--- RECRUITERS ---\n/recruiter  - Add recruiter (/recruiter John Smith Microsoft)\n/recruiters - List all recruiters\n\n--- CAREER TOOLS ---\n/prep       - Interview questions (/prep Microsoft)\n/email      - Cold email template (/email Microsoft)\n/salary     - Salary ranges (/salary SOC Analyst)\n/peakhours  - Best time to apply based on your data\n\n/help - Show this menu";
         break;
       case "/stats":      reply = await getStats(env);  break;
       case "/latest":     reply = await getLatest(env); break;
@@ -43,6 +43,9 @@ export async function onRequestPost(context) {
       case "/recruiter":  reply = await addRecruiter(env, fullText); break;
       case "/recruiters": reply = await listRecruiters(env); break;
       case "/prep":       reply = await interviewPrep(fullText); break;
+      case "/email":      reply = await coldEmail(fullText); break;
+      case "/salary":     reply = await salaryGuide(fullText); break;
+      case "/peakhours":  reply = await peakHours(env); break;
       default:            reply = "Unknown command. Send /help to see available commands.";
     }
 
@@ -256,6 +259,43 @@ async function interviewPrep(fullText) {
   };
   const key = company.toLowerCase();
   return PREP[key] || PREP["general"].replace("General Cybersecurity", company + " Cybersecurity");
+}
+
+async function coldEmail(fullText) {
+  const company = fullText.replace("/email", "").trim() || "the company";
+  return "Cold Email Template for " + company + "\n\n---\nSubject: Cybersecurity Analyst — Open to Opportunities at " + company + "\n\nHi [Recruiter Name],\n\nI'm Subash Lama, a Cybersecurity Analyst with 12+ years in IT, currently focused on SOC operations, IAM, and GRC. I built and operate a personal detection lab using Wazuh, Suricata, and Sysmon with 20+ custom MITRE ATT&CK detection rules.\n\nI'm reaching out because I admire " + company + "'s work in cybersecurity and believe my hands-on experience aligns well with your team's needs.\n\nPortfolio: https://subashlamaprofile.pages.dev\nResume: https://docsend.com/view/362qxyvxq9ggx6m9\n\nWould you be open to a 15-minute call to explore potential fit?\n\nBest regards,\nSubash Lama\nlamasubash107@gmail.com | +977 9840005771\n---\n\nTip: Personalize [Recruiter Name] and mention a specific project or role at " + company + ".";
+}
+
+async function salaryGuide(fullText) {
+  const role = fullText.replace("/salary", "").trim() || "SOC Analyst";
+  const SALARIES = {
+    "soc analyst": "SOC Analyst Salary Guide\n\nNepal (on-site):\n  Entry: NPR 40,000-60,000/month\n  Mid:   NPR 60,000-100,000/month\n  Senior: NPR 100,000-150,000/month\n\nRemote (USD):\n  Entry: $30,000-50,000/year\n  Mid:   $50,000-80,000/year\n  Senior: $80,000-120,000/year\n\nNegotiation Tips:\n1. Always ask for 20% above your target\n2. Mention your lab + certifications\n3. Remote roles pay 2-3x Nepal rates\n4. Ask for signing bonus if salary is fixed",
+    "grc analyst": "GRC Analyst Salary Guide\n\nNepal (on-site):\n  Entry: NPR 50,000-70,000/month\n  Mid:   NPR 70,000-120,000/month\n\nRemote (USD):\n  Entry: $40,000-60,000/year\n  Mid:   $60,000-90,000/year\n  Senior: $90,000-130,000/year\n\nNegotiation Tips:\n1. Highlight ISO 27001 and NIST knowledge\n2. Compliance experience is highly valued\n3. GRC roles often have better work-life balance",
+    "iam analyst": "IAM Analyst Salary Guide\n\nNepal (on-site):\n  Entry: NPR 45,000-65,000/month\n  Mid:   NPR 65,000-110,000/month\n\nRemote (USD):\n  Entry: $40,000-60,000/year\n  Mid:   $60,000-95,000/year\n  Senior: $95,000-140,000/year\n\nNegotiation Tips:\n1. Highlight Active Directory and PAM experience\n2. Cloud IAM (Azure AD, AWS IAM) pays premium\n3. MFA/SSO implementation skills are in demand",
+  };
+  const key = role.toLowerCase();
+  return SALARIES[key] || SALARIES["soc analyst"].replace("SOC Analyst", role);
+}
+
+async function peakHours(env) {
+  const lines = await fetchLog(env);
+  if (!lines.length) return "No download data yet to analyze peak hours.\n\nUse /apply to track applications and get more downloads.";
+  const hourMap = {};
+  const dayMap  = { 0:"Sun", 1:"Mon", 2:"Tue", 3:"Wed", 4:"Thu", 5:"Fri", 6:"Sat" };
+  const dayCounts = {};
+  lines.forEach(l => {
+    const d = parseLine(l);
+    if (!d.timestamp) return;
+    const dt = new Date(d.timestamp);
+    if (isNaN(dt)) return;
+    const h = dt.getUTCHours();
+    const day = dt.getUTCDay();
+    hourMap[h] = (hourMap[h] || 0) + 1;
+    dayCounts[day] = (dayCounts[day] || 0) + 1;
+  });
+  const topHours = Object.entries(hourMap).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([h,c])=>`  ${h}:00 UTC (${parseInt(h)+5}:45 NPT): ${c} downloads`).join("\n");
+  const topDays  = Object.entries(dayCounts).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([d,c])=>`  ${dayMap[d]}: ${c} downloads`).join("\n");
+  return "Peak Hours Analysis\n\nBest hours to post on LinkedIn (when recruiters download most):\n" + topHours + "\n\nBest days:\n" + topDays + "\n\nTip: Post on LinkedIn and apply for jobs during these peak hours for maximum visibility!";
 }
 
 async function sendMessage(token, chatId, text) {

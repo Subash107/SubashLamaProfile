@@ -1,0 +1,55 @@
+name: Weekly CTF Challenge
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'   # Every Monday 7:45 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ctf-challenge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Send weekly CTF challenge
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          WEEK=$(date -u +"%V")
+          DATE=$(date -u +"%Y-%m-%d")
+
+          CHALLENGES=(
+            "CHALLENGE: Log Analysis\nYou find this in your Wazuh logs:\n  'Failed password for root from 185.220.101.x port 54321'\n  (repeated 500 times in 60 seconds)\nQ: What attack is this? What rule would you write to detect and block it?\nHint: Think threshold-based detection + fail2ban"
+
+            "CHALLENGE: Phishing Email Analysis\nYou receive an email:\n  From: security@micros0ft.com\n  Subject: Urgent: Your account will be suspended\n  Link: http://login-microsoft-verify.tk/account\nQ: List 5 red flags in this email. What headers would you check?\nHint: SPF, DKIM, DMARC"
+
+            "CHALLENGE: Network Forensics\nSuricata alert: ET MALWARE Possible CobaltStrike Beacon\n  src: 192.168.1.50 -> dst: 45.77.x.x:443\n  (beaconing every 60 seconds)\nQ: What is CobaltStrike? How would you confirm this is C2 traffic?\nHint: JA3 fingerprint, beacon interval analysis"
+
+            "CHALLENGE: Privilege Escalation\nSysmon Event ID 4688 shows:\n  cmd.exe -> whoami /all\n  cmd.exe -> net localgroup administrators\n  cmd.exe -> reg add HKLM\\...\\Run\nQ: What MITRE ATT&CK technique is this? What detection rule would you write?\nHint: T1547.001"
+
+            "CHALLENGE: Malware Analysis\nYou find a suspicious file: update.exe\n  File size: 2.3MB\n  MD5: d41d8cd98f00b204e9800998ecf8427e\n  Connects to: randomdomain123.xyz:4444\nQ: What steps do you take to analyze this safely? What tools would you use?\nHint: VirusTotal, ANY.RUN, strings, PEStudio"
+
+            "CHALLENGE: IAM Security\nAn audit shows a service account with:\n  - Domain Admin privileges\n  - Password never expires\n  - Last login: 18 months ago\n  - No MFA\nQ: What are the risks? What would you do immediately?\nHint: Principle of least privilege, PAM solutions"
+
+            "CHALLENGE: Incident Response\nAt 2am you get an alert:\n  Ransomware note found on file server\n  50,000 files encrypted in last 30 minutes\n  Shadow copies deleted\nQ: What are your first 5 actions? Write your IR playbook.\nHint: Containment first, then eradication"
+
+            "CHALLENGE: Web Application Security\nA web app login page accepts:\n  Username: admin' OR '1'='1\n  Password: anything\n  Result: Login successful!\nQ: What vulnerability is this? How do you fix it in code?\nHint: Parameterized queries, prepared statements"
+          )
+
+          IDX=$(( (WEEK - 1) % ${#CHALLENGES[@]} ))
+          CHALLENGE="${CHALLENGES[$IDX]}"
+
+          MSG="WEEKLY CYBERSECURITY CHALLENGE
+Week ${WEEK} — ${DATE}
+
+${CHALLENGE}
+
+Post your answer in your notes or lab.
+Good luck, Subash!"
+
+          printf "$MSG" | curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"

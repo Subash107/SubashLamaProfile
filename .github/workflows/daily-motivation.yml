@@ -1,0 +1,65 @@
+name: Daily Motivation
+
+on:
+  schedule:
+    - cron: '45 1 * * 1-5'   # Weekdays 7:30 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  motivate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Send daily motivation
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          DAY=$(date -u +"%A")
+          DATE=$(date -u +"%Y-%m-%d")
+          DOW=$(date -u +"%u")
+
+          QUOTES=(
+            "The best time to plant a tree was 20 years ago. The second best time is now. Apply for that job today."
+            "Every expert was once a beginner. Your SOC lab experience is more valuable than you think."
+            "Security is not a product, but a process. You are building that process every day."
+            "Your GitHub green squares are your resume. Stay consistent."
+            "Recruiters are looking for someone exactly like you. Make it easy for them to find you."
+            "One rejection is not failure. Ten rejections is data. Keep applying."
+            "Skills pay the bills. Every hour studying Kubernetes Security is an investment."
+            "The cybersecurity skills gap is 3.5 million jobs. You are needed."
+            "Persistence beats talent when talent does not persist."
+            "Your next job offer could come from tomorrow's resume download. Be ready."
+            "Network security starts with networking with people. Reach out to one recruiter today."
+            "Document everything. Your lab notes today are your interview answers tomorrow."
+            "Wazuh, Suricata, Sysmon — you built that. Own it in every interview."
+            "Remote work is the future. Your skills travel with you anywhere in the world."
+            "A cybersecurity professional who never stops learning never stops growing."
+          )
+
+          IDX=$(( ($(date -u +%j) - 1) % ${#QUOTES[@]} ))
+          QUOTE="${QUOTES[$IDX]}"
+
+          GOALS=(
+            "Apply to 2 jobs today"
+            "Study 30 mins of Kubernetes Security"
+            "Push 1 commit to GitHub"
+            "Send 1 LinkedIn connection to a recruiter"
+            "Review and update your resume"
+          )
+          GOAL="${GOALS[$(( (DOW - 1) % ${#GOALS[@]} ))]}"
+
+          MSG="Good morning, Subash! — ${DAY} ${DATE}
+
+\"${QUOTE}\"
+
+Today's Goal: ${GOAL}
+
+Dashboard: https://subashlamaprofile.pages.dev/dashboard"
+
+          curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"
