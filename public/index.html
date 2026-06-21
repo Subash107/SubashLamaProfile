@@ -611,6 +611,48 @@
       </svg>
     </div>
 
+    <!-- Live Activity Dashboard -->
+    <section id="live-dashboard" class="live-dashboard-section" aria-label="Live activity dashboard">
+      <div class="ld-header">
+        <span class="ld-live-dot" aria-hidden="true"></span>
+        <h2 class="ld-title">Activity Dashboard</h2>
+        <span class="ld-sub">Updated daily &middot; real data via GitHub Actions</span>
+      </div>
+      <div class="ld-grid">
+        <div class="ld-card">
+          <span class="ld-icon">&#128200;</span>
+          <span class="ld-val" id="ldCommits">&#8212;</span>
+          <span class="ld-lbl">Commits This Week</span>
+        </div>
+        <div class="ld-card">
+          <span class="ld-icon">&#128196;</span>
+          <span class="ld-val" id="ldDownloads">&#8212;</span>
+          <span class="ld-lbl">Resume Downloads (7d)</span>
+        </div>
+        <div class="ld-card">
+          <span class="ld-icon">&#9876;</span>
+          <span class="ld-val" id="ldHTBRank">&#8212;</span>
+          <span class="ld-lbl">HackTheBox Rank</span>
+        </div>
+        <div class="ld-card">
+          <span class="ld-icon">&#128203;</span>
+          <span class="ld-val" id="ldApps">&#8212;</span>
+          <span class="ld-lbl">Applications (7d)</span>
+        </div>
+        <div class="ld-card">
+          <span class="ld-icon">&#127941;</span>
+          <span class="ld-val" id="ldCerts">7</span>
+          <span class="ld-lbl">Certifications Earned</span>
+        </div>
+        <div class="ld-card">
+          <span class="ld-icon">&#9200;</span>
+          <span class="ld-val" id="ldActivity">&#8212;</span>
+          <span class="ld-lbl">Last Active</span>
+        </div>
+      </div>
+      <p class="ld-footer">Data reflects real activity &mdash; GitHub commits, resume views &amp; job applications tracked automatically</p>
+    </section>
+
     <!-- Skills marquee ticker -->
     <div class="skill-marquee" aria-hidden="true">
       <div class="skill-marquee-inner">
@@ -801,6 +843,37 @@
                     />
                   </a>
                   <p class="gh-contrib-note">&#128279; <a href="https://github.com/Subash107" target="_blank" rel="noopener noreferrer">github.com/Subash107</a></p>
+                </div>
+
+                <!-- Platform Profiles — Proof of Work -->
+                <div class="platform-profiles" aria-label="Active learning and hacking platforms">
+                  <p class="pp-title">&#9876; Proof of Work &mdash; Active Platforms</p>
+                  <div class="pp-grid">
+                    <a href="https://app.hackthebox.com" target="_blank" rel="noopener noreferrer" class="pp-card" id="ppHTBCard">
+                      <div class="pp-logo pp-logo--htb">HTB</div>
+                      <div class="pp-info">
+                        <span class="pp-name">HackTheBox</span>
+                        <span class="pp-stat" id="ppHTBStat">Loading rank&hellip;</span>
+                      </div>
+                      <span class="pp-arrow">&#8599;</span>
+                    </a>
+                    <a href="https://tryhackme.com" target="_blank" rel="noopener noreferrer" class="pp-card">
+                      <div class="pp-logo pp-logo--thm">THM</div>
+                      <div class="pp-info">
+                        <span class="pp-name">TryHackMe</span>
+                        <span class="pp-stat">Active Learner</span>
+                      </div>
+                      <span class="pp-arrow">&#8599;</span>
+                    </a>
+                    <a href="https://github.com/Subash107" target="_blank" rel="noopener noreferrer" class="pp-card">
+                      <div class="pp-logo pp-logo--gh">GH</div>
+                      <div class="pp-info">
+                        <span class="pp-name">GitHub</span>
+                        <span class="pp-stat" id="ppGHStat">Loading commits&hellip;</span>
+                      </div>
+                      <span class="pp-arrow">&#8599;</span>
+                    </a>
+                  </div>
                 </div>
 
                 <div class="project-tag-filters" role="group" aria-label="Filter by technology">
@@ -1320,6 +1393,7 @@
                       <span class="mitre-key mitre-gap">&#9632; In Progress</span>
                       &nbsp;&middot;&nbsp;
                       <a href="https://attack.mitre.org/" target="_blank" rel="noopener noreferrer" class="mitre-link">MITRE ATT&amp;CK Framework &#8599;</a>
+                      <a href="assets/docs/mitre-layer.json" download="Subash-Lama-ATT&CK-Layer.json" class="mitre-nav-link" title="Download ATT&CK Navigator layer — open at mitre-attack.github.io/attack-navigator">&#11015; Navigator Layer</a>
                     </p>
                   </div>
 
