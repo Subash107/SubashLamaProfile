@@ -14,6 +14,9 @@ jobs:
     timeout-minutes: 5
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Check commit streak and celebrate milestones
         run: |
           TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
@@ -22,39 +25,16 @@ jobs:
           USERNAME="Subash107"
           MILESTONES="7 14 30 50 100 200 365"
 
-          # Fetch last 100 events to calculate streak
           EVENTS=$(curl -s -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "Accept: application/vnd.github+json" \
             "https://api.github.com/users/${USERNAME}/events?per_page=100")
 
-          # Calculate streak: count consecutive days with PushEvents going back from today
-          STREAK=$(echo "$EVENTS" | python3 -c "
-import json,sys
-from datetime import datetime,timedelta,timezone
-events=json.load(sys.stdin)
-push_dates=sorted(set(e['created_at'][:10] for e in events if isinstance(e,dict) and e.get('type')=='PushEvent'),reverse=True)
-streak=0
-check=datetime.now(timezone.utc).date()
-for date_str in push_dates:
-    d=datetime.strptime(date_str,'%Y-%m-%d').date()
-    if d==check or d==check-timedelta(days=1) and streak==0:
-        check=d
-        streak+=1
-        check=check-timedelta(days=1)
-    elif d<check:
-        break
-print(streak)
-" 2>/dev/null || echo 0)
-
+          STREAK=$(echo "$EVENTS" | python3 scripts/streak-calc.py 2>/dev/null || echo 0)
           echo "Current streak: ${STREAK} days"
 
-          # Check if streak hits a milestone
           HIT=""
           for M in $MILESTONES; do
-            if [ "$STREAK" -eq "$M" ]; then
-              HIT="$M"
-              break
-            fi
+            if [ "$STREAK" -eq "$M" ]; then HIT="$M"; break; fi
           done
 
           if [ -n "$HIT" ]; then
@@ -66,13 +46,13 @@ print(streak)
             else                          TROPHY="GOOD START"
             fi
 
-            MSG=$(printf 'STREAK MILESTONE REACHED!\n\n%s-DAY COMMIT STREAK!\nRating: %s\n\nYou have pushed code every day for %s consecutive days.\nThis is exactly what recruiters want to see!\n\nKeep building — your GitHub graph is your portfolio.\n\nhttps://github.com/%s' \
+            MSG=$(printf 'STREAK MILESTONE REACHED!\n\n%s-DAY COMMIT STREAK!\nRating: %s\n\nYou have pushed code every day for %s consecutive days.\nRecruiters can see this — it shows consistency!\n\nKeep building.\n\nhttps://github.com/%s' \
               "$HIT" "$TROPHY" "$HIT" "$USERNAME")
 
             RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
               -H "Content-Type: application/json" \
               -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
-            echo "Milestone alert sent for ${HIT}-day streak: $RESPONSE"
+            echo "Milestone alert sent: $RESPONSE"
           else
             echo "Streak at ${STREAK} days — no milestone today."
           fi

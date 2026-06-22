@@ -16,91 +16,17 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
 
       - name: Analyse download time patterns
         run: |
           TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
           CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
-          LOG="download-logs/resume-downloads.txt"
-
-          if [ ! -f "$LOG" ]; then
-            echo "No download log — skipping."
-            exit 0
-          fi
-
           WEEK_AGO=$(date -u -d "-7 days" +"%Y-%m-%d")
+          DATE=$(date -u +"%Y-%m-%d")
 
-          ANALYSIS=$(python3 -c "
-import re
-from collections import Counter
-
-week_ago = '$WEEK_AGO'
-hours_all  = []
-hours_week = []
-
-with open('$LOG') as f:
-    for line in f:
-        line = line.strip()
-        if not line or not line[0].isdigit(): continue
-        parts = line.split('|')
-        ts = parts[0].strip()
-        date = ts[:10]
-        m = re.search(r'T?(\d{2}):', ts[10:]) or re.search(r' (\d{2}):', ts)
-        if not m: continue
-        hour = int(m.group(1))
-        hours_all.append(hour)
-        if date >= week_ago:
-            hours_week.append(hour)
-
-def label(h):
-    suffix = 'AM' if h < 12 else 'PM'
-    h12 = h % 12 or 12
-    return f'{h12:02d}:00 {suffix} UTC'
-
-def nepal(h):
-    nh = (h + 5) % 24
-    nm = 45
-    suffix = 'AM' if nh < 12 else 'PM'
-    h12 = nh % 12 or 12
-    return f'{h12}:{nm:02d} {suffix} NPT'
-
-if not hours_all:
-    print('NO_DATA')
-else:
-    c_all  = Counter(hours_all)
-    c_week = Counter(hours_week)
-
-    top3_all  = c_all.most_common(3)
-    top3_week = c_week.most_common(3)
-
-    peak_utc   = top3_all[0][0]  if top3_all  else 0
-    peak_count = top3_all[0][1]  if top3_all  else 0
-
-    def bar(count, max_count):
-        filled = round(count / max_count * 10) if max_count else 0
-        return '█' * filled + '░' * (10 - filled)
-
-    max_c = max(c_all.values()) if c_all else 1
-
-    heatmap = ''
-    for h in range(24):
-        c = c_all.get(h, 0)
-        if c > 0:
-            heatmap += f'  {label(h):14s} ({nepal(h)}) {bar(c,max_c)} {c}\n'
-
-    top_str_week = ''
-    for h, c in top3_week:
-        top_str_week += f'  {label(h)} ({nepal(h)}) — {c} downloads\n'
-
-    print(f'total_all={len(hours_all)}')
-    print(f'total_week={len(hours_week)}')
-    print(f'peak_utc={label(peak_utc)}')
-    print(f'peak_npt={nepal(peak_utc)}')
-    print(f'top_week={top_str_week.strip()}')
-    print(f'heatmap={heatmap.strip()}')
-" 2>/dev/null)
+          ANALYSIS=$(LOG_FILE="download-logs/resume-downloads.txt" WEEK_AGO="$WEEK_AGO" \
+            python3 scripts/download-heatmap.py 2>/dev/null)
+          echo "$ANALYSIS"
 
           if echo "$ANALYSIS" | grep -q "NO_DATA"; then
             echo "No data to analyse — skipping."
@@ -113,8 +39,7 @@ else:
           PEAK_NPT=$(echo "$ANALYSIS"   | grep "^peak_npt="   | cut -d= -f2-)
           TOP_WEEK=$(echo "$ANALYSIS"   | grep "^top_week="   | cut -d= -f2-)
 
-          DATE=$(date -u +"%Y-%m-%d")
-          MSG=$(printf 'DOWNLOAD TIME HEATMAP — %s\n\nPeak hour (all time): %s\n  (%s)\n\nBest times this week:\n%s\n\nThis week: %s downloads\nAll time : %s downloads\n\nTip: Apply for jobs and post on LinkedIn during your peak hours — recruiters are most active then!' \
+          MSG=$(printf 'DOWNLOAD TIME HEATMAP — %s\n\nPeak hour (all time): %s\n  (%s)\n\nBest times this week:\n%s\n\nThis week: %s downloads\nAll time : %s downloads\n\nTip: Apply during peak hours — recruiters are most active then!' \
             "$DATE" "$PEAK_UTC" "$PEAK_NPT" "$TOP_WEEK" "$TOTAL_WEEK" "$TOTAL_ALL")
 
           RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
