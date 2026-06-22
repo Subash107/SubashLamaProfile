@@ -1,51 +1,58 @@
 [
   {
-    "name": "CompTIA Security+",
-    "code": "SY0-701",
-    "issued": "2023-01-01",
-    "expires": "2026-01-01",
-    "renewal_url": "https://www.comptia.org/continuing-education"
+    "name": "Cisco Endpoint Security",
+    "issuer": "Cisco",
+    "issued": "2026-06-01",
+    "expires": "2029-06-01",
+    "renewal_url": "https://www.netacad.com",
+    "notes": "Cisco NetAcad — 3-year validity"
   },
   {
-    "name": "CompTIA CySA+",
-    "code": "CS0-003",
-    "issued": "2023-06-01",
-    "expires": "2026-06-01",
-    "renewal_url": "https://www.comptia.org/continuing-education"
+    "name": "Cisco Ethical Hacker",
+    "issuer": "Cisco",
+    "issued": "2026-04-01",
+    "expires": "2029-04-01",
+    "renewal_url": "https://www.netacad.com",
+    "notes": "Cisco NetAcad — 3-year validity"
   },
   {
-    "name": "CompTIA PenTest+",
-    "code": "PT0-002",
-    "issued": "2023-09-01",
-    "expires": "2026-09-01",
-    "renewal_url": "https://www.comptia.org/continuing-education"
+    "name": "Cisco Introduction to Cybersecurity",
+    "issuer": "Cisco",
+    "issued": "2026-03-01",
+    "expires": "2029-03-01",
+    "renewal_url": "https://www.netacad.com",
+    "notes": "Cisco NetAcad — 3-year validity"
   },
   {
-    "name": "eJPT",
-    "code": "eJPT",
-    "issued": "2023-03-01",
-    "expires": "2026-03-01",
-    "renewal_url": "https://ine.com/certifications/ejpt-certification"
+    "name": "IBM Cybersecurity Fundamentals",
+    "issuer": "IBM",
+    "issued": "2026-03-01",
+    "expires": "2099-12-31",
+    "renewal_url": "https://www.credly.com/org/ibm",
+    "notes": "IBM badge — no expiry"
   },
   {
-    "name": "Google Cybersecurity Certificate",
-    "code": "Google-Cyber",
-    "issued": "2023-12-01",
-    "expires": "2027-12-01",
-    "renewal_url": "https://grow.google/certificates/cybersecurity/"
+    "name": "IBM Python for Data Science",
+    "issuer": "IBM",
+    "issued": "2026-03-01",
+    "expires": "2099-12-31",
+    "renewal_url": "https://www.credly.com/org/ibm",
+    "notes": "IBM badge — no expiry"
   },
   {
-    "name": "ISC2 CC",
-    "code": "CC",
-    "issued": "2024-01-01",
-    "expires": "2027-01-01",
-    "renewal_url": "https://www.isc2.org/Certifications/CC"
+    "name": "IBM Data Analysis with Python",
+    "issuer": "IBM SkillsBuild",
+    "issued": "2026-03-01",
+    "expires": "2099-12-31",
+    "renewal_url": "https://www.credly.com/org/ibm",
+    "notes": "IBM SkillsBuild badge — no expiry"
   },
   {
-    "name": "Wazuh Certified Engineer",
-    "code": "WCE",
-    "issued": "2024-06-01",
-    "expires": "2027-06-01",
-    "renewal_url": "https://wazuh.com/training/"
+    "name": "Google Ads Video Certification",
+    "issuer": "Google Skillshop",
+    "issued": "2026-05-01",
+    "expires": "2027-05-01",
+    "renewal_url": "https://skillshop.credential.net/182626545",
+    "notes": "Annual renewal required — expires May 2027"
   }
 ]
