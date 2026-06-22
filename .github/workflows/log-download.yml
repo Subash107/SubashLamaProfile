@@ -39,8 +39,8 @@ jobs:
 
       - name: Commit and push log
         run: |
-          git config user.email "portfolio-bot@users.noreply.github.com"
-          git config user.name "Resume Download Logger"
+          git config user.email "lamasubash107@gmail.com"
+          git config user.name "Subash Lama"
           git add download-logs/resume-downloads.txt
           git diff --staged --quiet && echo "No changes" && exit 0
           git commit -m "log: resume download [${{ github.event.client_payload.location }}] ${{ github.event.client_payload.timestamp }}"

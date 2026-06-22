@@ -49,8 +49,8 @@ jobs:
 
       - name: Commit connection log
         run: |
-          git config user.email "action@github.com"
-          git config user.name "Network Tracker"
+          git config user.email "lamasubash107@gmail.com"
+          git config user.name "Subash Lama"
           git add download-logs/connections.json
           git diff --staged --quiet && echo "No changes" && exit 0
           git commit -m "log: LinkedIn connection — ${{ inputs.name }} at ${{ inputs.company }}"

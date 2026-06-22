@@ -35,8 +35,8 @@ jobs:
             PREV=$(cat "$CACHE_FILE")
           else
             echo "$REPOS" > "$CACHE_FILE"
-            git config user.email "action@github.com"
-            git config user.name "GitHub Action"
+            git config user.email "lamasubash107@gmail.com"
+            git config user.name "Subash Lama"
             git add "$CACHE_FILE"
             git commit -m "chore: init stars cache" || true
             git push || true
@@ -58,8 +58,8 @@ jobs:
 
           # Update cache
           echo "$REPOS" > "$CACHE_FILE"
-          git config user.email "action@github.com"
-          git config user.name "GitHub Action"
+          git config user.email "lamasubash107@gmail.com"
+          git config user.name "Subash Lama"
           git add "$CACHE_FILE"
           git commit -m "chore: update stars cache" || true
           git push || true

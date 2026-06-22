@@ -73,8 +73,8 @@ jobs:
 
       - name: Commit CTF log
         run: |
-          git config user.email "action@github.com"
-          git config user.name "CTF Tracker"
+          git config user.email "lamasubash107@gmail.com"
+          git config user.name "Subash Lama"
           git add download-logs/ctf-log.json
           git diff --staged --quiet && echo "No changes" && exit 0
           git commit -m "log: CTF flag — ${{ inputs.challenge }} on ${{ inputs.ctf_name }} (${{ inputs.points }}pts)"

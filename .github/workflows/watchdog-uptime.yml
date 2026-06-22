@@ -46,7 +46,7 @@ jobs:
             echo "down" > "$STATE_FILE"
           fi
 
-          git config user.email "action@github.com"
-          git config user.name "GitHub Action"
+          git config user.email "lamasubash107@gmail.com"
+          git config user.name "Subash Lama"
           git add "$STATE_FILE" || true
           git diff --cached --quiet || git commit -m "chore: uptime state update" && git push || true

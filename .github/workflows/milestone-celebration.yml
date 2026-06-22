@@ -46,8 +46,8 @@ jobs:
                 -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"
 
               echo "$M" > "$CACHE"
-              git config user.email "action@github.com"
-              git config user.name "GitHub Action"
+              git config user.email "lamasubash107@gmail.com"
+              git config user.name "Subash Lama"
               git add "$CACHE"
               git commit -m "chore: update milestone cache to ${M}" || true
               git push || true

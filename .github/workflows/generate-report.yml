@@ -42,8 +42,8 @@ jobs:
 
       - name: Commit CSV reports
         run: |
-          git config user.email "action@github.com"
-          git config user.name "Report Generator"
+          git config user.email "lamasubash107@gmail.com"
+          git config user.name "Subash Lama"
           git add reports/output/
           git diff --staged --quiet && echo "No changes to commit" && exit 0
           git commit -m "chore: daily CSV report $(date -u +%Y-%m-%d)"
