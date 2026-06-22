@@ -42,14 +42,10 @@ jobs:
           IDX=$(( (WEEK - 1) % ${#CHALLENGES[@]} ))
           CHALLENGE="${CHALLENGES[$IDX]}"
 
-          MSG="WEEKLY CYBERSECURITY CHALLENGE
-Week ${WEEK} — ${DATE}
+          MSG=$(printf 'WEEKLY CYBERSECURITY CHALLENGE\nWeek %s — %s\n\n%s\n\nPost your answer in your notes or lab.\nGood luck, Subash!' \
+            "$WEEK" "$DATE" "$CHALLENGE")
 
-${CHALLENGE}
-
-Post your answer in your notes or lab.
-Good luck, Subash!"
-
-          printf "$MSG" | curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
             -H "Content-Type: application/json" \
-            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+          echo "Telegram response: $RESPONSE"

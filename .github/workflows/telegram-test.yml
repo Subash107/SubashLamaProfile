@@ -48,10 +48,7 @@ jobs:
           CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
           DATE=$(date -u +"%Y-%m-%d %H:%M UTC")
 
-          MSG="Telegram test — ${DATE}
-
-Your GitHub Actions connection is working correctly.
-Daily reports will arrive as scheduled."
+          MSG=$(printf 'Telegram test — %s\n\nYour GitHub Actions connection is working correctly.\nDaily reports will arrive as scheduled.' "$DATE")
 
           RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
             -H "Content-Type: application/json" \

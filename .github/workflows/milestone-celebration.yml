@@ -38,17 +38,8 @@ jobs:
               # Top company
               TOP_ORG=$(awk -F'|' '{print $4}' "$LOG" | tr -d ' ' | grep -v "^$" | sort | uniq -c | sort -rn | head -1 | awk '{print $2}')
 
-              MSG="MILESTONE REACHED: ${M} DOWNLOADS!
-
-Your resume has been downloaded ${TOTAL} times!
-
-Stats:
-  Top country : ${TOP_COUNTRY}
-  Top company : ${TOP_ORG}
-  Total       : ${TOTAL} downloads
-
-This is a real achievement. Recruiters around the world are reading your resume.
-Keep applying — your next job offer is coming!"
+              MSG=$(printf 'MILESTONE REACHED: %s DOWNLOADS!\n\nYour resume has been downloaded %s times!\n\nStats:\n  Top country : %s\n  Top company : %s\n  Total       : %s downloads\n\nThis is a real achievement. Recruiters around the world are reading your resume.\nKeep applying — your next job offer is coming!' \
+                "$M" "$TOTAL" "$TOP_COUNTRY" "$TOP_ORG" "$TOTAL")
 
               curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
                 -H "Content-Type: application/json" \

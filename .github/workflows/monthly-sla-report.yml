@@ -64,24 +64,8 @@ jobs:
             TOP_COUNTRY="N/A"
           fi
 
-          MSG="MONTHLY SLA REPORT — ${LAST_MONTH_NAME}
-
-PORTFOLIO STATUS
-Site status  : ${UPTIME_STATUS}
-SSL cert     : ${SSL_DAYS} days remaining
-
-RESUME DOWNLOADS
-Last month   : ${MONTH_DOWNLOADS} downloads
-HOT leads    : ${HOT}
-Top country  : ${TOP_COUNTRY}
-All time     : ${TOTAL} total
-
-INFRASTRUCTURE
-Uptime checks: Every 5 minutes (automated)
-CVE checks   : Daily
-Breach checks: Daily
-
-Dashboard: https://subashlamaprofile.pages.dev/dashboard"
+          MSG=$(printf 'MONTHLY SLA REPORT — %s\n\nPORTFOLIO STATUS\nSite status  : %s\nSSL cert     : %s days remaining\n\nRESUME DOWNLOADS\nLast month   : %s downloads\nHOT leads    : %s\nTop country  : %s\nAll time     : %s total\n\nINFRASTRUCTURE\nUptime checks: Every 5 minutes (automated)\nCVE checks   : Daily\nBreaches     : Daily\n\nDashboard: https://subashlamaprofile.pages.dev/dashboard' \
+            "$LAST_MONTH_NAME" "$UPTIME_STATUS" "$SSL_DAYS" "$MONTH_DOWNLOADS" "$HOT" "$TOP_COUNTRY" "$TOTAL")
 
           curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
             -H "Content-Type: application/json" \

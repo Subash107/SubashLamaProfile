@@ -21,17 +21,8 @@ jobs:
           DAY=$(date -u +"%A")
           DATE=$(date -u +"%Y-%m-%d")
 
-          MSG="STUDY REMINDER — ${DAY} ${DATE}
-
-Currently studying: Kubernetes Security
-
-Today's goal:
-  - 30 mins of Kubernetes Security study
-  - Practice one lab or concept
-  - Update your notes
-
-Remember: Every skill you add makes you more hireable.
-Keep going!"
+          MSG=$(printf "STUDY REMINDER — %s %s\n\nCurrently studying: Kubernetes Security\n\nToday's goal:\n  - 30 mins of Kubernetes Security study\n  - Practice one lab or concept\n  - Update your notes\n\nRemember: Every skill you add makes you more hireable.\nKeep going!" \
+            "$DAY" "$DATE")
 
           if [ -z "$TOKEN" ] || [ -z "$CHAT" ]; then
             echo "ERROR: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID secret is missing."

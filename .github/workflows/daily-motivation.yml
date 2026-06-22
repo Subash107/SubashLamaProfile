@@ -52,13 +52,8 @@ jobs:
           )
           GOAL="${GOALS[$(( (DOW - 1) % ${#GOALS[@]} ))]}"
 
-          MSG="Good morning, Subash! — ${DAY} ${DATE}
-
-\"${QUOTE}\"
-
-Today's Goal: ${GOAL}
-
-Dashboard: https://subashlamaprofile.pages.dev/dashboard"
+          MSG=$(printf "Good morning, Subash! — %s %s\n\n\"%s\"\n\nToday's Goal: %s\n\nDashboard: https://subashlamaprofile.pages.dev/dashboard" \
+            "$DAY" "$DATE" "$QUOTE" "$GOAL")
 
           if [ -z "$TOKEN" ] || [ -z "$CHAT" ]; then
             echo "ERROR: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID secret is missing in GitHub repo settings."

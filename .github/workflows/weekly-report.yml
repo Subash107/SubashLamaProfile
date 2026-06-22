@@ -99,22 +99,20 @@ jobs:
           WEEK_START=$(date -u -d "-6 days" +"%Y-%m-%d")
           WEEK_END=$(date -u +"%Y-%m-%d")
 
-          MSG="📊 WEEKLY REPORT CARD
-${WEEK_START} to ${WEEK_END}
+          MSG=$(printf 'WEEKLY REPORT CARD\n%s to %s\n\nDownloads this week : %s (%s)\nDownloads last week : %s\nAll time total      : %s\nHOT leads this week : %s\nBest day            : %s (%s downloads)\n\nTop Countries:\n%s\nTop Companies:\n%s\n\nKeep applying! Every download is a potential opportunity.' \
+            "$WEEK_START" "$WEEK_END" "$THIS_WEEK" "$TREND" "$LAST_WEEK" "$TOTAL" \
+            "$HOT_LEADS" "$BEST_DAY" "$BEST_COUNT" "$TOP_COUNTRIES" "$TOP_COMPANIES")
 
-Downloads this week : ${THIS_WEEK} (${TREND})
-Downloads last week : ${LAST_WEEK}
-All time total      : ${TOTAL}
-HOT leads this week : ${HOT_LEADS}
-Best day            : ${BEST_DAY} (${BEST_COUNT} downloads)
+          if [ -z "$TOKEN" ] || [ -z "$CHAT" ]; then
+            echo "ERROR: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID secret is missing."
+            exit 1
+          fi
 
-Top Countries:
-${TOP_COUNTRIES}
-Top Companies:
-${TOP_COMPANIES}
-
-Keep applying! Every download is a potential opportunity."
-
-          curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
             -H "Content-Type: application/json" \
-            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+          echo "Telegram response: $RESPONSE"
+          echo "$RESPONSE" | python3 -c "import json,sys; r=json.load(sys.stdin); exit(0 if r.get('ok') else 1)" || {
+            echo "ERROR: Telegram API rejected the message."
+            exit 1
+          }
