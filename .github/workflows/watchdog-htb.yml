@@ -31,16 +31,8 @@ jobs:
             -H "User-Agent: HTB-Tracker/1.0" \
             "https://www.hackthebox.com/api/v4/search/fetch?query=${HTB_USER}&tags=users&page=1" 2>/dev/null || echo '{}')
 
-          USER_DATA=$(echo "$PROFILE" | python3 -c "
-import sys, json
-d = json.load(sys.stdin)
-users = d.get('users', [])
-if users:
-    u = users[0]
-    print(f\"{u.get('name','N/A')}|{u.get('rank','N/A')}|{u.get('points','N/A')}|{u.get('rank_text','N/A')}\")
-else:
-    print('NOT_FOUND|N/A|N/A|N/A')
-" 2>/dev/null || echo "ERROR|N/A|N/A|N/A")
+          USER_DATA=$(echo "$PROFILE" | python3 -c "import sys,json; d=json.load(sys.stdin); u=d.get('users',[None])[0]; print(f\"{u.get('name','N/A')}|{u.get('rank','N/A')}|{u.get('points','N/A')}|{u.get('rank_text','N/A')}\" if u else 'NOT_FOUND|N/A|N/A|N/A')" \
+            2>/dev/null || echo "ERROR|N/A|N/A|N/A")
 
           NAME=$(echo "$USER_DATA" | cut -d'|' -f1)
           RANK=$(echo "$USER_DATA" | cut -d'|' -f2)

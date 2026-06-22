@@ -3085,7 +3085,6 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
     const TRACKER_URL = "https://lingering-surf-6d77.lamasubash107.workers.dev";
 
     btn.addEventListener("click", () => {
-      if (TRACKER_URL === "YOUR_CLOUDFLARE_WORKER_URL") return;
 
       const ua = navigator.userAgent;
       const getOS = () => {

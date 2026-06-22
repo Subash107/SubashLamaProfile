@@ -39,16 +39,8 @@ jobs:
             RESULT=$(echo "$RESULT_RAW" | cut -d'|' -f2-)
 
             if [ "${COUNT:-0}" -gt 0 ] 2>/dev/null; then
-              CVES=$(echo "$RESULT" | python3 -c "
-import sys,json
-d=json.load(sys.stdin)
-for v in d.get('vulnerabilities',[])[:2]:
-  cve=v['cve']
-  cid=cve.get('id','N/A')
-  desc=cve.get('descriptions',[{}])[0].get('value','No description')[:100]
-  score=cve.get('metrics',{}).get('cvssMetricV31',[{}])[0].get('cvssData',{}).get('baseScore','N/A') if cve.get('metrics',{}).get('cvssMetricV31') else 'N/A'
-  print(f'  {cid} CVSS:{score} - {desc}')
-" 2>/dev/null || echo "  See NVD for details")
+              CVES=$(echo "$RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); [print(f'  {v[\"cve\"].get(\"id\",\"N/A\")} CVSS:{(v[\"cve\"].get(\"metrics\",{}).get(\"cvssMetricV31\",[{}])[0].get(\"cvssData\",{}).get(\"baseScore\",\"N/A\") if v[\"cve\"].get(\"metrics\",{}).get(\"cvssMetricV31\") else \"N/A\")} - {v[\"cve\"].get(\"descriptions\",[{}])[0].get(\"value\",\"No description\")[:100]}') for v in d.get('vulnerabilities',[])[:2]]" \
+                2>/dev/null || echo "  See NVD for details")
               FOUND="${FOUND}🔴 ${TOOL^^}: ${COUNT} CVE(s)\n${CVES}\n\n"
             fi
           done

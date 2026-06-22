@@ -25,15 +25,8 @@ jobs:
           SINCE=$(date -u -d '-3 days' +%Y-%m-%dT%H:%M:%SZ)
           EVENTS=$(curl -s -H "Authorization: Bearer ${GH_TOKEN}" \
             "https://api.github.com/users/${USERNAME}/events?per_page=30" | \
-            python3 -c "
-import json, sys
-from datetime import datetime, timedelta, timezone
-events = json.load(sys.stdin)
-cutoff = datetime.now(timezone.utc) - timedelta(days=3)
-recent = [e for e in events if isinstance(e, dict) and e.get('type') == 'PushEvent'
-          and datetime.fromisoformat(e['created_at'].replace('Z','+00:00')) > cutoff]
-print(len(recent))
-" 2>/dev/null || echo 0)
+            python3 -c "import json,sys; from datetime import datetime,timedelta,timezone; events=json.load(sys.stdin); cutoff=datetime.now(timezone.utc)-timedelta(days=3); print(sum(1 for e in events if isinstance(e,dict) and e.get('type')=='PushEvent' and datetime.fromisoformat(e['created_at'].replace('Z','+00:00'))>cutoff))" \
+            2>/dev/null || echo 0)
 
           if [ "$EVENTS" -eq 0 ]; then
             curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \

@@ -25,24 +25,8 @@ jobs:
           KEV=$(curl -s --max-time 15 "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json" 2>/dev/null || echo '{}')
 
           # Get new entries added yesterday
-          NEW_ENTRIES=$(echo "$KEV" | python3 -c "
-import sys, json
-try:
-    d = json.load(sys.stdin)
-    vulns = d.get('vulnerabilities', [])
-    recent = [v for v in vulns if v.get('dateAdded','') >= '${YESTERDAY}'][:5]
-    if recent:
-        for v in recent:
-            cve = v.get('cveID','N/A')
-            product = v.get('product','N/A')
-            vendor = v.get('vendorProject','N/A')
-            desc = v.get('shortDescription','')[:80]
-            print(f'  {cve} - {vendor} {product}: {desc}')
-    else:
-        print('  No new entries today')
-except Exception as e:
-    print(f'  Error: {e}')
-" 2>/dev/null || echo "  Could not fetch KEV data")
+          NEW_ENTRIES=$(echo "$KEV" | python3 -c "import sys,json; d=json.load(sys.stdin); y=sys.argv[1]; recent=[v for v in d.get('vulnerabilities',[]) if v.get('dateAdded','')>=y][:5]; [print(f'  {v.get(\"cveID\",\"N/A\")} - {v.get(\"vendorProject\",\"N/A\")} {v.get(\"product\",\"N/A\")}: {v.get(\"shortDescription\",\"\")[:80]}') for v in recent] if recent else print('  No new entries today')" "$YESTERDAY" \
+            2>/dev/null || echo "  Could not fetch KEV data")
 
           TOTAL=$(echo "$KEV" | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d.get('vulnerabilities',[])))" 2>/dev/null || echo "N/A")
 

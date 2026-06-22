@@ -28,14 +28,7 @@ jobs:
           # Fetch all public repos
           REPOS=$(curl -s -H "Authorization: Bearer ${GH_TOKEN}" \
             "https://api.github.com/users/${USERNAME}/repos?per_page=50&sort=updated" | \
-            python3 -c "
-import json,sys
-repos = json.load(sys.stdin)
-result = {}
-for r in repos:
-    result[r['name']] = {'stars': r['stargazers_count'], 'forks': r['forks_count']}
-print(json.dumps(result))
-")
+            python3 -c "import json,sys; repos=json.load(sys.stdin); print(json.dumps({r['name']:{'stars':r['stargazers_count'],'forks':r['forks_count']} for r in repos if isinstance(r,dict)}))")
 
           # Load previous cache
           if [ -f "$CACHE_FILE" ]; then
@@ -52,21 +45,7 @@ print(json.dumps(result))
           fi
 
           # Compare and find changes
-          CHANGES=$(python3 -c "
-import json
-prev = json.loads('''${PREV}''')
-curr = json.loads('''${REPOS}''')
-msgs = []
-for repo, data in curr.items():
-    p = prev.get(repo, {'stars': 0, 'forks': 0})
-    if data['stars'] > p['stars']:
-        diff = data['stars'] - p['stars']
-        msgs.append(f'+{diff} star(s) on {repo} (total: {data[\"stars\"]})')
-    if data['forks'] > p['forks']:
-        diff = data['forks'] - p['forks']
-        msgs.append(f'+{diff} fork(s) on {repo} (total: {data[\"forks\"]})')
-print('\n'.join(msgs))
-")
+          CHANGES=$(PREV_JSON="$PREV" CURR_JSON="$REPOS" python3 scripts/stars-compare.py)
 
           if [ -n "$CHANGES" ]; then
             MSG="GITHUB ACTIVITY ALERT!\n\n${CHANGES}\n\nProfile: https://github.com/${USERNAME}"
