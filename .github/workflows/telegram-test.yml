@@ -1,0 +1,65 @@
+name: Telegram Connection Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Verify secrets are set
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+
+          if [ -z "$TOKEN" ]; then
+            echo "FAIL: TELEGRAM_BOT_TOKEN secret is not set in this repo."
+            exit 1
+          else
+            echo "OK: TELEGRAM_BOT_TOKEN is set (length: ${#TOKEN})"
+          fi
+
+          if [ -z "$CHAT" ]; then
+            echo "FAIL: TELEGRAM_CHAT_ID secret is not set in this repo."
+            exit 1
+          else
+            echo "OK: TELEGRAM_CHAT_ID is set (value: ${CHAT})"
+          fi
+
+      - name: Test bot token via getMe
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          echo "Calling getMe..."
+          RESPONSE=$(curl -s "https://api.telegram.org/bot${TOKEN}/getMe")
+          echo "Response: $RESPONSE"
+          echo "$RESPONSE" | python3 -c "import json,sys; r=json.load(sys.stdin); print('Bot username:', r.get('result',{}).get('username','N/A')); exit(0 if r.get('ok') else 1)" || {
+            echo "FAIL: Bot token is invalid or revoked. Regenerate it in BotFather."
+            exit 1
+          }
+
+      - name: Send test message to your chat
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          DATE=$(date -u +"%Y-%m-%d %H:%M UTC")
+
+          MSG="Telegram test — ${DATE}
+
+Your GitHub Actions connection is working correctly.
+Daily reports will arrive as scheduled."
+
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+          echo "sendMessage response: $RESPONSE"
+          echo "$RESPONSE" | python3 -c "import json,sys; r=json.load(sys.stdin); exit(0 if r.get('ok') else 1)" || {
+            echo "FAIL: Message not delivered. Check TELEGRAM_CHAT_ID is correct."
+            echo "Common fix: open your bot in Telegram, send /start, then re-check the chat ID."
+            exit 1
+          }
+          echo "SUCCESS: Test message delivered to your Telegram."
