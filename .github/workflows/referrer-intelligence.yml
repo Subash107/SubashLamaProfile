@@ -1,0 +1,97 @@
+name: Weekly Referrer Intelligence
+
+on:
+  schedule:
+    - cron: '0 4 * * 5'   # Every Friday 9:45 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  referrer-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Analyse referrer sources and send report
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          LOG="download-logs/resume-downloads.txt"
+
+          if [ ! -f "$LOG" ]; then
+            echo "No download log found — skipping."
+            exit 0
+          fi
+
+          WEEK_AGO=$(date -u -d "-7 days" +"%Y-%m-%d")
+          DATE=$(date -u +"%Y-%m-%d")
+
+          ANALYSIS=$(python3 -c "
+import sys
+from collections import Counter
+from datetime import datetime
+
+week_ago='$WEEK_AGO'
+refs=[]
+total=0
+
+with open('$LOG') as f:
+    for line in f:
+        line=line.strip()
+        if not line or not line[0].isdigit(): continue
+        parts=[p.strip() for p in line.split('|')]
+        date=parts[0][:10] if parts else ''
+        ref=parts[7].strip() if len(parts)>7 else 'direct'
+        if date>=week_ago:
+            total+=1
+            if not ref or ref in ('','none','None','-'):
+                ref='direct'
+            elif 'linkedin' in ref.lower():
+                ref='LinkedIn'
+            elif 'github' in ref.lower():
+                ref='GitHub'
+            elif 'google' in ref.lower():
+                ref='Google'
+            elif 'twitter' in ref.lower() or 'x.com' in ref.lower():
+                ref='Twitter/X'
+            elif 'indeed' in ref.lower():
+                ref='Indeed'
+            elif 'glassdoor' in ref.lower():
+                ref='Glassdoor'
+            else:
+                ref='Other'
+            refs.append(ref)
+
+if not refs:
+    print('No downloads this week')
+    sys.exit()
+
+counts=Counter(refs)
+print(f'total={total}')
+for src,cnt in counts.most_common():
+    pct=round(cnt/total*100)
+    print(f'{src}: {cnt} ({pct}%)')
+" 2>/dev/null || echo "total=0")
+
+          TOTAL=$(echo "$ANALYSIS" | grep "^total=" | cut -d= -f2)
+          BREAKDOWN=$(echo "$ANALYSIS" | grep -v "^total=")
+
+          if [ "${TOTAL:-0}" -eq 0 ]; then
+            echo "No downloads this week — skipping referrer report."
+            exit 0
+          fi
+
+          MSG=$(printf 'REFERRER INTELLIGENCE REPORT\nWeek ending %s\n\nWhere your downloads came from:\n\n%s\n\nTotal downloads this week: %s\n\nTip: The top source is where you should focus your job search activity this week.' \
+            "$DATE" "$BREAKDOWN" "$TOTAL")
+
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+          echo "Referrer report sent: $RESPONSE"

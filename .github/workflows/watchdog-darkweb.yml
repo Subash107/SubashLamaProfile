@@ -1,0 +1,51 @@
+name: Watchdog — Dark Web Mention Monitor
+
+on:
+  schedule:
+    - cron: '0 2 * * 3'   # Every Wednesday 7:45 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  darkweb-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check email in breach databases
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          EMAIL="lamasubash107@gmail.com"
+          DATE=$(date -u +"%Y-%m-%d")
+
+          # Check XposedOrNot (free, no API key)
+          RESULT=$(curl -s --max-time 15 \
+            -H "User-Agent: SecurityCheck/1.0" \
+            "https://api.xposedornot.com/v1/check-email/${EMAIL}" 2>/dev/null || echo '{"Error":"timeout"}')
+
+          BREACH_COUNT=$(echo "$RESULT" | python3 -c "import json,sys; d=json.load(sys.stdin); print(len(d.get('breaches_details',d.get('BreachMetrics',{}).get('risk',[]) or [])))" 2>/dev/null || echo "unknown")
+
+          # Also check HIBP paste exposure
+          PASTE_RESULT=$(curl -s --max-time 15 \
+            -H "User-Agent: SecurityCheck/1.0" \
+            "https://api.xposedornot.com/v1/check-email/${EMAIL}/exposures" 2>/dev/null || echo '{}')
+
+          PASTE_COUNT=$(echo "$PASTE_RESULT" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('exposures_count',0))" 2>/dev/null || echo "0")
+
+          if [ "$BREACH_COUNT" = "unknown" ]; then
+            MSG=$(printf 'DARK WEB MONITOR — %s\n\nStatus: API check timed out\nEmail checked: %s\n\nManual check:\nhttps://haveibeenpwned.com' "$DATE" "$EMAIL")
+          elif [ "$BREACH_COUNT" = "0" ] || [ "$BREACH_COUNT" = "" ]; then
+            MSG=$(printf 'DARK WEB MONITOR — %s\n\nStatus: CLEAN\nEmail: %s\nKnown breaches: 0\nExposures: %s\n\nYour email is not found in any known breach databases.' \
+              "$DATE" "$EMAIL" "$PASTE_COUNT")
+          else
+            MSG=$(printf 'DARK WEB ALERT — %s\n\nEmail: %s\nFound in breaches: %s\nExposures: %s\n\nAction required:\n  1. Change passwords for affected sites\n  2. Enable 2FA everywhere\n  3. Check: https://haveibeenpwned.com\n  4. Monitor for suspicious login attempts' \
+              "$DATE" "$EMAIL" "$BREACH_COUNT" "$PASTE_COUNT")
+          fi
+
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+          echo "Dark web check sent: $RESPONSE"

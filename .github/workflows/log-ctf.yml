@@ -1,0 +1,101 @@
+name: Log CTF Flag
+
+on:
+  workflow_dispatch:
+    inputs:
+      ctf_name:
+        description: 'CTF competition name (e.g. HackTheBox, TryHackMe, PicoCTF)'
+        required: true
+      challenge:
+        description: 'Challenge name'
+        required: true
+      category:
+        description: 'Category'
+        required: true
+        default: 'Web'
+        type: choice
+        options:
+          - Web
+          - Forensics
+          - Reverse Engineering
+          - Crypto
+          - Pwn
+          - OSINT
+          - Misc
+          - Network
+          - Steganography
+      points:
+        description: 'Points scored'
+        required: true
+        default: '100'
+      notes:
+        description: 'How you solved it (optional)'
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Log CTF flag
+        id: ctf
+        env:
+          CTF_NAME:      ${{ inputs.ctf_name }}
+          CTF_CHALLENGE: ${{ inputs.challenge }}
+          CTF_CATEGORY:  ${{ inputs.category }}
+          CTF_POINTS:    ${{ inputs.points }}
+          CTF_NOTES:     ${{ inputs.notes }}
+        run: |
+          mkdir -p download-logs
+          STATS=$(python3 scripts/log-ctf.py)
+          echo "$STATS"
+
+          TOTAL_FLAGS=$(echo "$STATS"  | grep "^total_flags="  | cut -d= -f2)
+          TOTAL_PTS=$(echo "$STATS"    | grep "^total_points=" | cut -d= -f2)
+          WEEK_FLAGS=$(echo "$STATS"   | grep "^week_flags="   | cut -d= -f2)
+          WEEK_PTS=$(echo "$STATS"     | grep "^week_points="  | cut -d= -f2)
+          TOP_CATS=$(echo "$STATS"     | grep "^top_cats="     | cut -d= -f2-)
+
+          echo "total_flags=$TOTAL_FLAGS" >> "$GITHUB_OUTPUT"
+          echo "total_pts=$TOTAL_PTS"     >> "$GITHUB_OUTPUT"
+          echo "week_flags=$WEEK_FLAGS"   >> "$GITHUB_OUTPUT"
+          echo "week_pts=$WEEK_PTS"       >> "$GITHUB_OUTPUT"
+          echo "top_cats=$TOP_CATS"       >> "$GITHUB_OUTPUT"
+
+      - name: Commit CTF log
+        run: |
+          git config user.email "action@github.com"
+          git config user.name "CTF Tracker"
+          git add download-logs/ctf-log.json
+          git diff --staged --quiet && echo "No changes" && exit 0
+          git commit -m "log: CTF flag — ${{ inputs.challenge }} on ${{ inputs.ctf_name }} (${{ inputs.points }}pts)"
+          git push
+
+      - name: Send Telegram confirmation
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+
+          MSG=$(printf 'FLAG CAPTURED!\n\nCTF        : %s\nChallenge  : %s\nCategory   : %s\nPoints     : %s\nDate       : %s\n\nYour Stats:\n  Total flags  : %s\n  Total points : %s\n  This week    : %s flags / %s pts\n\nTop categories: %s\n\nKeep hacking — every flag makes you better!' \
+            "${{ inputs.ctf_name }}" "${{ inputs.challenge }}" \
+            "${{ inputs.category }}" "${{ inputs.points }}" \
+            "$(date -u +"%Y-%m-%d")" \
+            "${{ steps.ctf.outputs.total_flags }}" \
+            "${{ steps.ctf.outputs.total_pts }}" \
+            "${{ steps.ctf.outputs.week_flags }}" \
+            "${{ steps.ctf.outputs.week_pts }}" \
+            "${{ steps.ctf.outputs.top_cats }}")
+
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+          echo "Telegram: $RESPONSE"

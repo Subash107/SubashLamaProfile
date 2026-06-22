@@ -1,0 +1,99 @@
+name: Monthly Country Interest Trend
+
+on:
+  schedule:
+    - cron: '0 4 * 1 *'   # 1st of every month 9:45 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  country-trend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Analyse country interest trends month-over-month
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          LOG="download-logs/resume-downloads.txt"
+
+          if [ ! -f "$LOG" ]; then
+            echo "No download log — skipping."
+            exit 0
+          fi
+
+          THIS_MONTH=$(date -u +"%Y-%m")
+          LAST_MONTH=$(date -u -d "-1 month" +"%Y-%m")
+          DATE=$(date -u +"%Y-%m-%d")
+
+          ANALYSIS=$(python3 -c "
+from collections import Counter
+
+this_month = '$THIS_MONTH'
+last_month = '$LAST_MONTH'
+
+this_countries = Counter()
+last_countries = Counter()
+
+with open('$LOG') as f:
+    for line in f:
+        line = line.strip()
+        if not line or not line[0].isdigit(): continue
+        parts = [p.strip() for p in line.split('|')]
+        date  = parts[0][:7]
+        loc   = parts[2].strip() if len(parts) > 2 else ''
+        country = loc.split(',')[-1].strip() if loc else 'Unknown'
+        if not country: country = 'Unknown'
+        if date == this_month: this_countries[country] += 1
+        if date == last_month: last_countries[country] += 1
+
+all_countries = set(list(this_countries.keys()) + list(last_countries.keys()))
+rising  = []
+falling = []
+new     = []
+for c in all_countries:
+    t = this_countries.get(c, 0)
+    l = last_countries.get(c, 0)
+    if l == 0 and t > 0:
+        new.append((c, t))
+    elif t > l:
+        rising.append((c, l, t))
+    elif t < l:
+        falling.append((c, l, t))
+
+rising.sort(key=lambda x: -(x[2]-x[1]))
+falling.sort(key=lambda x: x[2]-x[1])
+
+print(f'this_total={sum(this_countries.values())}')
+print(f'last_total={sum(last_countries.values())}')
+
+for c,l,t in rising[:5]:
+    print(f'rising={c}: {l} -> {t} (+{t-l})')
+for c,l,t in falling[:3]:
+    print(f'falling={c}: {l} -> {t} ({t-l})')
+for c,t in new[:3]:
+    print(f'new={c}: {t} downloads (NEW!)')
+")
+
+          THIS_TOTAL=$(echo "$ANALYSIS" | grep "^this_total=" | cut -d= -f2)
+          LAST_TOTAL=$(echo "$ANALYSIS" | grep "^last_total=" | cut -d= -f2)
+          RISING=$(echo "$ANALYSIS"     | grep "^rising="     | sed 's/^rising=/  /')
+          FALLING=$(echo "$ANALYSIS"    | grep "^falling="    | sed 's/^falling=/  /')
+          NEW=$(echo "$ANALYSIS"        | grep "^new="        | sed 's/^new=/  /')
+
+          MSG=$(printf 'MONTHLY COUNTRY INTEREST TREND\n%s\n\nDownloads this month : %s\nDownloads last month : %s\n\nRising interest:\n%s\n\nFalling interest:\n%s\n\nNew countries:\n%s\n\nFocus your LinkedIn activity on rising countries!' \
+            "$DATE" "$THIS_TOTAL" "$LAST_TOTAL" \
+            "${RISING:-  No change}" "${FALLING:-  None}" "${NEW:-  None}")
+
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+          echo "Country trend sent: $RESPONSE"

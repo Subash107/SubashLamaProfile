@@ -59,6 +59,12 @@ export default {
                   "/latest — Most recent download\n" +
                   "/log — Last 5 downloads\n" +
                   "/week — This week's count\n" +
+                  "/funnel — Job application funnel stats\n" +
+                  "/streak — Download streak tracker\n" +
+                  "/apply — How to log a job application\n" +
+                  "/study — How to log a study session\n" +
+                  "/ctf — How to log a CTF flag\n" +
+                  "/connections — How to log LinkedIn connections\n" +
                   "/help — Show this menu";
           break;
 
@@ -76,6 +82,30 @@ export default {
 
         case "/week":
           reply = await getWeek(env);
+          break;
+
+        case "/funnel":
+          reply = await getFunnel(env);
+          break;
+
+        case "/streak":
+          reply = await getStreak(env);
+          break;
+
+        case "/apply":
+          reply = "📝 *Log a Job Application*\n\nGo to GitHub Actions and run:\n*Log Job Application* workflow\n\nFill in: Company, Role, Status, Source\n\n🔗 github\\.com/Subash107/SubashLamaProfile/actions/workflows/log\\-application\\.yml\n\nThen use /funnel to see your stats\\.";
+          break;
+
+        case "/study":
+          reply = "📚 *Log a Study Session*\n\nGo to GitHub Actions and run:\n*Log Study Session* workflow\n\nFill in: Topic, Minutes, Notes\n\n🔗 github\\.com/Subash107/SubashLamaProfile/actions/workflows/log\\-study\\.yml";
+          break;
+
+        case "/ctf":
+          reply = "🚩 *Log a CTF Flag*\n\nGo to GitHub Actions and run:\n*Log CTF Flag* workflow\n\nFill in: CTF name, Challenge, Category, Points\n\n🔗 github\\.com/Subash107/SubashLamaProfile/actions/workflows/log\\-ctf\\.yml";
+          break;
+
+        case "/connections":
+          reply = "🤝 *Log a LinkedIn Connection*\n\nGo to GitHub Actions and run:\n*Log LinkedIn Connection* workflow\n\nFill in: Name, Company, Role, Notes\n\n🔗 github\\.com/Subash107/SubashLamaProfile/actions/workflows/log\\-connection\\.yml";
           break;
 
         default:
@@ -199,6 +229,83 @@ async function getWeek(env) {
                return `• ${escape(d.location)} — ${escape(d.timestamp.slice(0, 10))}`;
              }).join("\n")
            : "No downloads this week\\.");
+}
+
+async function fetchApps(env) {
+  const APP_PATH = "download-logs/job-applications.json";
+  const res = await fetch(
+    `https://api.github.com/repos/${GITHUB_REPO}/contents/${APP_PATH}`,
+    {
+      headers: {
+        "Authorization": `Bearer ${env.GITHUB_TOKEN}`,
+        "Accept":        "application/vnd.github+json",
+        "User-Agent":    "ResumeTrackerBot/1.0",
+      }
+    }
+  );
+  if (!res.ok) return [];
+  const data = await res.json();
+  try {
+    return JSON.parse(atob(data.content.replace(/\n/g, "")));
+  } catch { return []; }
+}
+
+async function getFunnel(env) {
+  const apps = await fetchApps(env);
+  if (!apps.length) return "No applications logged yet\\.\n\nUse /apply to learn how to log one\\.";
+
+  const total     = apps.length;
+  const applied   = apps.filter(a => a.status === "Applied").length;
+  const interview = apps.filter(a => a.status === "Interview").length;
+  const offers    = apps.filter(a => a.status === "Offer").length;
+  const rejected  = apps.filter(a => a.status === "Rejected").length;
+
+  const interviewRate = total > 0 ? Math.round((interview / total) * 100) : 0;
+  const offerRate     = interview > 0 ? Math.round((offers / interview) * 100) : 0;
+
+  const recent = apps.slice(-3).reverse().map(a =>
+    `• ${escape(a.company)} — ${escape(a.role)} \\(${escape(a.status)}\\)`
+  ).join("\n");
+
+  return `📊 *Job Application Funnel*\n\n` +
+         `📤 Applied    : *${total}*\n` +
+         `🤝 Interviews : *${interview}* \\(${interviewRate}% rate\\)\n` +
+         `🎯 Offers     : *${offers}* \\(${offerRate}% close rate\\)\n` +
+         `❌ Rejected   : *${rejected}*\n` +
+         `⏳ Pending    : *${applied}*\n\n` +
+         `*Recent applications:*\n${recent || "None"}`;
+}
+
+async function getStreak(env) {
+  const lines = await fetchLog(env);
+  if (!lines.length) return "No downloads recorded yet\\.";
+
+  const today = new Date().toISOString().slice(0, 10);
+  let streak = 0;
+  let checkDate = new Date();
+
+  while (true) {
+    const dateStr = checkDate.toISOString().slice(0, 10);
+    const hasDownload = lines.some(line => line.startsWith(dateStr));
+    if (!hasDownload) break;
+    streak++;
+    checkDate = new Date(checkDate.getTime() - 86400000);
+    if (streak > 365) break;
+  }
+
+  const weekAgo   = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
+  const weekCount = lines.filter(l => l.slice(0, 10) >= weekAgo).length;
+  const total     = lines.length;
+
+  if (streak === 0) {
+    return `📉 *Download Streak*\n\nNo download streak today\\.\n\n📥 This week: *${weekCount}*\n📦 All time: *${total}*`;
+  }
+
+  const fire = streak >= 7 ? "🔥🔥🔥" : streak >= 3 ? "🔥🔥" : "🔥";
+  return `${fire} *Download Streak: ${streak} day${streak > 1 ? "s" : ""}*\n\n` +
+         `📥 This week : *${weekCount}*\n` +
+         `📦 All time  : *${total}*\n\n` +
+         `Keep it going — recruiters are looking\\!`;
 }
 
 async function sendMessage(token, chatId, text) {

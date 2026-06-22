@@ -1,0 +1,83 @@
+name: Weekly Rejection Analytics
+
+on:
+  schedule:
+    - cron: '45 2 * * 5'   # Every Friday 8:30 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  analytics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Analyse rejection patterns and send report
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          FILE="download-logs/job-applications.json"
+
+          if [ ! -f "$FILE" ]; then
+            echo "No applications file — skipping."
+            exit 0
+          fi
+
+          REPORT=$(python3 -c "
+import json
+from collections import Counter
+
+apps = json.load(open('$FILE'))
+rejected = [a for a in apps if a.get('status') == 'Rejected']
+
+if not rejected:
+    print('NO_REJECTIONS')
+else:
+    total_applied   = len(apps)
+    total_rejected  = len(rejected)
+    rejection_rate  = round(total_rejected / total_applied * 100) if total_applied else 0
+
+    sources   = Counter(a.get('source','Unknown')  for a in rejected)
+    companies = Counter(a.get('company','Unknown') for a in rejected)
+
+    top_sources   = ', '.join(f'{s}:{c}' for s,c in sources.most_common(3))
+    top_companies = ', '.join(f'{c}:{n}' for c,n in companies.most_common(3))
+
+    recent = rejected[-5:]
+    recent_list = '\n'.join(f'  - {a.get(\"company\",\"?\")} ({a.get(\"role\",\"?\")})' for a in reversed(recent))
+
+    print(f'total_applied={total_applied}')
+    print(f'total_rejected={total_rejected}')
+    print(f'rejection_rate={rejection_rate}')
+    print(f'top_sources={top_sources}')
+    print(f'top_companies={top_companies}')
+    print(f'recent={recent_list}')
+" 2>/dev/null)
+
+          if echo "$REPORT" | grep -q "NO_REJECTIONS"; then
+            echo "No rejections recorded yet — skipping."
+            exit 0
+          fi
+
+          TOTAL_APPLIED=$(echo "$REPORT"   | grep "^total_applied="  | cut -d= -f2)
+          TOTAL_REJECTED=$(echo "$REPORT"  | grep "^total_rejected=" | cut -d= -f2)
+          RATE=$(echo "$REPORT"            | grep "^rejection_rate="  | cut -d= -f2)
+          TOP_SOURCES=$(echo "$REPORT"     | grep "^top_sources="     | cut -d= -f2-)
+          TOP_COMPANIES=$(echo "$REPORT"   | grep "^top_companies="   | cut -d= -f2-)
+          RECENT=$(echo "$REPORT"          | grep "^recent="          | cut -d= -f2-)
+
+          MSG=$(printf 'REJECTION ANALYTICS REPORT\n\nTotal applied  : %s\nTotal rejected : %s\nRejection rate : %s%%\n\nTop rejection sources:\n  %s\n\nMost rejections from:\n  %s\n\nRecent rejections:\n%s\n\nTip: High rejection from one source? Diversify your application channels.' \
+            "$TOTAL_APPLIED" "$TOTAL_REJECTED" "$RATE" \
+            "$TOP_SOURCES" "$TOP_COMPANIES" "$RECENT")
+
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+          echo "Rejection analytics sent: $RESPONSE"

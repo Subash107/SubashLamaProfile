@@ -1,0 +1,101 @@
+name: Log Job Application
+
+on:
+  workflow_dispatch:
+    inputs:
+      company:
+        description: 'Company name'
+        required: true
+      role:
+        description: 'Job title / role'
+        required: true
+      status:
+        description: 'Application status'
+        required: true
+        default: 'Applied'
+        type: choice
+        options:
+          - Applied
+          - Interview
+          - Offer
+          - Rejected
+          - Withdrawn
+      source:
+        description: 'Where you found it (LinkedIn, Indeed, referral...)'
+        required: false
+        default: 'LinkedIn'
+      notes:
+        description: 'Any notes (optional)'
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Append application entry
+        id: log
+        env:
+          APP_DATE:    ${{ github.event.inputs.company && '' || '' }}
+          APP_COMPANY: ${{ inputs.company }}
+          APP_ROLE:    ${{ inputs.role }}
+          APP_STATUS:  ${{ inputs.status }}
+          APP_SOURCE:  ${{ inputs.source }}
+          APP_NOTES:   ${{ inputs.notes }}
+        run: |
+          mkdir -p download-logs
+          STATS=$(python3 scripts/log-application.py)
+          echo "$STATS"
+          TOTAL=$(echo "$STATS" | grep "^total=" | cut -d= -f2)
+          INTERVIEW=$(echo "$STATS" | grep "^interview=" | cut -d= -f2)
+          OFFERS=$(echo "$STATS" | grep "^offers=" | cut -d= -f2)
+          echo "total=$TOTAL"     >> "$GITHUB_OUTPUT"
+          echo "interview=$INTERVIEW" >> "$GITHUB_OUTPUT"
+          echo "offers=$OFFERS"   >> "$GITHUB_OUTPUT"
+
+      - name: Commit log
+        run: |
+          git config user.email "action@github.com"
+          git config user.name "Job Tracker"
+          git add download-logs/job-applications.json
+          git diff --staged --quiet && echo "No changes to commit" && exit 0
+          git commit -m "log: applied to ${{ inputs.role }} at ${{ inputs.company }}"
+          git push
+
+      - name: Send Telegram confirmation
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+
+          MSG=$(printf 'Application Logged!\n\nCompany  : %s\nRole     : %s\nStatus   : %s\nSource   : %s\nDate     : %s\n\nFunnel (all time):\n  Total      : %s\n  Interviews : %s\n  Offers     : %s\n\nKeep going — every application is progress!' \
+            "${{ inputs.company }}" "${{ inputs.role }}" "${{ inputs.status }}" \
+            "${{ inputs.source }}" "$(date -u +"%Y-%m-%d")" \
+            "${{ steps.log.outputs.total }}" "${{ steps.log.outputs.interview }}" "${{ steps.log.outputs.offers }}")
+
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+          echo "Telegram: $RESPONSE"
+
+      - name: Send interview prep checklist
+        if: ${{ inputs.status == 'Interview' }}
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+
+          MSG=$(printf 'INTERVIEW ALERT — %s\n\nYou have an interview at %s for %s!\n\nPrep Checklist:\n\n RESEARCH\n  - Company mission, products, recent news\n  - Team size, culture, Glassdoor reviews\n  - Hiring manager LinkedIn profile\n\n TECHNICAL\n  - Review your SOC/SIEM lab notes (Wazuh, Suricata)\n  - Refresh MITRE ATT&CK framework talking points\n  - Prepare 2-3 incident response stories (STAR format)\n  - Review your 7 certifications — be ready to explain each\n\n BEHAVIOURAL\n  - Tell me about yourself (90 seconds, practiced)\n  - Why cybersecurity? Why this company?\n  - A time you solved a difficult security problem\n  - Salary expectation: research before answering\n\n LOGISTICS\n  - Confirm time, timezone, interviewer name\n  - Test your camera/mic if virtual\n  - Prepare questions to ask them\n\nGood luck — you are ready!' \
+            "$(date -u +"%Y-%m-%d")" "${{ inputs.company }}" "${{ inputs.role }}")
+
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+          echo "Interview prep sent: $RESPONSE"

@@ -1,0 +1,75 @@
+name: Generate Daily CSV Reports
+
+on:
+  schedule:
+    - cron: '45 3 * * *'   # 9:30 AM Nepal Time daily (runs after daily digest)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Generate CSV reports
+        id: report
+        run: |
+          mkdir -p reports/output
+          STATS=$(python3 reports/generate-daily-report.py)
+          echo "$STATS"
+
+          TODAY=$(echo "$STATS"    | grep "^  today="     | cut -d= -f2)
+          HOT=$(echo "$STATS"      | grep "^  hot_today=" | cut -d= -f2)
+          WEEK=$(echo "$STATS"     | grep "^  week="      | cut -d= -f2)
+          TOTAL=$(echo "$STATS"    | grep "^  total="     | cut -d= -f2)
+          COUNTRIES=$(echo "$STATS"| grep "^  countries=" | cut -d= -f2)
+          APPS=$(echo "$STATS"     | grep "^  apps_total="| cut -d= -f2)
+
+          echo "today=$TODAY"       >> "$GITHUB_OUTPUT"
+          echo "hot=$HOT"           >> "$GITHUB_OUTPUT"
+          echo "week=$WEEK"         >> "$GITHUB_OUTPUT"
+          echo "total=$TOTAL"       >> "$GITHUB_OUTPUT"
+          echo "countries=$COUNTRIES" >> "$GITHUB_OUTPUT"
+          echo "apps=$APPS"         >> "$GITHUB_OUTPUT"
+
+      - name: Commit CSV reports
+        run: |
+          git config user.email "action@github.com"
+          git config user.name "Report Generator"
+          git add reports/output/
+          git diff --staged --quiet && echo "No changes to commit" && exit 0
+          git commit -m "chore: daily CSV report $(date -u +%Y-%m-%d)"
+          git push
+
+      - name: Send Telegram report summary
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          DATE=$(date -u +"%Y-%m-%d")
+
+          MSG=$(printf 'DAILY REPORT GENERATED — %s\n\nResume Downloads:\n  Today      : %s\n  Hot leads  : %s\n  This week  : %s\n  All time   : %s\n  Countries  : %s\n\nJob Applications:\n  Total logged: %s\n\nCSV reports updated:\n  downloads-all.csv\n  downloads-daily.csv\n  downloads-country.csv\n  downloads-company.csv\n  applications.csv\n  weekly-summary.csv\n\nhttps://github.com/Subash107/SubashLamaProfile/tree/main/reports/output' \
+            "$DATE" \
+            "${{ steps.report.outputs.today }}" \
+            "${{ steps.report.outputs.hot }}" \
+            "${{ steps.report.outputs.week }}" \
+            "${{ steps.report.outputs.total }}" \
+            "${{ steps.report.outputs.countries }}" \
+            "${{ steps.report.outputs.apps }}")
+
+          if [ -z "$TOKEN" ] || [ -z "$CHAT" ]; then
+            echo "Telegram secrets missing — skipping notification."
+            exit 0
+          fi
+
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+          echo "Telegram: $RESPONSE"

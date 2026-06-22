@@ -1,0 +1,96 @@
+name: Log LinkedIn Connection
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'Full name of recruiter/contact'
+        required: true
+      company:
+        description: 'Their company'
+        required: true
+      role:
+        description: 'Their role/title'
+        required: false
+        default: 'Recruiter'
+      notes:
+        description: 'Any notes (job they mentioned, next steps...)'
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Append connection entry
+        id: conn
+        run: |
+          mkdir -p download-logs
+          FILE="download-logs/connections.json"
+
+          if [ ! -f "$FILE" ]; then echo "[]" > "$FILE"; fi
+
+          STATS=$(python3 -c "
+import json
+from datetime import datetime, timezone, timedelta
+
+today    = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+week_ago = (datetime.now(timezone.utc) - timedelta(days=7)).strftime('%Y-%m-%d')
+
+conns = json.load(open('$FILE'))
+conns.append({
+    'date':    today,
+    'name':    '${{ inputs.name }}',
+    'company': '${{ inputs.company }}',
+    'role':    '${{ inputs.role }}',
+    'notes':   '${{ inputs.notes }}',
+})
+json.dump(conns, open('$FILE','w'), indent=2)
+
+total      = len(conns)
+week_count = sum(1 for c in conns if c.get('date','') >= week_ago)
+companies  = list(set(c.get('company','') for c in conns[-10:]))[:5]
+print(f'total={total}')
+print(f'week={week_count}')
+print(f'recent_companies={chr(44).join(companies)}')
+")
+          echo "$STATS"
+
+          TOTAL=$(echo "$STATS" | grep "^total=" | cut -d= -f2)
+          WEEK=$(echo "$STATS"  | grep "^week="  | cut -d= -f2)
+          echo "total=$TOTAL" >> "$GITHUB_OUTPUT"
+          echo "week=$WEEK"   >> "$GITHUB_OUTPUT"
+
+      - name: Commit connection log
+        run: |
+          git config user.email "action@github.com"
+          git config user.name "Network Tracker"
+          git add download-logs/connections.json
+          git diff --staged --quiet && echo "No changes" && exit 0
+          git commit -m "log: LinkedIn connection — ${{ inputs.name }} at ${{ inputs.company }}"
+          git push
+
+      - name: Send Telegram confirmation
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+
+          MSG=$(printf 'LinkedIn Connection Logged!\n\nName     : %s\nCompany  : %s\nRole     : %s\nDate     : %s\n\nNetwork stats:\n  Total connections logged : %s\n  Added this week          : %s\n\nNotes: %s\n\nTip: Follow up in 3-5 days if they have an open role!' \
+            "${{ inputs.name }}" "${{ inputs.company }}" "${{ inputs.role }}" \
+            "$(date -u +"%Y-%m-%d")" \
+            "${{ steps.conn.outputs.total }}" "${{ steps.conn.outputs.week }}" \
+            "${notes:-None}")
+
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+          echo "Telegram: $RESPONSE"

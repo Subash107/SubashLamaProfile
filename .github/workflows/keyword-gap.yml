@@ -1,0 +1,27 @@
+name: Monthly Keyword Gap Analysis
+
+on:
+  schedule:
+    - cron: '0 4 1 * *'   # 1st of every month 9:45 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  keyword-gap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run AI keyword gap analysis
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python3 scripts/keyword-gap.py

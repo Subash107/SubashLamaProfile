@@ -1,0 +1,80 @@
+name: Cert Renewal Countdown
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'   # Every Monday 7:45 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cert-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Check cert expiry dates and send warnings
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          FILE="download-logs/cert-expiry.json"
+
+          if [ ! -f "$FILE" ]; then
+            echo "cert-expiry.json not found — skipping."
+            exit 0
+          fi
+
+          ALERTS=$(python3 -c "
+import json
+from datetime import datetime, timezone
+
+certs   = json.load(open('$FILE'))
+today   = datetime.now(timezone.utc).date()
+alerts  = []
+summary = []
+
+for cert in certs:
+    name    = cert.get('name', 'Unknown')
+    expires = cert.get('expires', '')
+    url     = cert.get('renewal_url', '')
+    try:
+        exp_date = datetime.strptime(expires, '%Y-%m-%d').date()
+        days     = (exp_date - today).days
+        summary.append(f'  {name}: {days} days')
+        if days <= 7:
+            alerts.append(f'CRITICAL — {name} expires in {days} DAYS! Renew NOW: {url}')
+        elif days <= 30:
+            alerts.append(f'URGENT — {name} expires in {days} days. Renew soon: {url}')
+        elif days <= 90:
+            alerts.append(f'WARNING — {name} expires in {days} days ({expires}).')
+    except ValueError:
+        continue
+
+for a in alerts:
+    print(f'ALERT={a}')
+for s in summary:
+    print(f'SUMMARY={s}')
+")
+
+          ALERT_COUNT=$(echo "$ALERTS" | grep -c "^ALERT=" || echo 0)
+          ALERTS_TEXT=$(echo "$ALERTS" | grep "^ALERT=" | sed 's/^ALERT=//')
+          SUMMARY_TEXT=$(echo "$ALERTS" | grep "^SUMMARY=" | sed 's/^SUMMARY=//')
+
+          if [ "${ALERT_COUNT:-0}" -gt 0 ]; then
+            MSG=$(printf 'CERT RENEWAL ALERT!\n\n%s\n\nAll certifications:\n%s\n\nUpdate your cert-expiry.json to keep countdowns accurate.' \
+              "$ALERTS_TEXT" "$SUMMARY_TEXT")
+          else
+            MSG=$(printf 'Cert Status — All Good!\n\nAll %s certifications are valid.\n\nUpcoming expiries:\n%s' \
+              "$(echo "$ALERTS" | grep -c "^SUMMARY=" || echo 0)" "$SUMMARY_TEXT")
+          fi
+
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+          echo "Cert countdown sent: $RESPONSE"

@@ -1,0 +1,77 @@
+name: Log Study Session
+
+on:
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: 'What did you study?'
+        required: true
+        default: 'Kubernetes Security'
+      minutes:
+        description: 'How many minutes?'
+        required: true
+        default: '60'
+      notes:
+        description: 'Key takeaways or notes (optional)'
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Log study session
+        id: study
+        env:
+          STUDY_TOPIC: ${{ inputs.topic }}
+          STUDY_MINS:  ${{ inputs.minutes }}
+          STUDY_NOTES: ${{ inputs.notes }}
+        run: |
+          mkdir -p download-logs
+          STATS=$(python3 scripts/log-study.py)
+          echo "$STATS"
+
+          TODAY_MINS=$(echo "$STATS"  | grep "^today_minutes=" | cut -d= -f2)
+          WEEK_HRS=$(echo "$STATS"    | grep "^week_hours="    | cut -d= -f2)
+          TOTAL_HRS=$(echo "$STATS"   | grep "^total_hours="   | cut -d= -f2)
+          TOP_TOPICS=$(echo "$STATS"  | grep "^top_topics="    | cut -d= -f2-)
+
+          echo "today_mins=$TODAY_MINS"   >> "$GITHUB_OUTPUT"
+          echo "week_hrs=$WEEK_HRS"       >> "$GITHUB_OUTPUT"
+          echo "total_hrs=$TOTAL_HRS"     >> "$GITHUB_OUTPUT"
+          echo "top_topics=$TOP_TOPICS"   >> "$GITHUB_OUTPUT"
+
+      - name: Commit study log
+        run: |
+          git config user.email "action@github.com"
+          git config user.name "Study Tracker"
+          git add download-logs/study-log.json
+          git diff --staged --quiet && echo "No changes" && exit 0
+          git commit -m "log: study session — ${{ inputs.topic }} (${{ inputs.minutes }}m)"
+          git push
+
+      - name: Send Telegram confirmation
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+
+          MSG=$(printf 'Study Session Logged!\n\nTopic    : %s\nDuration : %s minutes\nDate     : %s\n\nYour Progress:\n  Today      : %s mins\n  This week  : %s hours\n  All time   : %s hours\n\nTop subjects: %s\n\nEvery session counts — keep learning!' \
+            "${{ inputs.topic }}" "${{ inputs.minutes }}" "$(date -u +"%Y-%m-%d")" \
+            "${{ steps.study.outputs.today_mins }}" \
+            "${{ steps.study.outputs.week_hrs }}" \
+            "${{ steps.study.outputs.total_hrs }}" \
+            "${{ steps.study.outputs.top_topics }}")
+
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+          echo "Telegram: $RESPONSE"

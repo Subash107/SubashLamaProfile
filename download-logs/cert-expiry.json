@@ -1,0 +1,51 @@
+[
+  {
+    "name": "CompTIA Security+",
+    "code": "SY0-701",
+    "issued": "2023-01-01",
+    "expires": "2026-01-01",
+    "renewal_url": "https://www.comptia.org/continuing-education"
+  },
+  {
+    "name": "CompTIA CySA+",
+    "code": "CS0-003",
+    "issued": "2023-06-01",
+    "expires": "2026-06-01",
+    "renewal_url": "https://www.comptia.org/continuing-education"
+  },
+  {
+    "name": "CompTIA PenTest+",
+    "code": "PT0-002",
+    "issued": "2023-09-01",
+    "expires": "2026-09-01",
+    "renewal_url": "https://www.comptia.org/continuing-education"
+  },
+  {
+    "name": "eJPT",
+    "code": "eJPT",
+    "issued": "2023-03-01",
+    "expires": "2026-03-01",
+    "renewal_url": "https://ine.com/certifications/ejpt-certification"
+  },
+  {
+    "name": "Google Cybersecurity Certificate",
+    "code": "Google-Cyber",
+    "issued": "2023-12-01",
+    "expires": "2027-12-01",
+    "renewal_url": "https://grow.google/certificates/cybersecurity/"
+  },
+  {
+    "name": "ISC2 CC",
+    "code": "CC",
+    "issued": "2024-01-01",
+    "expires": "2027-01-01",
+    "renewal_url": "https://www.isc2.org/Certifications/CC"
+  },
+  {
+    "name": "Wazuh Certified Engineer",
+    "code": "WCE",
+    "issued": "2024-06-01",
+    "expires": "2027-06-01",
+    "renewal_url": "https://wazuh.com/training/"
+  }
+]

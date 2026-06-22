@@ -1,0 +1,43 @@
+name: GitHub Streak Warning
+
+on:
+  schedule:
+    - cron: '15 12 * * 1-5'   # Weekdays 6:00 PM Nepal Time (UTC+5:45)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  streak-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check today's commits
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          GH_TOKEN="${{ secrets.GITHUB_TOKEN }}"
+          TODAY=$(date -u +"%Y-%m-%d")
+
+          COMMITS=$(curl -s -H "Authorization: Bearer ${GH_TOKEN}" \
+            "https://api.github.com/users/Subash107/events?per_page=50" | \
+            python3 -c "import json,sys; events=json.load(sys.stdin); today='$(date -u +"%Y-%m-%d")'; print(sum(1 for e in events if isinstance(e,dict) and e.get('type')=='PushEvent' and e.get('created_at','')[:10]==today))" \
+            2>/dev/null || echo 0)
+
+          if [ "$COMMITS" -eq 0 ]; then
+            MSG=$(printf 'STREAK WARNING — %s\n\nNo GitHub commits yet today.\nYou have until midnight UTC to keep your streak alive!\n\nQuick ideas:\n  - Update your notes\n  - Push a small fix\n  - Log todays study session\n\nhttps://github.com/Subash107' "$TODAY")
+
+            if [ -z "$TOKEN" ] || [ -z "$CHAT" ]; then
+              echo "ERROR: Telegram secrets missing."
+              exit 1
+            fi
+
+            RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+            echo "Streak warning sent: $RESPONSE"
+          else
+            echo "Streak safe: ${COMMITS} commit(s) today — no warning needed."
+          fi

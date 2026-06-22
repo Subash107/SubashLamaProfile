@@ -1,0 +1,51 @@
+name: Application Follow-up Reminder
+
+on:
+  schedule:
+    - cron: '30 2 * * 1'   # Every Monday 8:15 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Check for stale applications and send reminders
+        run: |
+          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          FILE="download-logs/job-applications.json"
+
+          if [ ! -f "$FILE" ]; then
+            echo "No applications file found — skipping."
+            exit 0
+          fi
+
+          TODAY=$(date -u +"%Y-%m-%d")
+          CUTOFF=$(date -u -d "-7 days" +"%Y-%m-%d")
+
+          STALE=$(python3 -c "import json; apps=json.load(open('$FILE')); stale=[a for a in apps if a.get('status')=='Applied' and a.get('date','')<=('$CUTOFF')]; [print(f\"{a.get('company','?')} — {a.get('role','?')} (applied {a.get('date','?')})\") for a in stale[:10]]")
+
+          COUNT=$(python3 -c "import json; apps=json.load(open('$FILE')); print(sum(1 for a in apps if a.get('status')=='Applied' and a.get('date','')<=('$CUTOFF')))")
+
+          if [ "${COUNT:-0}" -eq 0 ]; then
+            echo "No stale applications — all good."
+            exit 0
+          fi
+
+          MSG=$(printf 'APPLICATION FOLLOW-UP REMINDER\n\n%s application(s) have been in Applied status for 7+ days with no update.\n\nConsider following up or updating the status:\n\n%s\n\nLog updates at:\ngithub.com/Subash107/SubashLamaProfile/actions/workflows/log-application.yml' \
+            "$COUNT" "$STALE")
+
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+          echo "Telegram: $RESPONSE"
