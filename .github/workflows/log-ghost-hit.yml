@@ -1,4 +1,4 @@
-﻿name: Log BBP Ghost Link / Callback Hit
+name: Log BBP Ghost Link / Callback Hit
 
 on:
   repository_dispatch:
@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Append hit to ghost-hits log
         run: |
