@@ -1,23 +1,30 @@
-name: Daily Motivation
+name: Daily Morning Report
 
 on:
   schedule:
-    - cron: '45 1 * * 1-5'   # Weekdays 7:30 AM Nepal Time
+    - cron: '45 1 * * 1-5'   # Weekdays 7:30 AM Nepal Time (UTC+5:45)
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  motivate:
+  report:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 5
 
     steps:
-      - name: Send daily motivation
+      - name: Send daily morning report
+        shell: bash
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
-          CHAT="${{ secrets.TELEGRAM_CHAT_ID }}"
+          if [ -z "$TOKEN" ] || [ -z "$CHAT" ]; then
+            echo "ERROR: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID secret is not set."
+            exit 1
+          fi
+
           DAY=$(date -u +"%A")
           DATE=$(date -u +"%Y-%m-%d")
           DOW=$(date -u +"%u")
@@ -52,19 +59,16 @@ jobs:
           )
           GOAL="${GOALS[$(( (DOW - 1) % ${#GOALS[@]} ))]}"
 
-          MSG=$(printf "Good morning, Subash! — %s %s\n\n\"%s\"\n\nToday's Goal: %s\n\nDashboard: https://subashlamaprofile.pages.dev/dashboard" \
+          MSG=$(printf 'Good morning, Subash! — %s %s\n\n"%s"\n\nToday Goal: %s\n\nStudy Reminder:\n  Topic: Kubernetes Security\n  Goal: 30 mins + 1 lab or concept\n  Update your notes after\n\nDashboard: https://subashlamaprofile.pages.dev/dashboard' \
             "$DAY" "$DATE" "$QUOTE" "$GOAL")
-
-          if [ -z "$TOKEN" ] || [ -z "$CHAT" ]; then
-            echo "ERROR: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID secret is missing in GitHub repo settings."
-            exit 1
-          fi
 
           RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
             -H "Content-Type: application/json" \
-            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(echo "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(printf '%s' "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+
           echo "Telegram response: $RESPONSE"
           echo "$RESPONSE" | python3 -c "import json,sys; r=json.load(sys.stdin); exit(0 if r.get('ok') else 1)" || {
             echo "ERROR: Telegram API rejected the message. Check token and chat ID."
             exit 1
           }
+          echo "SUCCESS: Morning report delivered to Telegram."
