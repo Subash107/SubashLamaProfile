@@ -56,21 +56,76 @@ const DATACENTER_KEYWORDS = [
   "data center", "colocation", "colo", "cdn", "content delivery",
 ];
 
-const BOT_UA_KEYWORDS = [
-  "bot", "crawler", "spider", "slurp", "googlebot", "bingbot", "yahoo",
-  "duckduck", "baidu", "yandex", "semrush", "ahrefs", "moz", "pingdom",
-  "uptimerobot", "monitor", "curl", "python", "java/", "go-http", "wget",
+/* Link preview bots — someone shared your portfolio on this platform */
+const LINK_PREVIEW_UAS = [
+  { ua: "linkedinbot",         platform: "LinkedIn"        },
+  { ua: "whatsapp",            platform: "WhatsApp"        },
+  { ua: "slackbot",            platform: "Slack"           },
+  { ua: "telegrambot",         platform: "Telegram"        },
+  { ua: "twitterbot",          platform: "Twitter/X"       },
+  { ua: "facebookexternalhit", platform: "Facebook"        },
+  { ua: "discordbot",          platform: "Discord"         },
+  { ua: "applebot",            platform: "Apple iMessage"  },
+  { ua: "skype",               platform: "Skype"           },
+  { ua: "viber",               platform: "Viber"           },
+  { ua: "microsoft teams",     platform: "Microsoft Teams" },
 ];
 
-function detectBot(org, ua, cf) {
-  const orgLow = (org || "").toLowerCase();
-  const uaLow  = (ua  || "").toLowerCase();
+/* Good crawlers — suppress Telegram alerts, they help you get indexed */
+const GOOD_CRAWLER_UAS = [
+  "googlebot", "bingbot", "yandexbot", "duckduckbot", "baiduspider",
+  "semrushbot", "ahrefsbot", "mj12bot", "dotbot", "rogerbot",
+  "exabot", "sistrix", "screaming frog", "seokicks", "linkdexbot",
+  "uptimerobot", "pingdom", "statuscake", "hetrixtools", "freshping",
+];
+
+/* Security scanners — alert with warning */
+const SECURITY_SCANNER_UAS = [
+  "shodan", "censys", "masscan", "zgrab", "nuclei", "nikto",
+  "sqlmap", "dirbuster", "gobuster", "wfuzz", "nessus", "openvas",
+];
+
+/* Generic unknown bots */
+const GENERIC_BOT_UAS = [
+  "crawler", "spider", "slurp", "curl", "python-requests",
+  "python/", "java/", "go-http", "wget", "libwww", "httpie",
+  "axios", "got/", "node-fetch", "scrapy", "phantomjs", "headless",
+];
+
+/* Classify every visitor into a category */
+function classifyVisitor(org, ua, cf) {
+  const uaLow    = (ua  || "").toLowerCase();
+  const orgLow   = (org || "").toLowerCase();
   const botScore = cf.botManagement?.score;
 
-  if (BOT_UA_KEYWORDS.some(k => uaLow.includes(k))) return "BOT (suspicious user-agent)";
-  if (botScore !== undefined && botScore < 30) return `BOT (CF bot score: ${botScore})`;
-  if (DATACENTER_KEYWORDS.some(k => orgLow.includes(k))) return "BOT (datacenter IP)";
-  return null;
+  const shareMatch = LINK_PREVIEW_UAS.find(b => uaLow.includes(b.ua));
+  if (shareMatch)
+    return { type: "link-preview",     platform: shareMatch.platform, suppress: false, isBot: true  };
+
+  if (SECURITY_SCANNER_UAS.some(k => uaLow.includes(k)))
+    return { type: "security-scanner", label: "Security Scanner",     suppress: false, isBot: true  };
+
+  if (GOOD_CRAWLER_UAS.some(k => uaLow.includes(k)))
+    return { type: "good-crawler",     label: "Search/SEO Crawler",   suppress: true,  isBot: true  };
+
+  if (botScore !== undefined && botScore < 30)
+    return { type: "generic-bot",      label: `CF score ${botScore}/100`, suppress: false, isBot: true };
+
+  if (GENERIC_BOT_UAS.some(k => uaLow.includes(k)))
+    return { type: "generic-bot",      label: "Suspicious user-agent",suppress: false, isBot: true  };
+
+  if (DATACENTER_KEYWORDS.some(k => orgLow.includes(k)))
+    return { type: "generic-bot",      label: "Datacenter IP",        suppress: false, isBot: true  };
+
+  return { type: "human", suppress: false, isBot: false };
+}
+
+/* Backward-compat wrapper used by /behavior endpoint */
+function detectBot(org, ua, cf) {
+  const v = classifyVisitor(org, ua, cf);
+  if (!v.isBot) return null;
+  if (v.type === "link-preview") return `Link preview (${v.platform})`;
+  return v.label || "BOT";
 }
 
 /* Recruiter Intent Score 0-100 */
@@ -254,7 +309,63 @@ export default {
         const ts        = new Date().toISOString();
         const today     = ts.slice(0, 10);
 
-        /* Deduplicate — one alert per IP per 10 minutes */
+        const visitor = classifyVisitor(org, ua, cf);
+
+        /* ── Rate limiting — block aggressive bots (10+ hits in 5 min) ── */
+        if (env.DOWNLOAD_KV && ip !== "unknown") {
+          const rateKey   = `rate_${ip.replace(/[:/]/g, "_")}`;
+          const rateCount = parseInt(await env.DOWNLOAD_KV.get(rateKey) || "0") + 1;
+          await env.DOWNLOAD_KV.put(rateKey, rateCount.toString(), { expirationTtl: 300 });
+          if (rateCount > 10) {
+            if (rateCount === 11) {
+              await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID,
+                  text: `🚨 AGGRESSIVE BOT BLOCKED\n\nIP hit your site ${rateCount}x in 5 minutes — silently blocked.\n\n🌐 IP      : ${ip}\n🏢 Org     : ${org}\n📍 Location: ${location}\n🕐 Time    : ${ts}` }),
+              }).catch(() => {});
+            }
+            return new Response("OK", { status: 200, headers: corsHeaders(origin) });
+          }
+        }
+
+        /* ── Track daily bot/human counts in KV ── */
+        if (env.DOWNLOAD_KV) {
+          const countKey = visitor.isBot ? `bot_count_${today}` : `human_count_${today}`;
+          const prev = parseInt(await env.DOWNLOAD_KV.get(countKey) || "0") + 1;
+          await env.DOWNLOAD_KV.put(countKey, prev.toString(), { expirationTtl: 86400 });
+        }
+
+        /* ── Link preview bot — someone SHARED your portfolio ── */
+        if (visitor.type === "link-preview") {
+          if (env.DOWNLOAD_KV) {
+            const shareKey = `share_count_${today}`;
+            const shareCount = parseInt(await env.DOWNLOAD_KV.get(shareKey) || "0") + 1;
+            await env.DOWNLOAD_KV.put(shareKey, shareCount.toString(), { expirationTtl: 86400 });
+          }
+          await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID,
+              text: `📤 PORTFOLIO SHARED ON ${visitor.platform}!\n\nSomeone just shared your portfolio link — a real person is about to view it!\n\n📍 Location : ${location}\n🌐 IP       : ${ip}\n🕐 Time     : ${ts}` }),
+          }).catch(() => {});
+          return new Response("OK", { status: 200, headers: corsHeaders(origin) });
+        }
+
+        /* ── Security scanner — alert separately ── */
+        if (visitor.type === "security-scanner") {
+          await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID,
+              text: `🔍 SECURITY SCANNER DETECTED\n\n${visitor.label} is probing your portfolio.\n\n🌐 IP       : ${ip}\n🏢 Org      : ${org}\n📍 Location : ${location}\n🕐 Time     : ${ts}` }),
+          }).catch(() => {});
+          return new Response("OK", { status: 200, headers: corsHeaders(origin) });
+        }
+
+        /* ── Good crawlers — silent, no Telegram alert ── */
+        if (visitor.suppress) {
+          return new Response("OK", { status: 200, headers: corsHeaders(origin) });
+        }
+
+        /* ── Deduplicate — one alert per IP per 10 minutes ── */
         if (env.DOWNLOAD_KV && ip !== "unknown") {
           const dedupKey = `visit_${ip.replace(/[:/]/g, "_")}`;
           const lastSent = await env.DOWNLOAD_KV.get(dedupKey);
@@ -264,16 +375,15 @@ export default {
           await env.DOWNLOAD_KV.put(dedupKey, Date.now().toString(), { expirationTtl: 600 });
         }
 
-        const botReason   = detectBot(org, ua, cf);
-        const visitorType = botReason ? `🤖 BOT — ${botReason}` : "✅ HUMAN VISITOR";
-        const leadScore   = scoreLead(org);
-        const anonFlag    = detectTorVPN(org, cf);
+        const visitorLabel = visitor.isBot ? `🤖 BOT — ${visitor.label}` : "✅ HUMAN VISITOR";
+        const leadScore    = scoreLead(org);
+        const anonFlag     = detectTorVPN(org, cf);
 
-        /* ── Extra intelligence signals ── */
+        /* ── Extra intelligence signals (humans only) ── */
         const extras = [];
-        if (env.DOWNLOAD_KV) {
+        if (env.DOWNLOAD_KV && !visitor.isBot) {
 
-          /* Company repeat visit tracker */
+          /* Company repeat visit */
           const companyKey   = `company_${org.replace(/[^a-zA-Z0-9]/g, "_").slice(0, 40)}`;
           const companyCount = parseInt(await env.DOWNLOAD_KV.get(companyKey) || "0") + 1;
           await env.DOWNLOAD_KV.put(companyKey, companyCount.toString(), { expirationTtl: 604800 });
@@ -281,8 +391,8 @@ export default {
           if (companyCount === 3) extras.push(`🔥 3rd visit from ${org} — HIGH INTEREST! Check LinkedIn.`);
           if (companyCount > 3)  extras.push(`⚡ Visit #${companyCount} from ${org} this week`);
 
-          /* First-ever country detection */
-          if (country && !botReason) {
+          /* First-ever country */
+          if (country) {
             let seen = [];
             try { seen = JSON.parse(await env.DOWNLOAD_KV.get("seen_countries") || "[]"); } catch {}
             if (!seen.includes(country)) {
@@ -301,7 +411,7 @@ export default {
             if (dailyCount >= 3)  extras.push(`👁️ Visit #${dailyCount} today — very interested!`);
           }
 
-          /* Traffic spike per source (5+ in one hour) */
+          /* Traffic spike per source */
           if (refSource && refSource !== "direct") {
             const hour      = ts.slice(0, 13).replace("T", "_");
             const spikeKey  = `spike_${refSource.replace(/[^a-zA-Z0-9]/g, "_").slice(0, 30)}_${hour}`;
@@ -315,9 +425,9 @@ export default {
         const lines = [
           `👁️ PORTFOLIO OPENED!`,
           ``,
-          visitorType,
+          visitorLabel,
           leadScore,
-          anonFlag  ? anonFlag  : null,
+          anonFlag ? anonFlag : null,
           extras.length ? `\n${extras.join("\n")}` : null,
           ``,
           `📍 Location : ${location}`,
@@ -327,18 +437,61 @@ export default {
           `🕐 Time     : ${ts}`,
         ].filter(l => l !== null);
 
-        const msg = lines.join("\n").replace(/\n{3,}/g, "\n\n");
-
         await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
           method:  "POST",
           headers: { "Content-Type": "application/json" },
-          body:    JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID, text: msg }),
+          body:    JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID, text: lines.join("\n").replace(/\n{3,}/g, "\n\n") }),
         }).catch(() => {});
 
         return new Response("OK", { status: 200, headers: corsHeaders(origin) });
       } catch {
         return new Response("OK", { status: 200 });
       }
+    }
+
+    /* ── Honeypot trap — hidden link only bots follow ── */
+    if (url.pathname === "/bot-trap") {
+      const ip  = request.headers.get("CF-Connecting-IP") || "unknown";
+      const ua  = request.headers.get("User-Agent") || "unknown";
+      const cf  = request.cf || {};
+      const org = cf.asOrganization || "unknown";
+      const loc = [cf.city, cf.country].filter(Boolean).join(", ") || "unknown";
+      await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID,
+          text: `🕵️ HONEYPOT TRIGGERED!\n\nA bot followed a hidden link that humans cannot see.\n\n🌐 IP       : ${ip}\n🏢 Org      : ${org}\n📍 Location : ${loc}\n🖥️ Agent    : ${ua.slice(0, 100)}\n🕐 Time     : ${new Date().toISOString()}` }),
+      }).catch(() => {});
+      return new Response("Not found", { status: 404 });
+    }
+
+    /* ── Fake admin/login traps — common bot probe paths ── */
+    const TRAP_PATHS = ["/admin", "/login", "/wp-admin", "/wp-login.php", "/.env", "/config"];
+    if (TRAP_PATHS.includes(url.pathname)) {
+      const ip  = request.headers.get("CF-Connecting-IP") || "unknown";
+      const ua  = request.headers.get("User-Agent") || "unknown";
+      const cf  = request.cf || {};
+      const org = cf.asOrganization || "unknown";
+      const loc = [cf.city, cf.country].filter(Boolean).join(", ") || "unknown";
+      await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID,
+          text: `🚨 BOT PROBING YOUR SITE\n\nTried to access: ${url.pathname}\nThis is a trap page — only bots hit this.\n\n🌐 IP       : ${ip}\n🏢 Org      : ${org}\n📍 Location : ${loc}\n🖥️ Agent    : ${ua.slice(0, 100)}\n🕐 Time     : ${new Date().toISOString()}` }),
+      }).catch(() => {});
+      return new Response(
+        `<!DOCTYPE html><html><head><title>Login</title></head><body><form><input type="text" placeholder="Username"><input type="password" placeholder="Password"><button>Login</button></form></body></html>`,
+        { status: 200, headers: { "Content-Type": "text/html" } }
+      );
+    }
+
+    /* ── Daily stats endpoint — queried by GitHub Actions digest ── */
+    if (url.pathname === "/daily-stats" && request.method === "GET") {
+      const today      = new Date().toISOString().slice(0, 10);
+      const humanCount = parseInt(await env.DOWNLOAD_KV?.get(`human_count_${today}`) || "0");
+      const botCount   = parseInt(await env.DOWNLOAD_KV?.get(`bot_count_${today}`)   || "0");
+      const shareCount = parseInt(await env.DOWNLOAD_KV?.get(`share_count_${today}`) || "0");
+      return new Response(JSON.stringify({ humanCount, botCount, shareCount, date: today }), {
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      });
     }
 
     /* ── Behavior tracking endpoint ── */

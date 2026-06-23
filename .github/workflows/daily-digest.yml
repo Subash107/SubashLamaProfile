@@ -57,6 +57,17 @@ jobs:
               "$TODAY" "$TODAY_COUNT" "$WEEK_COUNT" "$TOTAL" "${TOP:-  No data yet}")
           fi
 
+          # Query worker for today's bot/human stats
+          WORKER_URL="https://lingering-surf-6d77.lamasubash107.workers.dev"
+          STATS=$(curl -s --max-time 5 "${WORKER_URL}/daily-stats" 2>/dev/null || echo "{}")
+          HUMAN_COUNT=$(echo "$STATS" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('humanCount',0))" 2>/dev/null || echo "?")
+          BOT_COUNT=$(echo "$STATS"   | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('botCount',0))"   2>/dev/null || echo "?")
+          SHARE_COUNT=$(echo "$STATS" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('shareCount',0))" 2>/dev/null || echo "?")
+
+          STATS_LINE=$(printf '\nVisitor Stats Today:\n  Humans : %s\n  Bots   : %s\n  Shares : %s (link previews)' \
+            "$HUMAN_COUNT" "$BOT_COUNT" "$SHARE_COUNT")
+          MSG="${MSG}${STATS_LINE}"
+
           RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
             -H "Content-Type: application/json" \
             -d "{\"chat_id\":\"${CHAT}\",\"text\":$(printf '%s' "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
