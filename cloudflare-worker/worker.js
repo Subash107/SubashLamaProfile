@@ -510,18 +510,22 @@ export default {
         const city       = cf.city           || "";
         const location   = [city, country].filter(Boolean).join(", ") || "unknown";
 
-        /* Deduplicate — only send one alert per IP per 2 minutes */
+        /* Deduplicate — only send one alert per IP per 5 minutes (fixes duplicate on tab close) */
         if (env.DOWNLOAD_KV && ip !== "unknown") {
           const dedupKey = `behavior_${ip.replace(/[:/]/g, "_")}`;
           const lastSent = await env.DOWNLOAD_KV.get(dedupKey);
-          if (lastSent && Date.now() - parseInt(lastSent) < 120000) {
+          if (lastSent && Date.now() - parseInt(lastSent) < 300000) {
             return new Response("OK", { status: 200, headers: corsHeaders(origin) });
           }
-          await env.DOWNLOAD_KV.put(dedupKey, Date.now().toString(), { expirationTtl: 120 });
+          await env.DOWNLOAD_KV.put(dedupKey, Date.now().toString(), { expirationTtl: 300 });
         }
 
-        /* Bot detection */
+        /* Bot detection — suppress behavior reports for good crawlers */
         const botReason = detectBot(org, ua, cf);
+        const visitorClass = classifyVisitor(org, ua, cf);
+        if (visitorClass.suppress) {
+          return new Response("OK", { status: 200, headers: corsHeaders(origin) });
+        }
         const visitorType = botReason ? `🤖 BOT — ${botReason}` : "✅ HUMAN VISITOR";
 
         /* Recruiter Intent Score */

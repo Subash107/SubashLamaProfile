@@ -3257,8 +3257,10 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
         : fetch(TRACKER_URL + "/behavior", { method: "POST", body: JSON.stringify(payload), keepalive: true }).catch(() => {});
     };
 
-    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") sendReport(); });
-    window.addEventListener("pagehide", sendReport);
+    let reported = false;
+    const reportOnce = () => { if (!reported) { reported = true; sendReport(); } };
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") reportOnce(); });
+    window.addEventListener("pagehide", reportOnce);
   }
 
   function initDownloadCounter() {
