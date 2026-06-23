@@ -1,0 +1,11 @@
+timestamp,date,ip,location,city,country,org,os,browser,device,referrer,is_hot_lead
+2026-06-17T18:00:00Z,2026-06-17,TEST,",",,,TEST Corp,Windows 11,Chrome,,test,no
+2026-06-17T18:02:06.427Z,2026-06-17,unknown,unknown,,unknown,unknown,Windows 11/10,Chrome,Desktop,https://github.com/,no
+2026-06-17T18:05:51.346Z,2026-06-17,2404:7c00:49:6cb7:4c60:9f12:74c5:3775,"Kathmandu, NP",Kathmandu,NP,VIA NET COMMUNICATION LTD,Windows 11/10,Chrome,Desktop,direct,no
+2026-06-18T06:02:09.768Z,2026-06-18,2404:7c00:49:cc08:c992:562c:d482:a00c,"Kathmandu, NP",Kathmandu,NP,VIA NET COMMUNICATION LTD,Windows 11/10,Chrome,Desktop,direct,no
+2026-06-18T06:04:17.204Z,2026-06-18,2404:7c00:49:cc08:c992:562c:d482:a00c,"Kathmandu, NP",Kathmandu,NP,VIA NET COMMUNICATION LTD,Windows 11/10,Chrome,Desktop,direct,no
+2026-06-20T13:59:42.745Z,2026-06-20,2.49.20.24,"Dubai, AE",Dubai,AE,Emirates Telecommunications Corporation,Android,Chrome,Mobile,http://m.facebook.com/,no
+2026-06-20T14:02:06.339Z,2026-06-20,2.49.20.24,"Dubai, AE",Dubai,AE,Emirates Telecommunications Corporation,Android,Chrome,Mobile,http://m.facebook.com/,no
+2026-06-20T15:18:24.960Z,2026-06-20,2604:3d09:b980:64e0:956b:5bcb:1417:e96b,"Thunder Bay, CA",Thunder Bay,CA,Shaw Communications,Android,Chrome,Mobile,direct,no
+2026-06-20T18:38:50.127Z,2026-06-20,2404:7c00:49:99dc:ad7c:6077:e22a:66cd,"Kathmandu, Bagmati Province, NP",Kathmandu,NP,VIA NET COMMUNICATION LTD,Windows 11/10,Chrome,Desktop,direct,no
+2026-06-20T18:45:17.139Z,2026-06-20,2404:7c00:49:99dc:ad7c:6077:e22a:66cd,"Kathmandu, Bagmati Province, NP",Kathmandu,NP,VIA NET COMMUNICATION LTD,Windows 11/10,Edge,Desktop,direct,no
