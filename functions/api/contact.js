@@ -97,6 +97,16 @@ export async function onRequestPost(context) {
   // Log to Cloudflare Workers runtime logs (visible in dashboard)
   console.log(`[contact] New submission from ${nameT} <${emailT}> — ${country}`);
 
+  // Instant Telegram notification
+  if (env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHAT_ID) {
+    const msg = `📬 CONTACT FORM SUBMITTED!\n\n👤 Name    : ${nameT}\n📧 Email   : ${emailT}\n📍 Country : ${country}\n🌐 IP      : ${ip}\n📋 Subject : ${subject}\n\n💬 Message:\n${messageT.slice(0, 800)}${messageT.length > 800 ? '…' : ''}`;
+    fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID, text: msg }),
+    }).catch(() => {});
+  }
+
   return json({ ok: true, message: 'Message received — thank you!' });
 }
 

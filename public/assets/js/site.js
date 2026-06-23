@@ -3179,7 +3179,11 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
     const TRACKER_URL = "https://lingering-surf-6d77.lamasubash107.workers.dev";
     const startTime   = Date.now();
     const sections    = {};
-    const pageSource  = new URLSearchParams(window.location.search).get("ref") || "direct";
+    const clicks      = new Set();
+    const pageSource  = new URLSearchParams(window.location.search).get("ref")
+                        || new URLSearchParams(window.location.search).get("utm_source")
+                        || document.referrer
+                        || "direct";
 
     /* Track which sections are viewed and for how long */
     const observer = new IntersectionObserver((entries) => {
@@ -3198,16 +3202,42 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
 
     document.querySelectorAll("section[id], div[id]").forEach(el => observer.observe(el));
 
+    /* Track scroll depth */
+    let maxScroll = 0;
+    window.addEventListener("scroll", () => {
+      const total = document.documentElement.scrollHeight - window.innerHeight;
+      if (total > 0) {
+        const pct = Math.round((window.scrollY / total) * 100);
+        if (pct > maxScroll) maxScroll = pct;
+      }
+    }, { passive: true });
+
+    /* Track key element clicks */
+    const CLICK_TARGETS = [
+      { sel: "[data-resume-download]",   label: "resume" },
+      { sel: "a[href*='linkedin']",       label: "linkedin" },
+      { sel: "a[href*='github.com']",     label: "github" },
+      { sel: "[data-copy-email]",         label: "email" },
+      { sel: "#vcardBtn",                 label: "vcard" },
+      { sel: "a[href*='mailto']",         label: "mailto" },
+      { sel: "#contactForm button[type='submit']", label: "contact-form" },
+    ];
+    CLICK_TARGETS.forEach(({ sel, label }) => {
+      document.querySelectorAll(sel).forEach(el => {
+        el.addEventListener("click", () => clicks.add(label), { passive: true });
+      });
+    });
+
     /* Send behavior report when visitor leaves */
     const sendReport = () => {
       const totalTime = Math.round((Date.now() - startTime) / 1000);
-      if (totalTime < 5) return; /* ignore bots/accidental visits */
+      if (totalTime < 5) return;
 
       const topSections = Object.entries(sections)
         .filter(([, v]) => v.total > 2000)
         .sort(([, a], [, b]) => b.total - a.total)
         .slice(0, 4)
-        .map(([k, v]) => `${k}(${Math.round(v.total/1000)}s)`)
+        .map(([k, v]) => `${k}(${Math.round(v.total / 1000)}s)`)
         .join(", ");
 
       const payload = {
@@ -3215,9 +3245,11 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
         client_payload: {
           total_time:   totalTime + "s",
           top_sections: topSections || "none",
+          scroll_depth: maxScroll + "%",
+          clicks:       clicks.size ? Array.from(clicks).join(",") : "none",
           ref_source:   pageSource,
           timestamp:    new Date().toISOString(),
-        }
+        },
       };
 
       navigator.sendBeacon

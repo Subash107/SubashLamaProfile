@@ -1,0 +1,61 @@
+name: GitHub Streak Warning
+
+on:
+  schedule:
+    - cron: '15 13 * * *'   # 7:00 PM Nepal Time (UTC+5:45)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  streak:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check GitHub activity and warn if no commits today
+        shell: bash
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ] || [ -z "$CHAT" ]; then
+            echo "ERROR: Missing Telegram secrets."
+            exit 1
+          fi
+
+          TODAY=$(date -u +"%Y-%m-%d")
+          USERNAME="Subash107"
+
+          EVENTS=$(curl -s \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/users/${USERNAME}/events?per_page=30")
+
+          HAS_ACTIVITY=$(echo "$EVENTS" | python3 -c "
+import json, sys
+events = json.load(sys.stdin)
+today = '$TODAY'
+active_types = ('PushEvent','CreateEvent','IssuesEvent','PullRequestEvent','CommitCommentEvent','ReleaseEvent')
+has = any(
+    e.get('type') in active_types and e.get('created_at','')[:10] == today
+    for e in events
+)
+print('yes' if has else 'no')
+" 2>/dev/null || echo "unknown")
+
+          if [ "$HAS_ACTIVITY" = "yes" ]; then
+            echo "GitHub activity found today — no warning needed."
+            exit 0
+          fi
+
+          MSG=$(printf 'GITHUB STREAK WARNING — %s\n\nNo GitHub activity detected today.\n\nYour green squares are your resume — recruiters check this.\n\nQuick options:\n  - Push a small fix or content update\n  - Log a study session (log-study workflow)\n  - Log a CTF flag (log-ctf workflow)\n  - Update your portfolio content\n\nDo it before midnight!\ngithub.com/Subash107' "$TODAY")
+
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(printf '%s' "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+          echo "Response: $RESPONSE"
+          echo "$RESPONSE" | python3 -c "import json,sys; r=json.load(sys.stdin); exit(0 if r.get('ok') else 1)" || { echo "ERROR: Telegram rejected."; exit 1; }
+          echo "SUCCESS: GitHub streak warning sent."

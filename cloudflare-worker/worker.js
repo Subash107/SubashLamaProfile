@@ -247,6 +247,13 @@ export default {
         const org      = cf.asOrganization || "unknown";
         const location = [city, country].filter(Boolean).join(", ") || "unknown";
 
+        let body = {};
+        try { body = await request.json(); } catch {}
+        const payload   = body.client_payload || {};
+        const refSource = payload.ref_source  || "direct";
+        const ts        = new Date().toISOString();
+        const today     = ts.slice(0, 10);
+
         /* Deduplicate — one alert per IP per 10 minutes */
         if (env.DOWNLOAD_KV && ip !== "unknown") {
           const dedupKey = `visit_${ip.replace(/[:/]/g, "_")}`;
@@ -262,25 +269,65 @@ export default {
         const leadScore   = scoreLead(org);
         const anonFlag    = detectTorVPN(org, cf);
 
-        let body = {};
-        try { body = await request.json(); } catch {}
-        const payload   = body.client_payload || {};
-        const refSource = payload.ref_source  || "direct";
-        const ts        = new Date().toISOString();
+        /* ── Extra intelligence signals ── */
+        const extras = [];
+        if (env.DOWNLOAD_KV) {
 
-        const msg = [
+          /* Company repeat visit tracker */
+          const companyKey   = `company_${org.replace(/[^a-zA-Z0-9]/g, "_").slice(0, 40)}`;
+          const companyCount = parseInt(await env.DOWNLOAD_KV.get(companyKey) || "0") + 1;
+          await env.DOWNLOAD_KV.put(companyKey, companyCount.toString(), { expirationTtl: 604800 });
+          if (companyCount === 2) extras.push(`🔁 2nd visit from ${org} this week`);
+          if (companyCount === 3) extras.push(`🔥 3rd visit from ${org} — HIGH INTEREST! Check LinkedIn.`);
+          if (companyCount > 3)  extras.push(`⚡ Visit #${companyCount} from ${org} this week`);
+
+          /* First-ever country detection */
+          if (country && !botReason) {
+            let seen = [];
+            try { seen = JSON.parse(await env.DOWNLOAD_KV.get("seen_countries") || "[]"); } catch {}
+            if (!seen.includes(country)) {
+              seen.push(country);
+              await env.DOWNLOAD_KV.put("seen_countries", JSON.stringify(seen));
+              extras.push(`🌍 FIRST-EVER visit from ${country}!`);
+            }
+          }
+
+          /* Daily repeat visitor */
+          if (ip !== "unknown") {
+            const dailyKey   = `daily_${ip.replace(/[:/]/g, "_")}_${today}`;
+            const dailyCount = parseInt(await env.DOWNLOAD_KV.get(dailyKey) || "0") + 1;
+            await env.DOWNLOAD_KV.put(dailyKey, dailyCount.toString(), { expirationTtl: 86400 });
+            if (dailyCount === 2) extras.push(`👁️ Returned today — checking you out again`);
+            if (dailyCount >= 3)  extras.push(`👁️ Visit #${dailyCount} today — very interested!`);
+          }
+
+          /* Traffic spike per source (5+ in one hour) */
+          if (refSource && refSource !== "direct") {
+            const hour      = ts.slice(0, 13).replace("T", "_");
+            const spikeKey  = `spike_${refSource.replace(/[^a-zA-Z0-9]/g, "_").slice(0, 30)}_${hour}`;
+            const spikeCount= parseInt(await env.DOWNLOAD_KV.get(spikeKey) || "0") + 1;
+            await env.DOWNLOAD_KV.put(spikeKey, spikeCount.toString(), { expirationTtl: 3600 });
+            if (spikeCount === 5)  extras.push(`📈 TRAFFIC SPIKE — 5 visitors from ${refSource} this hour!`);
+            if (spikeCount === 10) extras.push(`🚀 VIRAL — 10 visitors from ${refSource} this hour!`);
+          }
+        }
+
+        const lines = [
           `👁️ PORTFOLIO OPENED!`,
           ``,
           visitorType,
           leadScore,
-          anonFlag || "",
+          anonFlag  ? anonFlag  : null,
+          extras.length ? `\n${extras.join("\n")}` : null,
           ``,
           `📍 Location : ${location}`,
           `🏢 Company  : ${org}`,
           `🌐 IP       : ${ip}`,
           `📌 Source   : ${refSource}`,
           `🕐 Time     : ${ts}`,
-        ].filter(l => l !== null && l !== undefined && !(l === "" && false)).join("\n").replace(/\n{3,}/g, "\n\n");
+        ].filter(l => l !== null);
+
+        const msg = lines.join("\n").replace(/\n{3,}/g, "\n\n");
 
         await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
           method:  "POST",
@@ -343,13 +390,22 @@ export default {
           }
         }
 
-        if (parseInt(totalTime) >= 15) {
+        const timeNum     = parseInt(totalTime) || 0;
+        const scrollDepth = payload.scroll_depth || "?";
+        const clicks      = payload.clicks       || "none";
+        const isLongSession = timeNum >= 300;
+
+        if (timeNum >= 15) {
+          const sessionLabel = isLongSession
+            ? `🔥 LONG SESSION — ${Math.round(timeNum / 60)} min — HIGH INTEREST!`
+            : `👁️ PORTFOLIO VISIT REPORT`;
+
           await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               chat_id: env.TELEGRAM_CHAT_ID,
-              text: `👁️ PORTFOLIO VISIT REPORT\n\n${visitorType}\n🎯 Intent Score: ${intent.score}/100 — ${intent.label}\n👀 Visit #${visitCount} from this IP\n\n📍 Location   : ${location}\n🏢 Company    : ${org}\n⏱️ Time spent : ${totalTime}\n📖 Read most  : ${sections}\n📌 Source     : ${ref}\n🌐 IP         : ${ip}\n🕐 Time       : ${payload.timestamp || new Date().toISOString()}`,
+              text: `${sessionLabel}\n\n${visitorType}\n🎯 Intent Score: ${intent.score}/100 — ${intent.label}\n👀 Visit #${visitCount} from this IP\n\n📍 Location   : ${location}\n🏢 Company    : ${org}\n⏱️ Time spent : ${totalTime}\n📜 Scroll     : ${scrollDepth}\n📖 Read most  : ${sections}\n🖱️ Clicked    : ${clicks}\n📌 Source     : ${ref}\n🌐 IP         : ${ip}\n🕐 Time       : ${payload.timestamp || new Date().toISOString()}`,
             }),
           }).catch(() => {});
         }

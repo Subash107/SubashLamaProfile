@@ -99,9 +99,21 @@ jobs:
           WEEK_START=$(date -u -d "-6 days" +"%Y-%m-%d")
           WEEK_END=$(date -u +"%Y-%m-%d")
 
-          MSG=$(printf 'WEEKLY REPORT CARD\n%s to %s\n\nDownloads this week : %s (%s)\nDownloads last week : %s\nAll time total      : %s\nHOT leads this week : %s\nBest day            : %s (%s downloads)\n\nTop Countries:\n%s\nTop Companies:\n%s\n\nKeep applying! Every download is a potential opportunity.' \
+          # Mobile vs Desktop split
+          MOBILE_COUNT=0
+          DESKTOP_COUNT=0
+          for i in $(seq 0 6); do
+            DAY=$(date -u -d "-${i} days" +"%Y-%m-%d")
+            M=$(grep "^${DAY}" "$LOG" 2>/dev/null | awk -F'|' '{print $7}' | tr -d ' ' | grep -ic "mobile" || echo 0)
+            D=$(grep "^${DAY}" "$LOG" 2>/dev/null | awk -F'|' '{print $7}' | tr -d ' ' | grep -ic "desktop" || echo 0)
+            MOBILE_COUNT=$((MOBILE_COUNT + M))
+            DESKTOP_COUNT=$((DESKTOP_COUNT + D))
+          done
+          DEVICE_LINE="Desktop: ${DESKTOP_COUNT} / Mobile: ${MOBILE_COUNT}"
+
+          MSG=$(printf 'WEEKLY REPORT CARD\n%s to %s\n\nDownloads this week : %s (%s)\nDownloads last week : %s\nAll time total      : %s\nHOT leads this week : %s\nBest day            : %s (%s downloads)\nDevice split        : %s\n\nTop Countries:\n%s\nTop Companies:\n%s\n\nKeep applying! Every download is a potential opportunity.' \
             "$WEEK_START" "$WEEK_END" "$THIS_WEEK" "$TREND" "$LAST_WEEK" "$TOTAL" \
-            "$HOT_LEADS" "$BEST_DAY" "$BEST_COUNT" "$TOP_COUNTRIES" "$TOP_COMPANIES")
+            "$HOT_LEADS" "$BEST_DAY" "$BEST_COUNT" "$DEVICE_LINE" "$TOP_COUNTRIES" "$TOP_COMPANIES")
 
           if [ -z "$TOKEN" ] || [ -z "$CHAT" ]; then
             echo "ERROR: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID secret is missing."

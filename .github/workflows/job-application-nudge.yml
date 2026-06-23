@@ -1,0 +1,64 @@
+name: Daily Job Application Nudge
+
+on:
+  schedule:
+    - cron: '15 12 * * *'   # 6:00 PM Nepal Time (UTC+5:45)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  nudge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Check applications and send nudge
+        shell: bash
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          if [ -z "$TOKEN" ] || [ -z "$CHAT" ]; then
+            echo "ERROR: Missing Telegram secrets."
+            exit 1
+          fi
+
+          APPS_FILE="download-logs/job-applications.json"
+          TODAY=$(date -u +"%Y-%m-%d")
+          WEEK_START=$(date -u -d "-6 days" +"%Y-%m-%d")
+          WEEK_TARGET=10
+
+          TODAY_APPS=0
+          TOTAL_APPS=0
+          WEEK_APPS=0
+
+          if [ -f "$APPS_FILE" ]; then
+            TODAY_APPS=$(python3 -c "import json; apps=json.load(open('$APPS_FILE')); print(sum(1 for a in apps if a.get('date','')=='$TODAY'))" 2>/dev/null || echo 0)
+            TOTAL_APPS=$(python3 -c "import json; apps=json.load(open('$APPS_FILE')); print(len(apps))" 2>/dev/null || echo 0)
+            WEEK_APPS=$(python3 -c "import json; apps=json.load(open('$APPS_FILE')); print(sum(1 for a in apps if a.get('date','')>='$WEEK_START'))" 2>/dev/null || echo 0)
+          fi
+
+          REMAINING=$((WEEK_TARGET - WEEK_APPS))
+          if [ "$REMAINING" -lt 0 ]; then REMAINING=0; fi
+
+          if [ "$TODAY_APPS" -ge 2 ]; then
+            MSG=$(printf 'JOB SEARCH UPDATE — %s\n\nGreat work today! You logged %s application(s).\n\nThis week : %s / %s target\nAll time  : %s total\n\nKeep the momentum going tomorrow!' \
+              "$TODAY" "$TODAY_APPS" "$WEEK_APPS" "$WEEK_TARGET" "$TOTAL_APPS")
+          else
+            MSG=$(printf 'JOB APPLICATION NUDGE — %s\n\nYou have not logged any applications today.\n\nThis week : %s / %s target\nStill need: %s more this week\nAll time  : %s total\n\nGoal: Apply to 2 jobs before midnight.\nLog at: github.com/Subash107/SubashLamaProfile/actions/workflows/log-application.yml' \
+              "$TODAY" "$WEEK_APPS" "$WEEK_TARGET" "$REMAINING" "$TOTAL_APPS")
+          fi
+
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(printf '%s' "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+          echo "Response: $RESPONSE"
+          echo "$RESPONSE" | python3 -c "import json,sys; r=json.load(sys.stdin); exit(0 if r.get('ok') else 1)" || { echo "ERROR: Telegram rejected."; exit 1; }
+          echo "SUCCESS: Application nudge sent."

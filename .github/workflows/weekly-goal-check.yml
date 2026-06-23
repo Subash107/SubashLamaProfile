@@ -1,0 +1,80 @@
+name: Weekly Goal Check
+
+on:
+  schedule:
+    - cron: '15 6 * * 3'   # Wednesday 12:00 PM Nepal Time (UTC+5:45)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  goal-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Send midweek goal progress
+        shell: bash
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          if [ -z "$TOKEN" ] || [ -z "$CHAT" ]; then
+            echo "ERROR: Missing Telegram secrets."
+            exit 1
+          fi
+
+          APPS_FILE="download-logs/job-applications.json"
+          WEEK_START=$(date -u -d "-2 days" +"%Y-%m-%d")
+          WEEK_TARGET=10
+          DAYS_LEFT=4
+
+          WEEK_APPS=0
+          INTERVIEWS=0
+          OFFERS=0
+
+          if [ -f "$APPS_FILE" ]; then
+            WEEK_APPS=$(python3 -c "import json; apps=json.load(open('$APPS_FILE')); print(sum(1 for a in apps if a.get('date','')>='$WEEK_START'))" 2>/dev/null || echo 0)
+            INTERVIEWS=$(python3 -c "import json; apps=json.load(open('$APPS_FILE')); print(sum(1 for a in apps if a.get('status')=='Interview' and a.get('date','')>='$WEEK_START'))" 2>/dev/null || echo 0)
+            OFFERS=$(python3 -c "import json; apps=json.load(open('$APPS_FILE')); print(sum(1 for a in apps if a.get('status')=='Offer' and a.get('date','')>='$WEEK_START'))" 2>/dev/null || echo 0)
+          fi
+
+          LOG="download-logs/resume-downloads.txt"
+          WEEK_DL=0
+          if [ -f "$LOG" ]; then
+            for i in $(seq 0 6); do
+              DAY=$(date -u -d "-${i} days" +"%Y-%m-%d")
+              C=$(grep -c "^${DAY}" "$LOG" 2>/dev/null || echo 0)
+              WEEK_DL=$((WEEK_DL + C))
+            done
+          fi
+
+          REMAINING=$((WEEK_TARGET - WEEK_APPS))
+          if [ "$REMAINING" -lt 0 ]; then REMAINING=0; fi
+          DAILY_NEEDED=$(python3 -c "print(round(max(0, $REMAINING / $DAYS_LEFT), 1))" 2>/dev/null || echo "$REMAINING")
+
+          if [ "$WEEK_APPS" -ge "$WEEK_TARGET" ]; then
+            STATUS="TARGET HIT! You reached your weekly goal of ${WEEK_TARGET} applications."
+          elif [ "$WEEK_APPS" -ge 7 ]; then
+            STATUS="Almost there — ${REMAINING} more to hit your target."
+          elif [ "$WEEK_APPS" -ge 4 ]; then
+            STATUS="On track — need ${DAILY_NEEDED} applications/day for the rest of the week."
+          else
+            STATUS="Behind target — need ${DAILY_NEEDED} applications/day. Push harder!"
+          fi
+
+          MSG=$(printf 'MIDWEEK GOAL CHECK — Wednesday\n\nJob Applications:\n  This week  : %s / %s target\n  Remaining  : %s (%s/day needed)\n  Interviews : %s this week\n  Offers     : %s this week\n\nResume Downloads this week: %s\n\n%s\n\nLog applications:\ngithub.com/Subash107/SubashLamaProfile/actions/workflows/log-application.yml' \
+            "$WEEK_APPS" "$WEEK_TARGET" "$REMAINING" "$DAILY_NEEDED" "$INTERVIEWS" "$OFFERS" "$WEEK_DL" "$STATUS")
+
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(printf '%s' "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+          echo "Response: $RESPONSE"
+          echo "$RESPONSE" | python3 -c "import json,sys; r=json.load(sys.stdin); exit(0 if r.get('ok') else 1)" || { echo "ERROR: Telegram rejected."; exit 1; }
+          echo "SUCCESS: Weekly goal check sent."

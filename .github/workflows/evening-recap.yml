@@ -1,0 +1,77 @@
+name: Evening Recap
+
+on:
+  schedule:
+    - cron: '15 14 * * *'   # 8:00 PM Nepal Time (UTC+5:45)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Send evening recap
+        shell: bash
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          if [ -z "$TOKEN" ] || [ -z "$CHAT" ]; then
+            echo "ERROR: Missing Telegram secrets."
+            exit 1
+          fi
+
+          LOG="download-logs/resume-downloads.txt"
+          TODAY=$(date -u +"%Y-%m-%d")
+          DATE_LABEL=$(date -u +"%A, %B %d")
+
+          TODAY_DL=0
+          TODAY_HOT=0
+          TOP_COMPANY="None"
+          TOP_COUNTRY="None"
+
+          if [ -f "$LOG" ]; then
+            TODAY_DL=$(grep -c "^${TODAY}" "$LOG" 2>/dev/null || echo 0)
+            TODAY_HOT=$(grep "^${TODAY}" "$LOG" 2>/dev/null | grep -iE "microsoft|google|amazon|cisco|ibm|deloitte|accenture|crowdstrike|palo alto|sentinelone|splunk|fortinet" | wc -l || echo 0)
+            TC=$(grep "^${TODAY}" "$LOG" 2>/dev/null | awk -F'|' '{print $4}' | tr -d ' ' | grep -v '^$' | sort | uniq -c | sort -rn | head -1 | awk '{print $2}')
+            TOP_COMPANY="${TC:-None}"
+            TY=$(grep "^${TODAY}" "$LOG" 2>/dev/null | awk -F'|' '{print $3}' | awk -F',' '{print $NF}' | tr -d ' ' | grep -v '^$' | sort | uniq -c | sort -rn | head -1 | awk '{print $2}')
+            TOP_COUNTRY="${TY:-None}"
+          fi
+
+          APPS_FILE="download-logs/job-applications.json"
+          TODAY_APPS=0
+          if [ -f "$APPS_FILE" ]; then
+            TODAY_APPS=$(python3 -c "import json; apps=json.load(open('$APPS_FILE')); print(sum(1 for a in apps if a.get('date','')=='$TODAY'))" 2>/dev/null || echo 0)
+          fi
+
+          if [ "$TODAY_HOT" -gt 0 ]; then
+            VERDICT="Strong day! ${TODAY_HOT} HOT lead download(s). Follow up on LinkedIn tonight."
+          elif [ "$TODAY_DL" -gt 2 ]; then
+            VERDICT="Good day — ${TODAY_DL} downloads. Momentum building."
+          elif [ "$TODAY_DL" -gt 0 ]; then
+            VERDICT="Steady. Keep sharing your portfolio link."
+          elif [ "$TODAY_APPS" -gt 0 ]; then
+            VERDICT="No downloads today, but you applied. Consistency is key."
+          else
+            VERDICT="Quiet day. No downloads and no applications logged. Push harder tomorrow."
+          fi
+
+          MSG=$(printf 'EVENING RECAP — %s\n\nResume Downloads : %s\nHOT Leads        : %s\nTop Company      : %s\nTop Country      : %s\nApplications     : %s logged today\n\n%s' \
+            "$DATE_LABEL" "$TODAY_DL" "$TODAY_HOT" "$TOP_COMPANY" "$TOP_COUNTRY" "$TODAY_APPS" "$VERDICT")
+
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(printf '%s' "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+          echo "Response: $RESPONSE"
+          echo "$RESPONSE" | python3 -c "import json,sys; r=json.load(sys.stdin); exit(0 if r.get('ok') else 1)" || { echo "ERROR: Telegram rejected."; exit 1; }
+          echo "SUCCESS: Evening recap sent."
