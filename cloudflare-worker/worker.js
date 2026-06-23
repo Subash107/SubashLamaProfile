@@ -236,6 +236,64 @@ export default {
       );
     }
 
+    /* ── Instant arrival notification ── */
+    if (url.pathname === "/visit" && request.method === "POST") {
+      try {
+        const ip       = request.headers.get("CF-Connecting-IP") || "unknown";
+        const ua       = request.headers.get("User-Agent") || "";
+        const cf       = request.cf || {};
+        const city     = cf.city           || "";
+        const country  = cf.country        || "";
+        const org      = cf.asOrganization || "unknown";
+        const location = [city, country].filter(Boolean).join(", ") || "unknown";
+
+        /* Deduplicate — one alert per IP per 10 minutes */
+        if (env.DOWNLOAD_KV && ip !== "unknown") {
+          const dedupKey = `visit_${ip.replace(/[:/]/g, "_")}`;
+          const lastSent = await env.DOWNLOAD_KV.get(dedupKey);
+          if (lastSent && Date.now() - parseInt(lastSent) < 600000) {
+            return new Response("OK", { status: 200, headers: corsHeaders(origin) });
+          }
+          await env.DOWNLOAD_KV.put(dedupKey, Date.now().toString(), { expirationTtl: 600 });
+        }
+
+        const botReason   = detectBot(org, ua, cf);
+        const visitorType = botReason ? `🤖 BOT — ${botReason}` : "✅ HUMAN VISITOR";
+        const leadScore   = scoreLead(org);
+        const anonFlag    = detectTorVPN(org, cf);
+
+        let body = {};
+        try { body = await request.json(); } catch {}
+        const payload   = body.client_payload || {};
+        const refSource = payload.ref_source  || "direct";
+        const ts        = new Date().toISOString();
+
+        const msg = [
+          `👁️ PORTFOLIO OPENED!`,
+          ``,
+          visitorType,
+          leadScore,
+          anonFlag || "",
+          ``,
+          `📍 Location : ${location}`,
+          `🏢 Company  : ${org}`,
+          `🌐 IP       : ${ip}`,
+          `📌 Source   : ${refSource}`,
+          `🕐 Time     : ${ts}`,
+        ].filter(l => l !== null && l !== undefined && !(l === "" && false)).join("\n").replace(/\n{3,}/g, "\n\n");
+
+        await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID, text: msg }),
+        }).catch(() => {});
+
+        return new Response("OK", { status: 200, headers: corsHeaders(origin) });
+      } catch {
+        return new Response("OK", { status: 200 });
+      }
+    }
+
     /* ── Behavior tracking endpoint ── */
     if (url.pathname === "/behavior" && request.method === "POST") {
       try {

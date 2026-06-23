@@ -3154,6 +3154,27 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
     if (countUp) countUp.setAttribute("data-target", yearsIT);
   }
 
+  function initArrivalPing() {
+    const TRACKER_URL = "https://lingering-surf-6d77.lamasubash107.workers.dev";
+    const refSource   = new URLSearchParams(window.location.search).get("ref")
+                        || document.referrer
+                        || "direct";
+
+    const payload = {
+      event_type: "page-visit",
+      client_payload: {
+        ref_source: refSource,
+        timestamp:  new Date().toISOString(),
+      },
+    };
+
+    fetch(TRACKER_URL + "/visit", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify(payload),
+    }).catch(() => {});
+  }
+
   function initBehaviorTracking() {
     const TRACKER_URL = "https://lingering-surf-6d77.lamasubash107.workers.dev";
     const startTime   = Date.now();
@@ -3221,6 +3242,7 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
   }
 
   document.addEventListener("DOMContentLoaded", () => {
+    initArrivalPing();
     initResumeTracking();
     initDownloadCounter();
     initBehaviorTracking();
