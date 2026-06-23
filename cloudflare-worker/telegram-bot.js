@@ -17,9 +17,10 @@
  *      curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=<WORKER_URL>"
  */
 
-const GITHUB_REPO  = "Subash107/SubashLamaProfile";
-const LOG_PATH     = "download-logs/resume-downloads.txt";
-const VERSION      = "1.0.1";
+const GITHUB_REPO      = "Subash107/SubashLamaProfile";
+const LOG_PATH         = "download-logs/resume-downloads.txt";
+const VERSION          = "1.0.1";
+const MAIN_WORKER_URL  = "https://lingering-surf-6d77.lamasubash107.workers.dev";
 
 export default {
   async fetch(request, env) {
@@ -61,6 +62,9 @@ export default {
                   "/week — This week's count\n" +
                   "/funnel — Job application funnel stats\n" +
                   "/streak — Download streak tracker\n" +
+                  "/cia — CIA impact summary this week\n" +
+                  "/incident — Last security incident report\n" +
+                  "/fp — Mark last alert as false positive\n" +
                   "/apply — How to log a job application\n" +
                   "/study — How to log a study session\n" +
                   "/ctf — How to log a CTF flag\n" +
@@ -106,6 +110,18 @@ export default {
 
         case "/connections":
           reply = "🤝 *Log a LinkedIn Connection*\n\nGo to GitHub Actions and run:\n*Log LinkedIn Connection* workflow\n\nFill in: Name, Company, Role, Notes\n\n🔗 github\\.com/Subash107/SubashLamaProfile/actions/workflows/log\\-connection\\.yml";
+          break;
+
+        case "/cia":
+          reply = await getCiaSummary();
+          break;
+
+        case "/incident":
+          reply = await getLastIncidentReport();
+          break;
+
+        case "/fp":
+          reply = "✅ *False Positive Acknowledged*\n\nLast alert marked as FP \\— helps tune detection accuracy\\.\n\nRun /cia to see updated weekly event counts\\.";
           break;
 
         default:
@@ -319,4 +335,68 @@ async function sendMessage(token, chatId, text) {
       disable_web_page_preview: true,
     }),
   });
+}
+
+async function getCiaSummary() {
+  try {
+    const res = await fetch(`${MAIN_WORKER_URL}/cia-data`);
+    if (!res.ok) return "Could not fetch CIA data\\. Try again\\.";
+    const data  = await res.json();
+    const total = data.ciaHigh + data.ciaMedium + data.ciaLow;
+
+    const eventCounts = {};
+    for (const e of (data.events || [])) {
+      eventCounts[e.cls] = (eventCounts[e.cls] || 0) + 1;
+    }
+    const topEvents = Object.entries(eventCounts)
+      .sort((a, b) => b[1] - a[1]).slice(0, 4)
+      .map(([cls, n]) => `  ${escape(cls)}: ${n}x`).join("\n") || "  None recorded this week";
+
+    const posture = data.ciaHigh > 5 ? "ELEVATED" : data.ciaHigh > 0 || data.ciaMedium > 3 ? "LOW\\-MEDIUM" : "LOW";
+
+    return `🛡️ *CIA IMPACT SUMMARY — ${escape(data.week)}*\n\n` +
+           `*Confidentiality*\n` +
+           `  HIGH   : ${data.ciaHigh} events\n` +
+           `  MEDIUM : ${data.ciaMedium} events\n` +
+           `  LOW    : ${data.ciaLow} events\n\n` +
+           `*Integrity*\n` +
+           `  ALL NONE ✓ \\(static site — no write surface\\)\n\n` +
+           `*Availability*\n` +
+           `  Aggressive bot blocks counted in HIGH/MEDIUM above\n\n` +
+           `*Top Security Events:*\n${topEvents}\n\n` +
+           `Total events : *${total}*\n` +
+           `Risk posture : *${posture}*`;
+  } catch {
+    return "Could not load CIA data\\. Try again\\.";
+  }
+}
+
+async function getLastIncidentReport() {
+  try {
+    const res = await fetch(`${MAIN_WORKER_URL}/last-incident`);
+    if (!res.ok) return "No incidents recorded yet\\.";
+    const evt = await res.json();
+    if (!evt.ts) return "No security incidents recorded yet\\.";
+
+    const d     = new Date(evt.ts);
+    const incId = `INC\\-${d.toISOString().slice(0,10).replace(/-/g,"")}\\-001`;
+    const sev   = evt.risk === "HIGH" ? "🟠 P2" : evt.risk === "MEDIUM" ? "🟡 P3" : "🔵 P4";
+
+    return `📋 *INCIDENT REPORT*\n\n` +
+           `ID             : ${incId}\n` +
+           `Severity       : ${sev} — ${escape(evt.risk || "UNKNOWN")} RISK\n` +
+           `Type           : ${escape(evt.type  || "unknown")}\n` +
+           `Classification : ${escape(evt.cls   || "unknown")}\n` +
+           `Location       : ${escape(evt.loc   || "unknown")}\n` +
+           `Time           : ${escape(evt.ts)}\n\n` +
+           `*CIA Assessment:*\n` +
+           `  C — Confidentiality : ${evt.risk === "HIGH" ? "HIGH" : "MEDIUM"}\n` +
+           `  I — Integrity       : NONE \\(read\\-only static surface\\)\n` +
+           `  A — Availability    : Controlled by rate limiter\n\n` +
+           `*Status*   : Contained\n` +
+           `*Controls* : Rate limiter \\+ honeypot ACTIVE\n` +
+           `*Action*   : Logged — no escalation required`;
+  } catch {
+    return "Could not load incident data\\. Try again\\.";
+  }
 }

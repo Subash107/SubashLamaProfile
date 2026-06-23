@@ -227,6 +227,96 @@ function detectTorVPN(org, cf) {
   return null;
 }
 
+/* ── MITRE ATT&CK technique map for probe/trap paths ── */
+const MITRE_MAP = {
+  "/admin":        { id: "T1190",     name: "Exploit Public-Facing Application" },
+  "/login":        { id: "T1078",     name: "Valid Accounts — Probe"             },
+  "/wp-admin":     { id: "T1190",     name: "Exploit Public-Facing Application" },
+  "/wp-login.php": { id: "T1078",     name: "Valid Accounts — WP Probe"          },
+  "/.env":         { id: "T1552.001", name: "Credentials In Files"               },
+  "/config":       { id: "T1083",     name: "File and Directory Discovery"       },
+};
+
+/* ── CIA impact profiles per event type ── */
+const CIA_PROFILES = {
+  credential_probe: { C: "HIGH",   I: "NONE", A: "LOW",    risk: "HIGH",   cls: "Credential Enumeration"       },
+  admin_probe:      { C: "HIGH",   I: "NONE", A: "LOW",    risk: "HIGH",   cls: "Admin Panel Discovery"        },
+  config_probe:     { C: "HIGH",   I: "NONE", A: "LOW",    risk: "HIGH",   cls: "Configuration Discovery"      },
+  honeypot:         { C: "HIGH",   I: "NONE", A: "LOW",    risk: "HIGH",   cls: "Unauthorized Reconnaissance"  },
+  aggressive_bot:   { C: "LOW",    I: "NONE", A: "MEDIUM", risk: "MEDIUM", cls: "Availability Attack Attempt"  },
+  security_scanner: { C: "MEDIUM", I: "NONE", A: "LOW",    risk: "MEDIUM", cls: "Active Reconnaissance"        },
+  canary:           { C: "HIGH",   I: "NONE", A: "NONE",   risk: "HIGH",   cls: "Document Exfiltration Signal" },
+  tor_vpn:          { C: "MEDIUM", I: "NONE", A: "NONE",   risk: "MEDIUM", cls: "Identity Concealment"         },
+};
+
+function getCiaTriage(eventType) {
+  return CIA_PROFILES[eventType] || { C: "LOW", I: "NONE", A: "NONE", risk: "LOW", cls: "Unknown Event" };
+}
+
+function formatCiaBlock(cia, mitre) {
+  const parts = [
+    `\n\n🛡️ CIA TRIAGE`,
+    `C — Confidentiality : ${cia.C}`,
+    `I — Integrity       : ${cia.I}  (static site — no write surface)`,
+    `A — Availability    : ${cia.A}`,
+    `Risk Level          : ${cia.risk}`,
+    `Classification      : ${cia.cls}`,
+  ];
+  if (mitre) parts.push(`MITRE ATT&CK         : ${mitre.id} — ${mitre.name}`);
+  return parts.join("\n");
+}
+
+function calcSeverity(ciaRisk, isHotLead) {
+  if (isHotLead)            return "🔴 P1 — HOT LEAD";
+  if (ciaRisk === "HIGH")   return "🟠 P2 — HIGH RISK";
+  if (ciaRisk === "MEDIUM") return "🟡 P3 — MEDIUM RISK";
+  return "🔵 P4 — LOW / INFO";
+}
+
+function getWeekKey() {
+  const now  = new Date();
+  const year = now.getUTCFullYear();
+  const jan1 = new Date(Date.UTC(year, 0, 1));
+  const week = Math.ceil(((now - jan1) / 86400000 + jan1.getUTCDay() + 1) / 7);
+  return `${year}-W${String(week).padStart(2, "0")}`;
+}
+
+async function trackCiaWeekly(env, cia, eventType, loc) {
+  if (!env.DOWNLOAD_KV) return;
+  const week = getWeekKey();
+  const riskKey = `cia_${cia.risk.toLowerCase()}_${week}`;
+  const prev    = parseInt(await env.DOWNLOAD_KV.get(riskKey) || "0") + 1;
+  await env.DOWNLOAD_KV.put(riskKey, prev.toString(), { expirationTtl: 1209600 });
+  const evtKey = `sec_events_${week}`;
+  let events   = [];
+  try { events = JSON.parse(await env.DOWNLOAD_KV.get(evtKey) || "[]"); } catch {}
+  events.push({ type: eventType, risk: cia.risk, cls: cia.cls, loc, ts: new Date().toISOString() });
+  if (events.length > 30) events = events.slice(-30);
+  await env.DOWNLOAD_KV.put(evtKey, JSON.stringify(events), { expirationTtl: 1209600 });
+  await env.DOWNLOAD_KV.put("last_sec_event", JSON.stringify({ type: eventType, risk: cia.risk, cls: cia.cls, loc, ts: new Date().toISOString() }));
+}
+
+function buildThreatKeyboard(ip) {
+  return {
+    inline_keyboard: [[
+      { text: "🔍 AbuseIPDB", url: `https://www.abuseipdb.com/check/${ip}` },
+      { text: "🔭 Shodan",    url: `https://www.shodan.io/host/${ip}` },
+    ]],
+  };
+}
+
+function buildHotLeadKeyboard(ip, org) {
+  return {
+    inline_keyboard: [[
+      { text: "🔍 AbuseIPDB", url: `https://www.abuseipdb.com/check/${ip}` },
+      { text: "🔭 Shodan",    url: `https://www.shodan.io/host/${ip}` },
+    ],[
+      { text: "🌐 IP Whois",  url: `https://who.is/whois-ip/ip-address/${ip}` },
+      { text: "💼 LinkedIn",  url: `https://www.linkedin.com/search/results/companies/?keywords=${encodeURIComponent(org)}` },
+    ]],
+  };
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
@@ -318,21 +408,32 @@ export default {
           await env.DOWNLOAD_KV.put(rateKey, rateCount.toString(), { expirationTtl: 300 });
           if (rateCount > 10) {
             if (rateCount === 11) {
+              const cia  = getCiaTriage("aggressive_bot");
+              const sev  = calcSeverity(cia.risk, false);
+              const ciaB = formatCiaBlock(cia, { id: "T1498", name: "Network Denial of Service" });
+              await trackCiaWeekly(env, cia, "aggressive_bot", location);
               await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
                 method: "POST", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID,
-                  text: `🚨 AGGRESSIVE BOT BLOCKED\n\nIP hit your site ${rateCount}x in 5 minutes — silently blocked.\n\n🌐 IP      : ${ip}\n🏢 Org     : ${org}\n📍 Location: ${location}\n🕐 Time    : ${ts}` }),
+                body: JSON.stringify({
+                  chat_id: env.TELEGRAM_CHAT_ID,
+                  text: `🚨 AGGRESSIVE BOT BLOCKED\n\n${sev}\nIP hit your site ${rateCount}x in 5 min — silently blocked.\n\n🌐 IP      : ${ip}\n🏢 Org     : ${org}\n📍 Location: ${location}\n🕐 Time    : ${ts}${ciaB}`,
+                  reply_markup: buildThreatKeyboard(ip),
+                }),
               }).catch(() => {});
             }
             return new Response("OK", { status: 200, headers: corsHeaders(origin) });
           }
         }
 
-        /* ── Track daily bot/human counts in KV ── */
+        /* ── Track daily + weekly bot/human counts in KV ── */
         if (env.DOWNLOAD_KV) {
           const countKey = visitor.isBot ? `bot_count_${today}` : `human_count_${today}`;
-          const prev = parseInt(await env.DOWNLOAD_KV.get(countKey) || "0") + 1;
+          const prev     = parseInt(await env.DOWNLOAD_KV.get(countKey) || "0") + 1;
           await env.DOWNLOAD_KV.put(countKey, prev.toString(), { expirationTtl: 86400 });
+          const week    = getWeekKey();
+          const weekKey = visitor.isBot ? `week_bot_${week}` : `week_human_${week}`;
+          const weekPrev= parseInt(await env.DOWNLOAD_KV.get(weekKey) || "0") + 1;
+          await env.DOWNLOAD_KV.put(weekKey, weekPrev.toString(), { expirationTtl: 1209600 });
         }
 
         /* ── Link preview bot — someone SHARED your portfolio ── */
@@ -352,10 +453,17 @@ export default {
 
         /* ── Security scanner — alert separately ── */
         if (visitor.type === "security-scanner") {
+          const cia  = getCiaTriage("security_scanner");
+          const sev  = calcSeverity(cia.risk, false);
+          const ciaB = formatCiaBlock(cia, { id: "T1595", name: "Active Scanning" });
+          await trackCiaWeekly(env, cia, "security_scanner", location);
           await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
             method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID,
-              text: `🔍 SECURITY SCANNER DETECTED\n\n${visitor.label} is probing your portfolio.\n\n🌐 IP       : ${ip}\n🏢 Org      : ${org}\n📍 Location : ${location}\n🕐 Time     : ${ts}` }),
+            body: JSON.stringify({
+              chat_id: env.TELEGRAM_CHAT_ID,
+              text: `🔍 SECURITY SCANNER DETECTED\n\n${sev}\n${visitor.label} is probing your portfolio.\n\n🌐 IP       : ${ip}\n🏢 Org      : ${org}\n📍 Location : ${location}\n🕐 Time     : ${ts}${ciaB}`,
+              reply_markup: buildThreatKeyboard(ip),
+            }),
           }).catch(() => {});
           return new Response("OK", { status: 200, headers: corsHeaders(origin) });
         }
@@ -456,10 +564,17 @@ export default {
       const cf  = request.cf || {};
       const org = cf.asOrganization || "unknown";
       const loc = [cf.city, cf.country].filter(Boolean).join(", ") || "unknown";
+      const cia  = getCiaTriage("honeypot");
+      const sev  = calcSeverity(cia.risk, false);
+      const ciaB = formatCiaBlock(cia, { id: "T1595.002", name: "Active Scanning: Vulnerability Scanning" });
+      await trackCiaWeekly(env, cia, "honeypot", loc);
       await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID,
-          text: `🕵️ HONEYPOT TRIGGERED!\n\nA bot followed a hidden link that humans cannot see.\n\n🌐 IP       : ${ip}\n🏢 Org      : ${org}\n📍 Location : ${loc}\n🖥️ Agent    : ${ua.slice(0, 100)}\n🕐 Time     : ${new Date().toISOString()}` }),
+        body: JSON.stringify({
+          chat_id: env.TELEGRAM_CHAT_ID,
+          text: `🕵️ HONEYPOT TRIGGERED!\n\n${sev}\nA bot followed a hidden link humans cannot see.\n\n🌐 IP       : ${ip}\n🏢 Org      : ${org}\n📍 Location : ${loc}\n🖥️ Agent    : ${ua.slice(0, 100)}\n🕐 Time     : ${new Date().toISOString()}${ciaB}`,
+          reply_markup: buildThreatKeyboard(ip),
+        }),
       }).catch(() => {});
       return new Response("Not found", { status: 404 });
     }
@@ -472,10 +587,21 @@ export default {
       const cf  = request.cf || {};
       const org = cf.asOrganization || "unknown";
       const loc = [cf.city, cf.country].filter(Boolean).join(", ") || "unknown";
+      const mitre    = MITRE_MAP[url.pathname];
+      const ciaType  = (url.pathname === "/.env")  ? "credential_probe"
+                     : (url.pathname === "/config") ? "config_probe"
+                     : "admin_probe";
+      const cia  = getCiaTriage(ciaType);
+      const sev  = calcSeverity(cia.risk, false);
+      const ciaB = formatCiaBlock(cia, mitre);
+      await trackCiaWeekly(env, cia, ciaType, loc);
       await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID,
-          text: `🚨 BOT PROBING YOUR SITE\n\nTried to access: ${url.pathname}\nThis is a trap page — only bots hit this.\n\n🌐 IP       : ${ip}\n🏢 Org      : ${org}\n📍 Location : ${loc}\n🖥️ Agent    : ${ua.slice(0, 100)}\n🕐 Time     : ${new Date().toISOString()}` }),
+        body: JSON.stringify({
+          chat_id: env.TELEGRAM_CHAT_ID,
+          text: `🚨 BOT PROBING YOUR SITE\n\n${sev}\nPath    : ${url.pathname}\nNote    : Trap page — only bots hit this\n\n🌐 IP       : ${ip}\n🏢 Org      : ${org}\n📍 Location : ${loc}\n🖥️ Agent    : ${ua.slice(0, 100)}\n🕐 Time     : ${new Date().toISOString()}${ciaB}`,
+          reply_markup: buildThreatKeyboard(ip),
+        }),
       }).catch(() => {});
       return new Response(
         `<!DOCTYPE html><html><head><title>Login</title></head><body><form><input type="text" placeholder="Username"><input type="password" placeholder="Password"><button>Login</button></form></body></html>`,
@@ -553,6 +679,8 @@ export default {
         const isLongSession = timeNum >= 300;
 
         if (timeNum >= 15) {
+          const isHotVisit   = HOT_LEADS.some(h => org.toUpperCase().includes(h.toUpperCase()));
+          const visitSev     = calcSeverity(intent.score >= 75 ? "HIGH" : intent.score >= 45 ? "MEDIUM" : "LOW", isHotVisit);
           const sessionLabel = isLongSession
             ? `🔥 LONG SESSION — ${Math.round(timeNum / 60)} min — HIGH INTEREST!`
             : `👁️ PORTFOLIO VISIT REPORT`;
@@ -562,7 +690,8 @@ export default {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               chat_id: env.TELEGRAM_CHAT_ID,
-              text: `${sessionLabel}\n\n${visitorType}\n🎯 Intent Score: ${intent.score}/100 — ${intent.label}\n👀 Visit #${visitCount} from this IP\n\n📍 Location   : ${location}\n🏢 Company    : ${org}\n⏱️ Time spent : ${totalTime}\n📜 Scroll     : ${scrollDepth}\n📖 Read most  : ${sections}\n🖱️ Clicked    : ${clicks}\n📌 Source     : ${ref}\n🌐 IP         : ${ip}\n🕐 Time       : ${payload.timestamp || new Date().toISOString()}`,
+              text: `${sessionLabel}\n\n${visitorType}\n${visitSev}\n🎯 Intent Score: ${intent.score}/100 — ${intent.label}\n👀 Visit #${visitCount} from this IP\n\n📍 Location   : ${location}\n🏢 Company    : ${org}\n⏱️ Time spent : ${totalTime}\n📜 Scroll     : ${scrollDepth}\n📖 Read most  : ${sections}\n🖱️ Clicked    : ${clicks}\n📌 Source     : ${ref}\n🌐 IP         : ${ip}\n🕐 Time       : ${payload.timestamp || new Date().toISOString()}`,
+              reply_markup: (isHotVisit || intent.score >= 60) ? buildHotLeadKeyboard(ip, org) : undefined,
             }),
           }).catch(() => {});
         }
@@ -600,6 +729,103 @@ export default {
       } catch { return new Response("OK"); }
     }
 
+    /* ── Weekly SOC Digest — called by GitHub Actions every Monday ── */
+    if (url.pathname === "/weekly-report" && request.method === "GET") {
+      const auth = (request.headers.get("Authorization") || "").replace("Bearer ", "");
+      if (!env.REPORT_SECRET || auth !== env.REPORT_SECRET) {
+        return new Response("Forbidden", { status: 403 });
+      }
+      if (!env.DOWNLOAD_KV) return new Response("No KV binding", { status: 500 });
+      try {
+        const week = getWeekKey();
+        const [ weekHuman, weekBot, ciaHigh, ciaMedium, ciaLow, totalDl, streak, eventsRaw ] = await Promise.all([
+          env.DOWNLOAD_KV.get(`week_human_${week}`),
+          env.DOWNLOAD_KV.get(`week_bot_${week}`),
+          env.DOWNLOAD_KV.get(`cia_high_${week}`),
+          env.DOWNLOAD_KV.get(`cia_medium_${week}`),
+          env.DOWNLOAD_KV.get(`cia_low_${week}`),
+          env.DOWNLOAD_KV.get("total_dl_count"),
+          env.DOWNLOAD_KV.get("streak_count"),
+          env.DOWNLOAD_KV.get(`sec_events_${week}`),
+        ]);
+        let events = [];
+        try { events = JSON.parse(eventsRaw || "[]"); } catch {}
+        const eventCounts = {};
+        for (const e of events) { eventCounts[e.cls] = (eventCounts[e.cls] || 0) + 1; }
+        const topEvents = Object.entries(eventCounts)
+          .sort((a, b) => b[1] - a[1]).slice(0, 3)
+          .map(([cls, n]) => `  ${cls}: ${n}x`).join("\n") || "  None recorded";
+        const ciaH = parseInt(ciaHigh   || "0");
+        const ciaM = parseInt(ciaMedium || "0");
+        const ciaL = parseInt(ciaLow    || "0");
+        const posture = ciaH > 5 ? "ELEVATED" : ciaH > 0 || ciaM > 3 ? "LOW-MEDIUM" : "LOW";
+        const report = [
+          `📊 WEEKLY SOC DIGEST — ${week}`,
+          ``,
+          `👥 TRAFFIC`,
+          `  Human visitors : ${parseInt(weekHuman || "0")}`,
+          `  Bot events     : ${parseInt(weekBot   || "0")}`,
+          `  Resume DLs     : ${totalDl || "0"} (all time)`,
+          `  DL streak      : ${streak  || "0"} days`,
+          ``,
+          `🛡️ CIA IMPACT SUMMARY`,
+          `  HIGH   : ${ciaH} events  (C or A impact)`,
+          `  MEDIUM : ${ciaM} events`,
+          `  LOW    : ${ciaL} events`,
+          `  Integrity — ALL NONE ✓ (static read-only surface)`,
+          ``,
+          `🔍 TOP SECURITY EVENTS THIS WEEK`,
+          topEvents,
+          ``,
+          `📋 GRC RISK REGISTER`,
+          `  Unauthorized scanning  : Honeypot + rate limiter ACTIVE`,
+          `  Document exfiltration  : Canary token ACTIVE`,
+          `  Bot detection          : CF bot score + UA match ACTIVE`,
+          `  CIA triage             : Automated per-event ACTIVE`,
+          ``,
+          `Overall posture : ${posture}`,
+          ``,
+          `🎯 JOB HUNT — send /funnel for application stats`,
+        ].join("\n");
+        await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID, text: report }),
+        }).catch(() => {});
+        return new Response("OK");
+      } catch { return new Response("OK"); }
+    }
+
+    /* ── CIA data endpoint — used by Telegram bot /cia command ── */
+    if (url.pathname === "/cia-data" && request.method === "GET") {
+      if (!env.DOWNLOAD_KV) return new Response(
+        JSON.stringify({ week: getWeekKey(), ciaHigh: 0, ciaMedium: 0, ciaLow: 0, events: [] }),
+        { headers: { "Content-Type": "application/json" } }
+      );
+      const week = getWeekKey();
+      const [ ciaHigh, ciaMedium, ciaLow, eventsRaw ] = await Promise.all([
+        env.DOWNLOAD_KV.get(`cia_high_${week}`),
+        env.DOWNLOAD_KV.get(`cia_medium_${week}`),
+        env.DOWNLOAD_KV.get(`cia_low_${week}`),
+        env.DOWNLOAD_KV.get(`sec_events_${week}`),
+      ]);
+      let events = [];
+      try { events = JSON.parse(eventsRaw || "[]"); } catch {}
+      return new Response(
+        JSON.stringify({ week, ciaHigh: parseInt(ciaHigh || "0"), ciaMedium: parseInt(ciaMedium || "0"), ciaLow: parseInt(ciaLow || "0"), events }),
+        { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } }
+      );
+    }
+
+    /* ── Last security incident — used by Telegram bot /incident command ── */
+    if (url.pathname === "/last-incident" && request.method === "GET") {
+      if (!env.DOWNLOAD_KV) return new Response("{}", { headers: { "Content-Type": "application/json" } });
+      const raw = await env.DOWNLOAD_KV.get("last_sec_event");
+      return new Response(raw || "{}", {
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      });
+    }
+
     /* ── Canary Token endpoint ── */
     if (url.pathname === "/canary") {
       const ip        = request.headers.get("CF-Connecting-IP") || "unknown";
@@ -611,12 +837,17 @@ export default {
       const ua        = request.headers.get("User-Agent") || "unknown";
       const ts        = new Date().toISOString();
 
+      const ciaCanary  = getCiaTriage("canary");
+      const sevCanary  = calcSeverity(ciaCanary.risk, false);
+      const ciaBCanary = formatCiaBlock(ciaCanary, { id: "T1567", name: "Exfiltration Over Web Service" });
+      await trackCiaWeekly(env, ciaCanary, "canary", location);
       await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: env.TELEGRAM_CHAT_ID,
-          text: `🕵️ CANARY TOKEN FIRED!\n\nYour resume PDF was OPENED!\n\n📍 Location : ${location}\n🏢 Org      : ${org}\n🌐 IP       : ${ip}\n🖥️ App      : ${ua.slice(0,80)}\n🕐 Time     : ${ts}\n\n⚠️ This may be someone who received your resume by email or file share.`,
+          text: `🕵️ CANARY TOKEN FIRED!\n\n${sevCanary}\nYour resume PDF was OPENED outside tracked channels!\n\n📍 Location : ${location}\n🏢 Org      : ${org}\n🌐 IP       : ${ip}\n🖥️ App      : ${ua.slice(0,80)}\n🕐 Time     : ${ts}\n\n⚠️ May be: email forward, ATS scan, or recruiter share${ciaBCanary}`,
+          reply_markup: buildThreatKeyboard(ip),
         }),
       }).catch(() => {});
 

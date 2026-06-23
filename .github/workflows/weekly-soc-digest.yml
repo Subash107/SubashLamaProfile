@@ -1,0 +1,30 @@
+name: Weekly SOC Digest
+
+on:
+  schedule:
+    - cron: '15 0 * * 1'   # Every Monday 05:45 AM Nepal Time (UTC+5:45)
+  workflow_dispatch:
+
+permissions:
+  contents: none
+
+jobs:
+  soc-digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Trigger weekly SOC digest via Cloudflare Worker
+        run: |
+          RESPONSE=$(curl -s -o /tmp/resp.txt -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.REPORT_SECRET }}" \
+            "https://lingering-surf-6d77.lamasubash107.workers.dev/weekly-report")
+
+          echo "HTTP status: $RESPONSE"
+          echo "Body: $(cat /tmp/resp.txt)"
+
+          if [ "$RESPONSE" != "200" ]; then
+            echo "ERROR: Worker returned HTTP $RESPONSE"
+            exit 1
+          fi
+          echo "Weekly SOC digest sent successfully."

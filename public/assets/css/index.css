@@ -6553,3 +6553,111 @@
   margin-left: 0.5rem;
 }
 .mitre-nav-link:hover { background: rgba(80,250,123,0.08); border-color: rgba(80,250,123,0.5); }
+
+/* ── Post-certifications Hire CTA ── */
+#cta-hire {
+  width: 100%;
+  max-width: 860px;
+  background: linear-gradient(135deg, rgba(80,250,123,0.07), rgba(114,239,255,0.04));
+  border: 1px solid rgba(80,250,123,0.32);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+#cta-hire::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(80,250,123,0.6), rgba(114,239,255,0.6), transparent);
+}
+.cta-hire-badge {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: #50fa7b;
+  border: 1px solid rgba(80,250,123,0.45);
+  padding: 0.22rem 0.75rem;
+  border-radius: 100px;
+  margin-bottom: 0.85rem;
+  background: rgba(80,250,123,0.06);
+}
+.cta-hire-headline {
+  font-size: clamp(1.2rem, 2.5vw, 1.65rem);
+  font-weight: 700;
+  margin: 0 0 0.55rem;
+  color: #fff;
+}
+.cta-hire-sub {
+  font-size: 0.84rem;
+  color: rgba(255,255,255,0.5);
+  margin: 0 0 1.5rem;
+  line-height: 1.6;
+}
+.cta-hire-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.62rem 1.3rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.22s ease;
+  border: 1px solid transparent;
+}
+.cta-btn-primary {
+  background: #50fa7b;
+  color: #07111c;
+  box-shadow: 0 0 20px rgba(80,250,123,0.28);
+}
+.cta-btn-primary:hover {
+  background: #70fc90;
+  box-shadow: 0 0 32px rgba(80,250,123,0.48);
+  transform: translateY(-2px);
+}
+.cta-btn-secondary {
+  background: rgba(114,239,255,0.1);
+  color: #8ae8ff;
+  border-color: rgba(114,239,255,0.32);
+}
+.cta-btn-secondary:hover {
+  background: rgba(114,239,255,0.18);
+  border-color: rgba(114,239,255,0.6);
+  transform: translateY(-2px);
+}
+.cta-btn-outline {
+  background: transparent;
+  color: rgba(255,255,255,0.6);
+  border-color: rgba(255,255,255,0.18);
+}
+.cta-btn-outline:hover {
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.85);
+  border-color: rgba(255,255,255,0.35);
+  transform: translateY(-2px);
+}
+/* ── Cert proof text ── */
+.cert-proof {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.38);
+  margin: 0.3rem 0 0;
+  font-style: italic;
+  line-height: 1.45;
+}
+@media (max-width: 600px) {
+  #cta-hire { padding: 1.5rem 1rem; }
+  .cta-hire-actions { flex-direction: column; align-items: stretch; }
+  .cta-btn { justify-content: center; }
+}
+@media print {
+  #cta-hire { display: none; }
+}
