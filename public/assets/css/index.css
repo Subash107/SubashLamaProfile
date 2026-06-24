@@ -6661,3 +6661,101 @@
 @media print {
   #cta-hire { display: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   UPGRADE 1 — SOC Terminal
+   ═══════════════════════════════════════════════════════════════ */
+.soc-terminal-section .terminal-desc { color: rgba(255,255,255,0.55); font-size:0.88rem; margin-bottom:14px; }
+.soc-terminal-section code { background: rgba(0,255,136,0.12); padding:1px 6px; border-radius:3px; color:#00ff88; font-family:'Courier New',Courier,monospace; }
+.terminal-window { background:#020e1a; border:1px solid rgba(0,255,136,0.22); border-radius:10px; overflow:hidden; font-family:'Courier New',Courier,monospace; margin-top:12px; }
+.terminal-titlebar { background:#061624; padding:9px 14px; display:flex; align-items:center; gap:6px; border-bottom:1px solid rgba(0,255,136,0.10); }
+.terminal-dot { width:11px; height:11px; border-radius:50%; display:inline-block; }
+.terminal-dot--red { background:#ff5f56; }
+.terminal-dot--yellow { background:#ffbd2e; }
+.terminal-dot--green { background:#27c93f; }
+.terminal-title { color:rgba(0,255,136,0.65); font-size:0.78rem; margin-left:10px; letter-spacing:0.04em; }
+.terminal-output { padding:14px 16px; min-height:200px; max-height:300px; overflow-y:auto; font-size:0.8rem; line-height:1.65; color:#b8f0c0; scrollbar-width:thin; scrollbar-color:rgba(0,255,136,0.3) transparent; }
+.terminal-output .t-cmd { color:#00ff88; }
+.terminal-output .t-out { color:#7aad8a; white-space:pre-wrap; }
+.terminal-output .t-err { color:#ff6655; }
+.terminal-output .t-warn { color:#ffcc44; }
+.terminal-output .t-info { color:#5dcfff; }
+.terminal-input-row { display:flex; align-items:center; padding:8px 14px; border-top:1px solid rgba(0,255,136,0.10); gap:8px; }
+.terminal-prompt-label { color:#00ff88; font-size:0.8rem; white-space:nowrap; user-select:none; }
+.terminal-cmd-input { background:transparent; border:none; outline:none; color:#00ff88; font-family:'Courier New',Courier,monospace; font-size:0.8rem; flex:1; caret-color:#00ff88; }
+.terminal-cmd-input::placeholder { color:rgba(0,255,136,0.22); }
+
+/* ═══════════════════════════════════════════════════════════════
+   UPGRADE 2 — Homelab click-to-detail panel
+   ═══════════════════════════════════════════════════════════════ */
+.hl-detail-panel { margin-top:10px; background:rgba(0,255,136,0.04); border:1px solid rgba(0,255,136,0.18); border-radius:8px; padding:12px 16px; display:none; }
+.hl-detail-panel.hl-detail-visible { display:block; animation:fadeInQuick 0.2s ease; }
+@keyframes fadeInQuick { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+.hl-detail-name { color:#00ff88; font-weight:700; font-size:0.88rem; margin-bottom:6px; }
+.hl-detail-body { color:rgba(255,255,255,0.65); font-size:0.8rem; line-height:1.6; }
+.hl-detail-tags { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
+.hl-detail-tag { background:rgba(0,255,136,0.1); border:1px solid rgba(0,255,136,0.22); border-radius:12px; padding:2px 8px; font-size:0.7rem; color:#00ff88; }
+.hl-node { cursor:pointer; }
+.hl-node.hl-selected circle { stroke:#ffffff !important; stroke-width:3; }
+
+/* ═══════════════════════════════════════════════════════════════
+   UPGRADE 3 — Compliance Mapping
+   ═══════════════════════════════════════════════════════════════ */
+.compliance-section { }
+.compliance-intro { color:rgba(255,255,255,0.55); font-size:0.88rem; margin-bottom:18px; }
+.compliance-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; }
+.compliance-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); border-radius:10px; padding:14px 16px; }
+.compliance-card-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.compliance-card-icon { width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+.compliance-card-title { font-size:0.85rem; font-weight:700; color:rgba(255,255,255,0.88); }
+.compliance-card-sub { font-size:0.7rem; color:rgba(255,255,255,0.38); }
+.compliance-items { list-style:none; padding:0; margin:0; }
+.compliance-items li { font-size:0.78rem; color:rgba(255,255,255,0.58); padding:3px 0; display:flex; align-items:flex-start; gap:6px; }
+.compliance-items li::before { content:"✓"; color:#00ff88; font-size:0.72rem; flex-shrink:0; margin-top:2px; }
+.compliance-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.68rem; font-weight:600; margin-top:8px; }
+.compliance-badge--full { background:rgba(0,255,136,0.12); color:#00ff88; border:1px solid rgba(0,255,136,0.28); }
+.compliance-badge--partial { background:rgba(255,204,68,0.10); color:#ffcc44; border:1px solid rgba(255,204,68,0.22); }
+.compliance-badge--planned { background:rgba(100,160,255,0.10); color:#64a0ff; border:1px solid rgba(100,160,255,0.22); }
+
+/* ═══════════════════════════════════════════════════════════════
+   UPGRADE 12 — Security Posture Self-Assessment
+   ═══════════════════════════════════════════════════════════════ */
+.posture-intro { color:rgba(255,255,255,0.55); font-size:0.88rem; margin-bottom:18px; }
+.posture-overall { display:flex; align-items:center; gap:18px; margin-bottom:20px; padding:14px 18px; background:rgba(0,255,136,0.04); border:1px solid rgba(0,255,136,0.18); border-radius:10px; flex-wrap:wrap; }
+.posture-score-ring { position:relative; width:72px; height:72px; flex-shrink:0; }
+.posture-score-ring svg { transform:rotate(-90deg); }
+.posture-score-text { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.posture-score-pct { font-size:1.05rem; font-weight:700; color:#00ff88; line-height:1; }
+.posture-score-label { font-size:0.55rem; color:rgba(255,255,255,0.45); margin-top:2px; text-transform:uppercase; letter-spacing:0.05em; }
+.posture-overall-text h4 { color:rgba(255,255,255,0.88); font-size:0.92rem; margin-bottom:4px; }
+.posture-overall-text p { color:rgba(255,255,255,0.5); font-size:0.8rem; margin:0; }
+.posture-categories { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; }
+.posture-cat { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:12px 14px; }
+.posture-cat-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:7px; }
+.posture-cat-name { font-size:0.8rem; font-weight:600; color:rgba(255,255,255,0.82); }
+.posture-cat-pct { font-size:0.78rem; color:#00ff88; font-weight:700; }
+.posture-bar { background:rgba(255,255,255,0.06); border-radius:4px; height:5px; overflow:hidden; }
+.posture-bar-fill { height:5px; border-radius:4px; transition:width 1.1s ease; width:0; }
+.posture-legend { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+.posture-legend-item { display:flex; align-items:center; gap:5px; font-size:0.72rem; color:rgba(255,255,255,0.45); }
+.posture-legend-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+/* ═══════════════════════════════════════════════════════════════
+   UPGRADE 13 — Currently Hunting (dynamic cards)
+   ═══════════════════════════════════════════════════════════════ */
+.hunting-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin-top:14px; }
+.hunting-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:12px 14px; }
+.hunting-card-tag { display:inline-block; padding:1px 8px; border-radius:10px; font-size:0.67rem; font-weight:600; margin-bottom:7px; letter-spacing:0.03em; }
+.hunting-card-tag--ttp  { background:rgba(255,68,68,0.12); color:#ff8888; border:1px solid rgba(255,68,68,0.22); }
+.hunting-card-tag--tool { background:rgba(0,255,136,0.09); color:#00ff88; border:1px solid rgba(0,255,136,0.18); }
+.hunting-card-tag--cert { background:rgba(100,160,255,0.10); color:#64a0ff; border:1px solid rgba(100,160,255,0.18); }
+.hunting-card-tag--lab  { background:rgba(255,180,0,0.09); color:#ffb400; border:1px solid rgba(255,180,0,0.18); }
+.hunting-card h4 { font-size:0.82rem; font-weight:600; color:rgba(255,255,255,0.85); margin-bottom:4px; }
+.hunting-card p { font-size:0.76rem; color:rgba(255,255,255,0.48); line-height:1.5; margin:0; }
+
+/* ═══════════════════════════════════════════════════════════════
+   UPGRADE 14 — Resume Version Badge
+   ═══════════════════════════════════════════════════════════════ */
+.resume-version-badge { display:inline-flex; align-items:center; gap:5px; background:rgba(0,255,136,0.07); border:1px solid rgba(0,255,136,0.2); border-radius:12px; padding:2px 9px; font-size:0.7rem; color:rgba(0,255,136,0.8); margin-left:6px; vertical-align:middle; white-space:nowrap; }
+.rv-dot { width:6px; height:6px; border-radius:50%; background:#00ff88; animation:rvBlink 2.4s ease-in-out infinite; }
+@keyframes rvBlink { 0%,100%{opacity:1} 50%{opacity:0.25} }

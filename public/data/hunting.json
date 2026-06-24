@@ -1,0 +1,25 @@
+{
+  "updated": "2026-06-24",
+  "items": [
+    {
+      "type": "ttp",
+      "title": "T1059 — Command & Scripting Interpreter",
+      "detail": "Building Wazuh rules to detect suspicious PowerShell and Bash execution chains from parent processes like winword.exe and mshta.exe."
+    },
+    {
+      "type": "tool",
+      "title": "Elastic Stack (ELK)",
+      "detail": "Learning Elasticsearch queries and Kibana dashboards as a complementary SIEM alongside Wazuh for multi-source log correlation."
+    },
+    {
+      "type": "cert",
+      "title": "CompTIA CySA+ preparation",
+      "detail": "Studying for CySA+ to formalise threat detection, vulnerability management, and incident response knowledge."
+    },
+    {
+      "type": "lab",
+      "title": "Kubernetes Security Monitoring",
+      "detail": "Adding K8s audit log ingestion to the home SOC lab — container telemetry and runtime anomaly detection with Falco."
+    }
+  ]
+}

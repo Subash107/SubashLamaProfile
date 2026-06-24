@@ -1,0 +1,85 @@
+name: Resume Version Bump
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version part to bump'
+        required: true
+        type: choice
+        default: patch
+        options:
+          - patch
+          - minor
+          - major
+      reason:
+        description: 'What changed in the resume'
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Bump version
+        run: |
+          TODAY=$(date -u +"%Y-%m-%d")
+          python3 -c "
+import json, datetime
+path = 'public/data/resume-version.json'
+try:
+    with open(path) as f:
+        data = json.load(f)
+except Exception:
+    data = {'version': '1.0.0', 'updated': '', 'build': 0}
+
+parts = data.get('version','1.0.0').split('.')
+major, minor, patch = int(parts[0]), int(parts[1]), int(parts[2])
+bump = '${{ inputs.bump }}'
+
+if bump == 'major':
+    major += 1; minor = 0; patch = 0
+elif bump == 'minor':
+    minor += 1; patch = 0
+else:
+    patch += 1
+
+data['version'] = f'{major}.{minor}.{patch}'
+data['updated'] = '$TODAY'
+data['build'] = data.get('build', 0) + 1
+
+with open(path, 'w') as f:
+    json.dump(data, f, indent=2)
+print(f'Bumped to v{data[\"version\"]} (build {data[\"build\"]})')
+"
+
+      - name: Commit version bump
+        run: |
+          git config user.email "lamasubash107@gmail.com"
+          git config user.name "Subash Lama"
+          git add public/data/resume-version.json
+          git diff --staged --quiet && echo "No change" && exit 0
+          VERSION=$(python3 -c "import json; print(json.load(open('public/data/resume-version.json'))['version'])")
+          git commit -m "chore: resume version bump to v${VERSION} — ${{ inputs.reason }}"
+          git push
+
+      - name: Telegram notification
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          VERSION=$(python3 -c "import json; print(json.load(open('public/data/resume-version.json'))['version'])")
+          MSG=$(printf 'Resume Version Bumped!\n\nNew version : v%s\nBump type   : %s\nReason      : %s\n\nBadge on portfolio will update on next page load.' \
+            "$VERSION" "${{ inputs.bump }}" "${REASON:-not specified}")
+          curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(printf '%s' "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"

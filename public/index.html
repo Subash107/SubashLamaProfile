@@ -1089,6 +1089,12 @@
                         <text class="hl-tip-text" id="hlTipText"></text>
                       </g>
                     </svg>
+                    <!-- UPGRADE 2: click-to-detail panel -->
+                    <div id="hlDetailPanel" class="hl-detail-panel" aria-live="polite">
+                      <div class="hl-detail-name"></div>
+                      <div class="hl-detail-body"></div>
+                      <div class="hl-detail-tags"></div>
+                    </div>
                     <!-- Homelab detection capabilities -->
                     <ul class="homelab-caps" aria-label="Lab detection capabilities">
                       <li>&#10003; Wazuh SIEM &mdash; host-based detection &amp; log correlation</li>
@@ -1332,6 +1338,144 @@
       </div>
     </section>
 
+    <!-- UPGRADE 3: Compliance Mapping -->
+    <section id="compliance-mapping" class="glass-card compliance-section">
+      <div class="section-inner">
+        <div class="section-content">
+          <h2>Compliance Mapping</h2>
+          <p class="compliance-intro">My homelab and practitioner experience maps to real controls across NIST CSF, CIS Controls, and ISO 27001 — showing how hands-on work translates to governance frameworks.</p>
+          <div class="compliance-grid">
+            <div class="compliance-card">
+              <div class="compliance-card-header">
+                <div class="compliance-card-icon" style="background:rgba(0,255,136,0.1)">&#128737;</div>
+                <div>
+                  <div class="compliance-card-title">NIST CSF 2.0</div>
+                  <div class="compliance-card-sub">Cybersecurity Framework</div>
+                </div>
+              </div>
+              <ul class="compliance-items">
+                <li>IDENTIFY — Asset inventory via Wazuh agents &amp; Docker labelling</li>
+                <li>PROTECT — pfSense firewall rules, IAM policies, Sysmon baselines</li>
+                <li>DETECT — Suricata IDS + Wazuh correlation rules (SIEM alerting)</li>
+                <li>RESPOND — Alert triage playbooks, incident log workflows</li>
+                <li>RECOVER — Lab rebuild scripts, Docker image versioning</li>
+              </ul>
+              <span class="compliance-badge compliance-badge--full">Full coverage</span>
+            </div>
+            <div class="compliance-card">
+              <div class="compliance-card-header">
+                <div class="compliance-card-icon" style="background:rgba(93,207,255,0.1)">&#128203;</div>
+                <div>
+                  <div class="compliance-card-title">CIS Controls v8</div>
+                  <div class="compliance-card-sub">Level 1 &amp; 2</div>
+                </div>
+              </div>
+              <ul class="compliance-items">
+                <li>CIS 1 — Enterprise Asset Management (Wazuh agent inventory)</li>
+                <li>CIS 4 — Secure Configuration (hardened Docker &amp; Linux baseline)</li>
+                <li>CIS 8 — Audit Log Management (Wazuh + Sysmon centralized logs)</li>
+                <li>CIS 10 — Malware Defences (endpoint protection policies)</li>
+                <li>CIS 13 — Network Monitoring (Suricata + pfSense logging)</li>
+              </ul>
+              <span class="compliance-badge compliance-badge--partial">L1 implemented · L2 in progress</span>
+            </div>
+            <div class="compliance-card">
+              <div class="compliance-card-header">
+                <div class="compliance-card-icon" style="background:rgba(196,122,255,0.1)">&#127760;</div>
+                <div>
+                  <div class="compliance-card-title">ISO 27001:2022</div>
+                  <div class="compliance-card-sub">Information Security</div>
+                </div>
+              </div>
+              <ul class="compliance-items">
+                <li>A.5 — Information security policies (documented SOC runbooks)</li>
+                <li>A.8 — Asset management (lab asset register &amp; ownership)</li>
+                <li>A.12 — Operations security (change control via GitHub Actions)</li>
+                <li>A.16 — Incident management (triage &amp; response playbooks)</li>
+              </ul>
+              <span class="compliance-badge compliance-badge--planned">Awareness level — GRC cert planned</span>
+            </div>
+            <div class="compliance-card">
+              <div class="compliance-card-header">
+                <div class="compliance-card-icon" style="background:rgba(255,180,0,0.1)">&#9881;</div>
+                <div>
+                  <div class="compliance-card-title">GRC Practitioner</div>
+                  <div class="compliance-card-sub">Risk &amp; Governance</div>
+                </div>
+              </div>
+              <ul class="compliance-items">
+                <li>Risk registers applied to homelab change decisions</li>
+                <li>Policy documentation for access control &amp; log retention</li>
+                <li>Control gap analysis mapped against CIS L1 checklist</li>
+                <li>Audit evidence collection via automated GitHub Actions workflows</li>
+              </ul>
+              <span class="compliance-badge compliance-badge--partial">Applied in homelab &amp; work experience</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- UPGRADE 12: Security Posture Self-Assessment -->
+    <section id="security-posture" class="glass-card">
+      <div class="section-inner">
+        <div class="section-content">
+          <h2>Security Posture Self-Assessment</h2>
+          <p class="posture-intro">CIS Controls L1 self-assessment of my personal SOC lab and practitioner knowledge. Scored against implementation evidence, not just awareness.</p>
+          <div class="posture-overall">
+            <div class="posture-score-ring">
+              <svg width="72" height="72" viewBox="0 0 72 72" aria-hidden="true">
+                <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="7"/>
+                <circle id="postureRingFill" cx="36" cy="36" r="30" fill="none" stroke="#00ff88" stroke-width="7" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="188.5" style="transition:stroke-dashoffset 1.2s ease"/>
+              </svg>
+              <div class="posture-score-text">
+                <span class="posture-score-pct" id="postureScorePct">—</span>
+                <span class="posture-score-label">Overall</span>
+              </div>
+            </div>
+            <div class="posture-overall-text">
+              <h4>CIS Controls L1 — Home SOC Lab</h4>
+              <p>Scored against 6 control families based on implemented tooling, documented policies, and observable telemetry from Wazuh, Suricata, Sysmon, and pfSense.</p>
+            </div>
+          </div>
+          <div class="posture-categories">
+            <div class="posture-cat">
+              <div class="posture-cat-header"><span class="posture-cat-name">Asset Inventory</span><span class="posture-cat-pct" id="posturePct0">—</span></div>
+              <div class="posture-bar"><div class="posture-bar-fill"></div></div>
+            </div>
+            <div class="posture-cat">
+              <div class="posture-cat-header"><span class="posture-cat-name">Secure Configuration</span><span class="posture-cat-pct" id="posturePct1">—</span></div>
+              <div class="posture-bar"><div class="posture-bar-fill"></div></div>
+            </div>
+            <div class="posture-cat">
+              <div class="posture-cat-header"><span class="posture-cat-name">Log Management</span><span class="posture-cat-pct" id="posturePct2">—</span></div>
+              <div class="posture-bar"><div class="posture-bar-fill"></div></div>
+            </div>
+            <div class="posture-cat">
+              <div class="posture-cat-header"><span class="posture-cat-name">Access Control</span><span class="posture-cat-pct" id="posturePct3">—</span></div>
+              <div class="posture-bar"><div class="posture-bar-fill"></div></div>
+            </div>
+            <div class="posture-cat">
+              <div class="posture-cat-header"><span class="posture-cat-name">Network Monitoring</span><span class="posture-cat-pct" id="posturePct4">—</span></div>
+              <div class="posture-bar"><div class="posture-bar-fill"></div></div>
+            </div>
+            <div class="posture-cat">
+              <div class="posture-cat-header"><span class="posture-cat-name">Incident Response</span><span class="posture-cat-pct" id="posturePct5">—</span></div>
+              <div class="posture-bar"><div class="posture-bar-fill"></div></div>
+            </div>
+          </div>
+          <div class="posture-legend">
+            <span class="posture-legend-item"><span class="posture-legend-dot" style="background:#00ff88"></span>Implemented</span>
+            <span class="posture-legend-item"><span class="posture-legend-dot" style="background:#5dcfff"></span>Secure Config</span>
+            <span class="posture-legend-item"><span class="posture-legend-dot" style="background:#ffcc44"></span>Log Management</span>
+            <span class="posture-legend-item"><span class="posture-legend-dot" style="background:#ff6655"></span>Access Control</span>
+            <span class="posture-legend-item"><span class="posture-legend-dot" style="background:#c47aff"></span>Network Mon.</span>
+            <span class="posture-legend-item"><span class="posture-legend-dot" style="background:#ff9944"></span>IR Readiness</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section id="certifications" class="glass-card">
       <div class="book-card" tabindex="0">
         <div class="book-card-inner">
@@ -1534,17 +1678,57 @@
         </div>
       </section>
 
+      <!-- UPGRADE 1: SOC Terminal -->
+      <section id="soc-terminal" class="glass-card soc-terminal-section">
+        <div class="section-inner">
+          <div class="section-content">
+            <h2>SOC Terminal</h2>
+            <p class="terminal-desc">Explore my SOC methodology interactively. Type <code>help</code> to see available commands.</p>
+            <div class="terminal-window" aria-label="Interactive SOC terminal emulator">
+              <div class="terminal-titlebar" aria-hidden="true">
+                <span class="terminal-dot terminal-dot--red"></span>
+                <span class="terminal-dot terminal-dot--yellow"></span>
+                <span class="terminal-dot terminal-dot--green"></span>
+                <span class="terminal-title">soc-analyst@parrot:~$</span>
+              </div>
+              <div class="terminal-output" id="termOutput" aria-live="polite" aria-label="Terminal output"></div>
+              <div class="terminal-input-row">
+                <span class="terminal-prompt-label" aria-hidden="true">soc@parrot:~$&nbsp;</span>
+                <input type="text" id="termInput" class="terminal-cmd-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Terminal command input" placeholder="type a command..." />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- UPGRADE 13: Currently Hunting (JSON-driven) -->
       <section id="working-on" class="glass-card working-on-section">
         <div class="section-inner">
           <div class="section-content">
-            <h2>Currently Working On</h2>
-            <ul class="working-list">
-              <li>Expanding the personal SOC lab with Kubernetes security monitoring and container telemetry</li>
-              <li>Deepening MITRE ATT&amp;CK coverage &mdash; mapping detections to real TTPs and building custom Wazuh rules</li>
-              <li>Exploring Elastic Stack and OpenTelemetry for observability and log correlation</li>
-              <li>Pursuing GRC certification to formalise governance, risk &amp; compliance knowledge</li>
-            </ul>
-            <p class="working-note">Last updated <span id="workingOnDate">Jun 2026</span> &mdash; <a href="https://mail.google.com/mail/?view=cm&to=lamasubash107%40gmail.com&su=What%27s%20new%3F" target="_blank" rel="noopener noreferrer">ask me what&rsquo;s new</a></p>
+            <h2>Currently Hunting</h2>
+            <p class="working-note" style="margin-bottom:0.75rem">Active focus areas this month &mdash; last updated <span id="huntingUpdated">Jun 2026</span> &middot; <a href="https://mail.google.com/mail/?view=cm&to=lamasubash107%40gmail.com&su=What%27s%20new%3F" target="_blank" rel="noopener noreferrer">ask me what&rsquo;s new</a></p>
+            <div class="hunting-grid" id="huntingGrid">
+              <div class="hunting-card">
+                <span class="hunting-card-tag hunting-card-tag--ttp">TTP</span>
+                <h4>T1059 — Command &amp; Scripting Interpreter</h4>
+                <p>Building Wazuh rules to detect suspicious PowerShell and Bash chains from unusual parent processes.</p>
+              </div>
+              <div class="hunting-card">
+                <span class="hunting-card-tag hunting-card-tag--tool">TOOL</span>
+                <h4>Elastic Stack (ELK)</h4>
+                <p>Learning ELK as a complementary SIEM for multi-source log correlation alongside Wazuh.</p>
+              </div>
+              <div class="hunting-card">
+                <span class="hunting-card-tag hunting-card-tag--cert">CERT</span>
+                <h4>CompTIA CySA+ Preparation</h4>
+                <p>Studying to formalise threat detection, vulnerability management, and IR knowledge.</p>
+              </div>
+              <div class="hunting-card">
+                <span class="hunting-card-tag hunting-card-tag--lab">LAB</span>
+                <h4>Kubernetes Security Monitoring</h4>
+                <p>Adding K8s audit log ingestion and Falco runtime anomaly detection to the home SOC lab.</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -1604,7 +1788,7 @@
                 <p>Security-first culture &middot; Hands-on engineering &middot; Continuous learning &middot; Real threat detection work</p>
               </div>
             </div>
-            <p class="lf-cta">Let&rsquo;s talk &mdash; <a href="#contact">contact me directly</a> or <a href="assets/docs/cv/latest-resume.pdf" download="Subash-Lama-Resume.pdf">download my CV</a></p>
+            <p class="lf-cta">Let&rsquo;s talk &mdash; <a href="#contact">contact me directly</a> or <a href="assets/docs/cv/latest-resume.pdf" download="Subash-Lama-Resume.pdf">download my CV</a><span class="resume-version-badge" id="resumeVersionBadge" title="Resume version"><span class="rv-dot"></span><span class="rv-version">v1.0.0</span></span></p>
           </div>
         </div>
       </section>
@@ -1705,7 +1889,10 @@
         <span class="footer-sep">&middot;</span>
         <a href="https://soundcloud.com/subash-lama-408609351" target="_blank" rel="noopener noreferrer" class="footer-music-link footer-icon-link" aria-label="SoundCloud">♪ Music</a>
       </div>
-      <p class="footer-copy">&copy; <span id="footerYear">2026</span> Subash Lama. All rights reserved.</p>
+      <p style="margin-bottom:10px;text-align:center">
+        <img src="assets/badge.svg" alt="Subash Lama — SOC Analyst skills badge: certs, study streak, CTF score" width="340" height="20" style="border-radius:3px;max-width:100%" loading="lazy" />
+      </p>
+      <p class="footer-copy">&copy; <span id="footerYear">2026</span> Subash Lama. All rights reserved. &middot; <a href="threat-intel.html" style="color:rgba(0,255,136,0.6);font-size:0.75rem">Threat Intel</a></p>
     </div>
   </div>
   <!-- Hacker score HUD — hidden; gamification removed for professional presentation -->

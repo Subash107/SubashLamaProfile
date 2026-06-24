@@ -1,0 +1,125 @@
+name: Generate Skills Badge
+
+on:
+  schedule:
+    - cron: '30 2 * * *'   # Daily 8:15 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  badge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Generate badge SVG
+        run: |
+          LOG_DIR="download-logs"
+          CERT_COUNT=4
+          STUDY_LOG="${LOG_DIR}/study-log.json"
+          CTF_LOG="${LOG_DIR}/ctf-log.json"
+          VERSION_FILE="public/data/resume-version.json"
+
+          STREAK=0
+          if [ -f "$STUDY_LOG" ]; then
+            STREAK=$(python3 -c "
+import json, datetime
+try:
+    with open('$STUDY_LOG') as f:
+        entries = json.load(f)
+    dates = sorted(set(e['date'][:10] for e in entries if 'date' in e), reverse=True)
+    streak = 0
+    today = datetime.date.today()
+    for i, d in enumerate(dates):
+        expected = (today - datetime.timedelta(days=i)).isoformat()
+        if d == expected:
+            streak += 1
+        else:
+            break
+    print(streak)
+except Exception:
+    print(0)
+" 2>/dev/null || echo 0)
+          fi
+
+          CTF_SCORE=0
+          if [ -f "$CTF_LOG" ]; then
+            CTF_SCORE=$(python3 -c "
+import json
+try:
+    with open('$CTF_LOG') as f:
+        entries = json.load(f)
+    print(sum(e.get('score',0) for e in entries))
+except Exception:
+    print(0)
+" 2>/dev/null || echo 0)
+          fi
+
+          VERSION="1.0.0"
+          if [ -f "$VERSION_FILE" ]; then
+            VERSION=$(python3 -c "import json; print(json.load(open('$VERSION_FILE')).get('version','1.0.0'))" 2>/dev/null || echo "1.0.0")
+          fi
+
+          python3 -c "
+import sys
+cert_count = $CERT_COUNT
+streak     = $STREAK
+ctf_score  = $CTF_SCORE
+version    = '$VERSION'
+
+def badge_seg(x, w, color, label, value):
+    return (
+        '<rect x=\"{x}\" width=\"{w}\" height=\"20\" fill=\"{c}\"/>'.format(x=x,w=w,c=color),
+        '<text x=\"{cx}\" y=\"150\" fill=\"#010101\" fill-opacity=\".3\" transform=\"scale(.1)\" textLength=\"{tl}\">{v}</text>'
+        '<text x=\"{cx}\" y=\"140\" transform=\"scale(.1)\" textLength=\"{tl}\">{v}</text>'.format(
+            cx=int((x+w/2)*10), tl=int(len(value)*55), v=value)
+    )
+
+segs = [
+    (0,   90,  '#555',    'Profile',  'SOC Analyst'),
+    (90,  60,  '#007ec6', 'Certs',    str(cert_count) + ' certs'),
+    (150, 70,  '#00aa44', 'Streak',   'streak ' + str(streak) + 'd'),
+    (220, 65,  '#e05d44', 'CTF',      'CTF ' + str(ctf_score) + 'pts'),
+    (285, 55,  '#9f9f9f', 'CV',       'v' + version),
+]
+
+total_w = 285 + 55
+rects = []; texts = []
+for x, w, color, label, value in segs:
+    cx = int((x + w/2) * 10)
+    tl = max(len(value) * 55, 100)
+    rects.append('<rect x=\"{x}\" width=\"{w}\" height=\"20\" fill=\"{c}\"/>'.format(x=x,w=w,c=color))
+    texts.append('<text x=\"{cx}\" y=\"150\" fill=\"#010101\" fill-opacity=\".3\" transform=\"scale(.1)\" textLength=\"{tl}\">{v}</text><text x=\"{cx}\" y=\"140\" transform=\"scale(.1)\" fill=\"#fff\" textLength=\"{tl}\">{v}</text>'.format(cx=cx,tl=tl,v=value))
+
+svg = '''<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{w}\" height=\"20\">
+  <linearGradient id=\"s\" x2=\"0\" y2=\"100%\"><stop offset=\"0\" stop-color=\"#bbb\" stop-opacity=\".1\"/><stop offset=\"1\" stop-opacity=\".1\"/></linearGradient>
+  <clipPath id=\"r\"><rect width=\"{w}\" height=\"20\" rx=\"3\"/></clipPath>
+  <g clip-path=\"url(#r)\">
+    {rects}
+    <rect width=\"{w}\" height=\"20\" fill=\"url(#s)\"/>
+  </g>
+  <g fill=\"#fff\" text-anchor=\"middle\" font-family=\"DejaVu Sans,Verdana,Geneva,sans-serif\" font-size=\"110\">
+    {texts}
+  </g>
+</svg>'''.format(w=total_w, rects=chr(10).join(rects), texts=chr(10).join(texts))
+
+with open('public/assets/badge.svg', 'w') as f:
+    f.write(svg)
+print('Badge generated: certs={}, streak={}, ctf={}, v={}'.format(cert_count, streak, ctf_score, version))
+"
+
+      - name: Commit badge
+        run: |
+          git config user.email "lamasubash107@gmail.com"
+          git config user.name "Subash Lama"
+          git add public/assets/badge.svg
+          git diff --staged --quiet && echo "Badge unchanged" && exit 0
+          git commit -m "chore: regenerate skills badge $(date -u +"%Y-%m-%d")"
+          git push

@@ -134,12 +134,100 @@
       </article>
     </div>
 
+    <!-- UPGRADE 11: STRIDE Threat Model -->
+    <div class="project-category" id="threat-model">
+      <h2>Threat Model — Personal SOC Lab</h2>
+      <article class="project-card" id="stride-model">
+        <div class="project-meta">
+          <h3>STRIDE Analysis: Wazuh + Suricata + Sysmon</h3>
+          <div class="project-links">
+            <a href="index.html#skills">View Lab Topology &rarr;</a>
+          </div>
+        </div>
+        <p>Applying STRIDE threat modelling to my home SOC lab to identify attack surfaces, validate mitigations, and demonstrate structured security thinking.</p>
+        <div class="stride-table-wrap">
+          <table class="stride-table">
+            <thead>
+              <tr>
+                <th>Threat Category</th>
+                <th>Scenario</th>
+                <th>Affected Component</th>
+                <th>Mitigation</th>
+                <th>Risk</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="stride-tag stride-s">S — Spoofing</span></td>
+                <td>Attacker spoofs a Wazuh agent identity to inject false telemetry</td>
+                <td>Wazuh Manager</td>
+                <td>Agent authentication keys; agent ID pinning in ossec.conf</td>
+                <td class="risk-low">Low</td>
+              </tr>
+              <tr>
+                <td><span class="stride-tag stride-t">T — Tampering</span></td>
+                <td>Attacker modifies log files to evade detection and erase evidence</td>
+                <td>Sysmon / EVTX logs</td>
+                <td>Immutable log forwarding to Wazuh; integrity monitoring rules on log paths</td>
+                <td class="risk-med">Medium</td>
+              </tr>
+              <tr>
+                <td><span class="stride-tag stride-r">R — Repudiation</span></td>
+                <td>No audit trail for SIEM admin actions (rule changes, alert suppression)</td>
+                <td>Wazuh Manager Admin UI</td>
+                <td>Sysmon EventID 11/13 tracks Wazuh config changes; all changes committed to Git</td>
+                <td class="risk-med">Medium</td>
+              </tr>
+              <tr>
+                <td><span class="stride-tag stride-i">I — Info Disclosure</span></td>
+                <td>Log files contain cleartext credentials from monitored endpoints</td>
+                <td>Centralized log store</td>
+                <td>Log sanitisation rules; encrypted storage at rest; restricted RBAC access to log UI</td>
+                <td class="risk-high">High</td>
+              </tr>
+              <tr>
+                <td><span class="stride-tag stride-d">D — Denial of Service</span></td>
+                <td>Agent flood overwhelms Wazuh analysis engine, dropping real alerts</td>
+                <td>Wazuh Analysisd</td>
+                <td>Rate limiting per agent; event queue monitoring; alert on queue overflow</td>
+                <td class="risk-med">Medium</td>
+              </tr>
+              <tr>
+                <td><span class="stride-tag stride-e">E — Elevation of Privilege</span></td>
+                <td>Attacker gains root on SIEM host and disables detection entirely</td>
+                <td>Wazuh Server (Linux)</td>
+                <td>Minimal attack surface; SELinux enforcing; Suricata lateral movement detection; no direct internet exposure</td>
+                <td class="risk-high">High</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="project-tech"><strong>Method:</strong> STRIDE &middot; <strong>Tools:</strong> Wazuh, Suricata, Sysmon, pfSense &middot; <strong>Framework:</strong> MITRE ATT&amp;CK</p>
+      </article>
+    </div>
+
     <div class="projects-footer-nav">
       <a class="back-link" href="index.html">&larr; Back to Home</a>
       <button id="projBackToTop" class="proj-btt" aria-label="Back to top" title="Back to top">&#8679; Top</button>
     </div>
   </div>
   <style>
+    /* STRIDE threat model table */
+    .stride-table-wrap { overflow-x:auto; margin:14px 0; }
+    .stride-table { width:100%; border-collapse:collapse; font-size:0.78rem; }
+    .stride-table th { background:rgba(93,207,255,0.06); color:rgba(255,255,255,0.6); text-align:left; padding:7px 10px; border-bottom:1px solid rgba(255,255,255,0.1); font-weight:600; white-space:nowrap; }
+    .stride-table td { padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); vertical-align:top; color:rgba(255,255,255,0.7); }
+    .stride-table tr:hover td { background:rgba(255,255,255,0.02); }
+    .stride-tag { display:inline-block; padding:2px 7px; border-radius:4px; font-size:0.68rem; font-weight:700; white-space:nowrap; }
+    .stride-s { background:rgba(0,255,136,0.1);  color:#00ff88; }
+    .stride-t { background:rgba(255,204,68,0.1); color:#ffcc44; }
+    .stride-r { background:rgba(93,207,255,0.1); color:#5dcfff; }
+    .stride-i { background:rgba(196,122,255,0.1);color:#c47aff; }
+    .stride-d { background:rgba(255,102,85,0.1); color:#ff6655; }
+    .stride-e { background:rgba(255,153,68,0.1); color:#ff9944; }
+    .risk-low  { color:#00ff88; font-weight:600; }
+    .risk-med  { color:#ffcc44; font-weight:600; }
+    .risk-high { color:#ff6655; font-weight:600; }
     .projects-footer-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 2rem; flex-wrap: wrap; gap: 1rem; }
     .proj-btt {
       background: rgba(138,232,255,0.08); border: 1px solid rgba(138,232,255,0.3);

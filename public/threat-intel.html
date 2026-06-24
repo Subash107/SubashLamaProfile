@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Threat Intelligence — Subash Lama</title>
+  <style>
+    :root { --bg:#07111c; --panel:#0d1e2e; --accent:#00ff88; --red:#ff6655; --yellow:#ffcc44; --blue:#5dcfff; --text:#e0e0e0; --muted:#6b7a8d; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg); color:var(--text); font-family:'Segoe UI',sans-serif; min-height:100vh; padding:20px; }
+    a { color:var(--accent); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+
+    .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; padding-bottom:14px; border-bottom:1px solid #1a2a3a; flex-wrap:wrap; gap:10px; }
+    .top-bar h1 { color:var(--accent); font-size:1.2rem; }
+    .top-bar .back { font-size:0.82rem; color:var(--muted); }
+
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:24px; }
+    .stat { background:var(--panel); border:1px solid #1a2a3a; border-radius:10px; padding:18px; text-align:center; }
+    .stat .num { font-size:2rem; font-weight:700; color:var(--accent); }
+    .stat .lbl { font-size:0.78rem; color:var(--muted); margin-top:4px; }
+
+    .section { background:var(--panel); border:1px solid #1a2a3a; border-radius:10px; padding:18px; margin-bottom:16px; }
+    .section h2 { font-size:0.95rem; color:var(--accent); margin-bottom:14px; }
+
+    table { width:100%; border-collapse:collapse; font-size:0.8rem; }
+    th { color:var(--muted); text-align:left; padding:5px 8px; border-bottom:1px solid #1a2a3a; font-weight:500; }
+    td { padding:7px 8px; border-bottom:1px solid #0d1e2e; vertical-align:top; }
+    tr:hover td { background:#0a1828; }
+
+    .badge { display:inline-block; padding:2px 8px; border-radius:12px; font-size:0.7rem; font-weight:600; }
+    .badge-bot  { background:rgba(255,102,85,0.15); color:#ff6655; border:1px solid rgba(255,102,85,0.3); }
+    .badge-human{ background:rgba(0,255,136,0.12); color:#00ff88; border:1px solid rgba(0,255,136,0.25); }
+    .badge-scan { background:rgba(255,204,68,0.12); color:#ffcc44; border:1px solid rgba(255,204,68,0.25); }
+
+    .bar-row { display:flex; align-items:center; gap:10px; margin-bottom:7px; font-size:0.8rem; }
+    .bar-label { width:130px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .bar-track { flex:1; background:#0a1828; border-radius:3px; height:7px; }
+    .bar-fill  { height:7px; border-radius:3px; background:var(--accent); transition:width 0.7s ease; }
+    .bar-count { width:28px; text-align:right; color:var(--muted); font-size:0.75rem; }
+
+    .pattern-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; }
+    .pattern-card { background:#0a1828; border:1px solid #1a2a3a; border-radius:8px; padding:12px 14px; }
+    .pattern-card h4 { font-size:0.82rem; color:var(--accent); margin-bottom:5px; }
+    .pattern-card p  { font-size:0.76rem; color:var(--muted); line-height:1.5; }
+
+    .loading { color:var(--muted); font-size:0.85rem; padding:16px 0; }
+    .refresh-btn { background:transparent; border:1px solid var(--accent); color:var(--accent); padding:5px 12px; border-radius:5px; cursor:pointer; font-size:0.78rem; }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <h1>Threat Intelligence Feed — Subash Lama Portfolio</h1>
+    <div style="display:flex;gap:10px;align-items:center">
+      <span id="lastUpdated" class="back"></span>
+      <button class="refresh-btn" onclick="loadData()">Refresh</button>
+      <a class="back" href="index.html">&larr; Back to portfolio</a>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="stat"><div class="num" id="statHuman">—</div><div class="lbl">Human Visitors</div></div>
+    <div class="stat"><div class="num" id="statBot">—</div><div class="lbl">Bot Requests</div></div>
+    <div class="stat"><div class="num" id="statShare">—</div><div class="lbl">Link Previews</div></div>
+    <div class="stat"><div class="num" id="statRatio">—</div><div class="lbl">Signal / Noise</div></div>
+  </div>
+
+  <div class="section">
+    <h2>Live Visitor Feed (Today)</h2>
+    <div id="liveTable"><div class="loading">Loading...</div></div>
+  </div>
+
+  <div class="section">
+    <h2>Traffic Classification</h2>
+    <div id="classBars"><div class="loading">Loading...</div></div>
+  </div>
+
+  <div class="section">
+    <h2>Observed Bot Patterns</h2>
+    <div class="pattern-grid">
+      <div class="pattern-card">
+        <h4>User-Agent Spoofing</h4>
+        <p>Bots claiming to be Chrome/Firefox but missing JS fingerprint properties. Detected via behaviour analysis.</p>
+      </div>
+      <div class="pattern-card">
+        <h4>Headless Browser Crawlers</h4>
+        <p>Puppeteer/Playwright-based crawlers — caught by canvas fingerprint and missing audio context.</p>
+      </div>
+      <div class="pattern-card">
+        <h4>PDF Link Harvesters</h4>
+        <p>Automated resume scrapers that download the PDF without any prior page interaction.</p>
+      </div>
+      <div class="pattern-card">
+        <h4>Honeypot Triggered</h4>
+        <p>Visitors accessing hidden bot-trap endpoints (/bot-trap, /.env) — logged and flagged automatically.</p>
+      </div>
+      <div class="pattern-card">
+        <h4>Preview Crawlers</h4>
+        <p>LinkedIn, Slack, Discord link-preview bots — classified as "shares" rather than bot attacks.</p>
+      </div>
+      <div class="pattern-card">
+        <h4>Canary Token Pings</h4>
+        <p>Tracking pixel embedded in resume PDF fires when the PDF is opened — confirms download and read.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>CVE Watchlist (My Stack)</h2>
+    <div id="cveTable"><div class="loading">Loading...</div></div>
+  </div>
+
+  <script>
+    const WORKER = "https://lingering-surf-6d77.lamasubash107.workers.dev";
+    const CVE_URL = "data/cve-watchlist.json";
+
+    async function loadData() {
+      document.getElementById("lastUpdated").textContent = "Updated " + new Date().toLocaleTimeString();
+      await Promise.all([loadWorkerStats(), loadCveTable()]);
+    }
+
+    async function loadWorkerStats() {
+      try {
+        const r = await fetch(WORKER + "/daily-stats?t=" + Date.now());
+        const d = await r.json();
+
+        const human = d.humanCount || 0;
+        const bot   = d.botCount   || 0;
+        const share = d.shareCount || 0;
+        const ratio = bot > 0 ? (human / bot).toFixed(1) + ":1" : "∞";
+
+        document.getElementById("statHuman").textContent = human;
+        document.getElementById("statBot").textContent   = bot;
+        document.getElementById("statShare").textContent = share;
+        document.getElementById("statRatio").textContent = ratio;
+
+        const max = Math.max(human, bot, share, 1);
+        document.getElementById("classBars").innerHTML = [
+          ["Human Visitors",  human, "var(--accent)"],
+          ["Bot Requests",    bot,   "var(--red)"],
+          ["Link Previews",   share, "var(--yellow)"],
+        ].map(([l,v,c]) =>
+          '<div class="bar-row">' +
+          '<div class="bar-label">' + l + '</div>' +
+          '<div class="bar-track"><div class="bar-fill" style="width:' + Math.round(v/max*100) + '%;background:' + c + '"></div></div>' +
+          '<div class="bar-count">' + v + '</div></div>'
+        ).join("");
+
+        document.getElementById("liveTable").innerHTML =
+          '<table><thead><tr><th>Date</th><th>Type</th><th>Count</th></tr></thead><tbody>' +
+          '<tr><td>' + (d.date || new Date().toISOString().slice(0,10)) + '</td><td><span class="badge badge-human">HUMAN</span></td><td>' + human + '</td></tr>' +
+          '<tr><td>' + (d.date || new Date().toISOString().slice(0,10)) + '</td><td><span class="badge badge-bot">BOT</span></td><td>' + bot + '</td></tr>' +
+          '<tr><td>' + (d.date || new Date().toISOString().slice(0,10)) + '</td><td><span class="badge badge-scan">PREVIEW</span></td><td>' + share + '</td></tr>' +
+          '</tbody></table>';
+      } catch(e) {
+        document.getElementById("statHuman").textContent = "—";
+        document.getElementById("classBars").innerHTML = '<div class="loading">Worker unreachable</div>';
+      }
+    }
+
+    async function loadCveTable() {
+      try {
+        const r = await fetch(CVE_URL + "?t=" + Date.now());
+        const d = await r.json();
+        if (!d.entries || !d.entries.length) {
+          document.getElementById("cveTable").innerHTML = '<div class="loading">No CVEs logged yet — watchlist workflow runs daily.</div>';
+          return;
+        }
+        const rows = d.entries.map(e => {
+          const sevColor = e.severity === "critical" ? "var(--red)" : e.severity === "high" ? "var(--yellow)" : "var(--muted)";
+          return '<tr><td style="color:' + sevColor + ';font-weight:700">' + (e.id||"?") + '</td>' +
+            '<td>' + (e.product||"?") + '</td>' +
+            '<td style="color:' + sevColor + '">' + (e.severity||"?").toUpperCase() + ' (' + (e.cvss||"?") + ')</td>' +
+            '<td>' + (e.summary||"").slice(0,90) + '…</td>' +
+            '<td style="color:' + (e.status==="patched" ? "var(--accent)" : "var(--red)") + '">' + (e.status||"?") + '</td></tr>';
+        }).join("");
+        document.getElementById("cveTable").innerHTML =
+          '<table><thead><tr><th>CVE ID</th><th>Product</th><th>Severity</th><th>Summary</th><th>Status</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+          '<p style="font-size:0.74rem;color:var(--muted);margin-top:10px">Last updated: ' + (d.updated||"—") + ' · Stack: ' + (d.stack||[]).join(', ') + '</p>';
+      } catch(e) {
+        document.getElementById("cveTable").innerHTML = '<div class="loading">Could not load CVE data.</div>';
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>

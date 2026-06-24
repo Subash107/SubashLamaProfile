@@ -105,6 +105,38 @@
     <h2>Download Heatmap — By Hour (UTC)</h2>
     <div id="hourmap"><div class="loading">Loading...</div></div>
   </div>
+
+  <!-- UPGRADE 15: Visitor Country Map -->
+  <div class="section">
+    <h2>Visitor Country Map</h2>
+    <div id="countryMapWrap" style="overflow-x:auto">
+      <svg id="worldMap" viewBox="0 0 900 440" style="width:100%;max-width:900px;background:#040e1a;border-radius:8px" aria-label="Visitor world map">
+        <!-- Simplified continent outlines -->
+        <!-- North America -->
+        <path d="M 100 80 L 220 70 L 260 100 L 270 140 L 240 170 L 200 180 L 160 200 L 130 240 L 110 220 L 80 180 L 70 130 Z" fill="#0d1e2e" stroke="#1a2a3a" stroke-width="1.5"/>
+        <!-- South America -->
+        <path d="M 170 250 L 230 240 L 260 280 L 260 340 L 230 390 L 190 400 L 160 370 L 150 320 L 155 270 Z" fill="#0d1e2e" stroke="#1a2a3a" stroke-width="1.5"/>
+        <!-- Europe -->
+        <path d="M 390 60 L 470 55 L 490 80 L 470 110 L 430 115 L 400 100 Z" fill="#0d1e2e" stroke="#1a2a3a" stroke-width="1.5"/>
+        <!-- Africa -->
+        <path d="M 400 130 L 470 125 L 490 160 L 480 240 L 460 290 L 430 310 L 400 290 L 380 240 L 385 170 Z" fill="#0d1e2e" stroke="#1a2a3a" stroke-width="1.5"/>
+        <!-- Asia -->
+        <path d="M 490 55 L 700 50 L 730 80 L 720 150 L 680 170 L 620 175 L 560 160 L 510 130 L 490 90 Z" fill="#0d1e2e" stroke="#1a2a3a" stroke-width="1.5"/>
+        <!-- Southeast Asia / India -->
+        <path d="M 600 175 L 650 185 L 660 240 L 630 270 L 600 250 L 590 210 Z" fill="#0d1e2e" stroke="#1a2a3a" stroke-width="1.5"/>
+        <!-- Australia -->
+        <path d="M 680 270 L 780 265 L 800 310 L 790 360 L 740 370 L 690 340 L 675 300 Z" fill="#0d1e2e" stroke="#1a2a3a" stroke-width="1.5"/>
+        <!-- Country visitor dots — rendered by JS -->
+        <g id="mapDots"></g>
+        <!-- Legend -->
+        <circle cx="30" cy="420" r="6" fill="rgba(0,255,136,0.8)"/>
+        <text x="42" y="424" fill="#6b7a8d" font-size="10">Visitor origin</text>
+        <circle cx="140" cy="420" r="4" fill="rgba(93,207,255,0.6)"/>
+        <text x="152" y="424" fill="#6b7a8d" font-size="10">Single visit</text>
+      </svg>
+    </div>
+    <div id="mapCountryList" style="margin-top:10px"></div>
+  </div>
 </div>
 
 <script>
@@ -195,11 +227,66 @@
     entries.forEach(e => { const d = new Date(e.ts); if(!isNaN(d)) dayMap[DAYS[d.getUTCDay()]]++; });
     renderHeatmap("heatmap", DAYS.map(d => [d, dayMap[d]]));
 
+    // Visitor country map (Upgrade 15)
+    renderCountryMap(entries);
+
     // Hour heatmap
     const hourMap = {};
     for (let h=0; h<24; h++) hourMap[h] = 0;
     entries.forEach(e => { const d = new Date(e.ts); if(!isNaN(d)) hourMap[d.getUTCHours()]++; });
     renderHeatmap("hourmap", Object.entries(hourMap).map(([h,v]) => [h+"h", v]));
+  }
+
+  function renderCountryMap(entries) {
+    const COUNTRY_COORDS = {
+      "United States": [160, 140], "US": [160, 140], "USA": [160, 140],
+      "United Kingdom": [415, 75], "UK": [415, 75],
+      "Germany": [440, 75], "France": [425, 85], "Netherlands": [435, 70],
+      "India": [615, 155], "Nepal": [625, 145], "NP": [625, 145],
+      "China": [670, 110], "Japan": [710, 110], "South Korea": [700, 110],
+      "Australia": [740, 310], "Singapore": [650, 220], "Canada": [150, 105],
+      "Brazil": [215, 290], "Nigeria": [430, 220], "South Africa": [440, 290],
+      "Russia": [600, 75], "Turkey": [500, 115], "Pakistan": [600, 135],
+      "Bangladesh": [640, 155], "Sri Lanka": [625, 200], "UAE": [550, 155],
+    };
+
+    const cMap = {};
+    entries.forEach(e => {
+      const country = e.location.split(",").pop().trim();
+      if (country) cMap[country] = (cMap[country] || 0) + 1;
+    });
+
+    const dotsEl = document.getElementById("mapDots");
+    const listEl = document.getElementById("mapCountryList");
+    if (!dotsEl || !listEl) return;
+
+    dotsEl.innerHTML = "";
+    const sorted = Object.entries(cMap).sort((a,b) => b[1]-a[1]);
+    const maxCount = sorted[0]?.[1] || 1;
+
+    sorted.forEach(([country, count]) => {
+      const coords = COUNTRY_COORDS[country];
+      if (!coords) return;
+      const r = Math.max(4, Math.min(12, 4 + (count / maxCount) * 8));
+      const opacity = 0.4 + (count / maxCount) * 0.6;
+      const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      dot.setAttribute("cx", coords[0]);
+      dot.setAttribute("cy", coords[1]);
+      dot.setAttribute("r", r);
+      dot.setAttribute("fill", `rgba(0,255,136,${opacity})`);
+      dot.setAttribute("stroke", "rgba(0,255,136,0.4)");
+      dot.setAttribute("stroke-width", "1");
+      const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+      title.textContent = country + ": " + count + " download" + (count > 1 ? "s" : "");
+      dot.appendChild(title);
+      dotsEl.appendChild(dot);
+    });
+
+    listEl.innerHTML = sorted.slice(0, 8).map(([c, v]) =>
+      '<span style="display:inline-flex;align-items:center;gap:5px;margin:0 8px 6px 0;font-size:0.78rem;color:#6b7a8d">' +
+      '<span style="width:8px;height:8px;border-radius:50%;background:rgba(0,255,136,0.7);display:inline-block"></span>' +
+      c + ' (' + v + ')</span>'
+    ).join("");
   }
 
   function renderHeatmap(id, data) {

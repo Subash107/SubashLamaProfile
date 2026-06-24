@@ -1,0 +1,66 @@
+name: Recruiter Company Auto-Research
+
+on:
+  push:
+    paths:
+      - 'download-logs/resume-downloads.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Extract latest download entry and research company
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          LOG="download-logs/resume-downloads.txt"
+          if [ ! -f "$LOG" ]; then
+            echo "No download log found — skipping."
+            exit 0
+          fi
+
+          LATEST=$(tail -1 "$LOG" | grep "^[0-9]" || true)
+          if [ -z "$LATEST" ]; then
+            echo "No valid entry found."
+            exit 0
+          fi
+
+          TS=$(echo "$LATEST"      | cut -d'|' -f1 | tr -d ' ')
+          IP=$(echo "$LATEST"      | cut -d'|' -f2 | tr -d ' ')
+          LOCATION=$(echo "$LATEST"| cut -d'|' -f3 | tr -d ' ')
+          ORG=$(echo "$LATEST"     | cut -d'|' -f4 | tr -d ' ')
+          BROWSER=$(echo "$LATEST" | cut -d'|' -f5 | tr -d ' ')
+          REF=$(echo "$LATEST"     | cut -d'|' -f8 | tr -d ' ')
+
+          if [ -z "$ORG" ] || [ "$ORG" = "Unknown" ]; then
+            echo "No org info — skipping Telegram alert."
+            exit 0
+          fi
+
+          ORG_ENCODED=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$ORG")
+          GH_JOBS_URL="https://github.com/search?q=${ORG_ENCODED}+cybersecurity+analyst&type=repositories"
+          LI_URL="https://www.linkedin.com/company/${ORG_ENCODED}/jobs/"
+
+          HOT=""
+          echo "$ORG" | grep -qiE "microsoft|google|amazon|cisco|ibm|palo alto|crowdstrike|deloitte|accenture|fortinet|sophos|splunk" && HOT=" RECRUITER ALERT"
+
+          MSG=$(printf 'Resume Download%s\n\nTime     : %s\nOrg      : %s\nLocation : %s\nBrowser  : %s\nReferrer : %s\n\nIntel links:\n  LinkedIn Jobs : %s\n  GitHub Search : %s\n\nTip: Search LinkedIn for hiring managers at %s in Security/IT.' \
+            "$HOT" "$TS" "$ORG" "$LOCATION" "$BROWSER" "${REF:-direct}" "$LI_URL" "$GH_JOBS_URL" "$ORG")
+
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(printf '%s' "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+
+          echo "Telegram: $RESPONSE"

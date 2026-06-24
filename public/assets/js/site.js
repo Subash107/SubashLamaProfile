@@ -3368,6 +3368,11 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
     initGuidedTour();
     initPresentationMode();
     initCopyAsMarkdown();
+    initSocTerminal();
+    initHomelabClickDetail();
+    initPostureChart();
+    initCurrentlyHunting();
+    initResumeVersionBadge();
 
     const scheduleNonCriticalStartup = () => {
       scheduleDeferredTask(initResumeDownload, { timeout: 1200 });
@@ -3383,3 +3388,335 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
     window.addEventListener("load", scheduleNonCriticalStartup, { once: true });
   });
 })();
+
+/* ─────────────────────────────────────────────────────────────────
+   UPGRADE 1 — Interactive SOC Terminal
+   ───────────────────────────────────────────────────────────────── */
+function initSocTerminal() {
+  const output = document.getElementById("termOutput");
+  const input  = document.getElementById("termInput");
+  if (!output || !input) return;
+
+  const NODE_DETAILS = {
+    FW:   { name:"pfSense Firewall", body:"Internet gateway running pfSense 2.7. Manages firewall rules, NAT, VLAN segmentation, and traffic filtering for the SOC lab. All inbound/outbound flows are logged.", tags:["Firewall","NAT","VLAN","pfSense"] },
+    IDS:  { name:"Suricata IDS/IPS", body:"Network intrusion detection running Suricata 7.x with ET Open rules. Monitors all LAN traffic, generates alerts on signatures and anomalies, and feeds events to Wazuh.", tags:["Suricata","IDS/IPS","ET Open Rules","PCAP"] },
+    SYS:  { name:"Sysmon (Windows)", body:"Sysmon installed on Windows endpoints for process creation, network connections, registry changes, and file events. Config tuned to SwiftOnSecurity ruleset.", tags:["Sysmon","Windows Telemetry","EventID 1/3/7/11"] },
+    SIEM: { name:"Wazuh SIEM (Central)", body:"Core SIEM running Wazuh 4.x. Aggregates logs from all agents, runs correlation rules, generates alerts, and provides dashboards for detection and response.", tags:["Wazuh","SIEM","Log Correlation","Alerting"] },
+    CTR:  { name:"Docker (Lab Services)", body:"Containerised services including vulnerable apps for attack simulation, isolated network zones, and repeatable lab environments. Managed via Docker Compose.", tags:["Docker","Containers","Isolation","DevSecOps"] },
+    KALI: { name:"Kali Linux (Red Team)", body:"Kali Linux for penetration testing and adversary simulation. Used to generate realistic attack telemetry — port scans, brute force, lateral movement — to test detection rules.", tags:["Kali","Red Team","Metasploit","Nmap"] },
+    SOC:  { name:"SOC Analyst (You)", body:"Monitoring alerts from Wazuh dashboards, triaging Suricata events, running threat hunts mapped to MITRE ATT&CK, and continuously tuning detection rules.", tags:["Alert Triage","Incident Response","MITRE ATT&CK"] }
+  };
+
+  const history = [];
+  let histIdx = -1;
+
+  function print(text, cls) {
+    const d = document.createElement("div");
+    d.className = cls || "t-out";
+    d.textContent = text;
+    output.appendChild(d);
+    output.scrollTop = output.scrollHeight;
+  }
+
+  function printCmd(cmd) {
+    const d = document.createElement("div");
+    d.className = "t-cmd";
+    d.textContent = "$ " + cmd;
+    output.appendChild(d);
+  }
+
+  function run(cmd) {
+    const parts = cmd.trim().split(/\s+/);
+    const base  = parts[0].toLowerCase();
+    const arg   = parts.slice(1).join(" ");
+    printCmd(cmd);
+
+    switch (base) {
+      case "help":
+        print(["Available commands:",
+          "  whoami          — analyst profile",
+          "  threat-hunt     — run MITRE-based hunt playbook",
+          "  analyze-ioc <x> — analyze IP or domain IOC",
+          "  check-cve       — check monitored stack CVE status",
+          "  status          — SOC lab health check",
+          "  nmap [host]     — simulated port scan",
+          "  ping [host]     — simulated connectivity check",
+          "  ps              — running security processes",
+          "  ls              — list lab directories",
+          "  uname           — system info",
+          "  clear           — clear terminal",
+        ].join("\n"), "t-info");
+        break;
+
+      case "whoami":
+        print(["Subash Lama — Cybersecurity Analyst",
+          "Role     : SOC L1/L2 | GRC | IAM",
+          "OS       : Parrot OS 6.3 (Lorikeet)",
+          "Certs    : Cisco Endpoint Security · Cisco Ethical Hacker",
+          "           IBM Cybersecurity Fundamentals · Python for Data Science",
+          "Lab      : Wazuh · Suricata · Sysmon · pfSense",
+          "Location : Kathmandu, Nepal (UTC+5:45)",
+        ].join("\n"));
+        break;
+
+      case "threat-hunt":
+        print("Initiating MITRE ATT&CK hunt playbook...", "t-warn");
+        [[400,"[T1059] Checking suspicious command-line execution chains..."],
+         [900,"[T1078] Scanning for valid account abuse patterns..."],
+         [1400,"[T1055] Process injection artifacts — analysing..."],
+         [1900,"[T1190] Exploit attempt logs (public-facing services)..."],
+         [2400,"[T1566] Phishing indicator review (email headers)..."],
+         [2900,"Hunt complete. 0 active threats. 3 low-priority alerts queued.", "t-info"],
+        ].forEach(([ms, msg, cls]) => setTimeout(() => print(msg, cls), ms));
+        break;
+
+      case "analyze-ioc": {
+        if (!arg) { print("Usage: analyze-ioc <ip or domain>", "t-err"); break; }
+        print("Analysing IOC: " + arg, "t-warn");
+        const risk = Math.random() > 0.55 ? "MEDIUM" : "LOW";
+        [[400,"[OSINT] Checking threat intel feeds (AbuseIPDB, URLhaus)..."],
+         [800,"[WHOIS] Registration lookup..."],
+         [1200,"[GEO]   Geolocation..."],
+         [1700,"Result: " + arg + " — Risk: " + risk + " | No active blacklist match.", risk === "MEDIUM" ? "t-warn" : "t-info"],
+        ].forEach(([ms, msg, cls]) => setTimeout(() => print(msg, cls), ms));
+        break;
+      }
+
+      case "check-cve":
+        print("Stack CVE status — " + new Date().toISOString().slice(0,10), "t-info");
+        [[400,"[Wazuh 4.x]    — No critical CVEs in current release"],
+         [700,"[Suricata 7.x] — No critical CVEs in current release"],
+         [1000,"[pfSense 2.7]  — Advisory: XSS in WebGUI (low, patched 2026-04)","t-warn"],
+         [1300,"[Docker 26.x]  — No critical CVEs in current release"],
+         [1600,"[Ubuntu 22.04] — 2 kernel patches available — schedule maintenance","t-warn"],
+         [2000,"CVE check done. Patch schedule: Ubuntu kernel update.","t-info"],
+        ].forEach(([ms, msg, cls]) => setTimeout(() => print(msg, cls), ms));
+        break;
+
+      case "status":
+        print("SOC Lab Status — " + new Date().toLocaleString(), "t-info");
+        print(["  [UP]  pfSense firewall        — Rules: 24 active",
+          "  [UP]  Suricata IDS             — Alerts (24h): 12",
+          "  [UP]  Wazuh SIEM              — Agents: 3 connected",
+          "  [UP]  Sysmon (Windows)        — Events/min: 142",
+          "  [UP]  Docker services         — Containers: 5 running",
+          "  [--]  Kali attack simulation  — Idle",
+        ].join("\n"));
+        break;
+
+      case "nmap": {
+        const host = arg || "192.168.1.1";
+        print("Starting Nmap scan on " + host + " ...", "t-warn");
+        [[600,"PORT     STATE  SERVICE"],[900,"22/tcp   open   ssh"],
+         [1100,"80/tcp   open   http"],[1300,"443/tcp  open   https"],
+         [1500,"8080/tcp closed http-alt"],
+         [1800,"Nmap done: 1 IP — 3 open ports","t-info"],
+        ].forEach(([ms, msg, cls]) => setTimeout(() => print(msg, cls), ms));
+        break;
+      }
+
+      case "ping": {
+        const target = arg || "8.8.8.8";
+        print("PING " + target, "t-info");
+        [64,65,66,67].forEach((seq, i) => {
+          setTimeout(() => print("64 bytes from " + target + ": icmp_seq=" + seq + " ttl=55 time=" + (12 + Math.random()*3).toFixed(1) + " ms"), i * 320);
+        });
+        setTimeout(() => print("--- " + target + " ping statistics ---\n4 packets tx, 4 rx, 0% loss", "t-info"), 1400);
+        break;
+      }
+
+      case "ps":
+        print(["PID    CMD",
+          "1      /usr/bin/wazuh-agent",
+          "142    suricata -D -c /etc/suricata/suricata.yaml",
+          "318    docker-containerd-shim",
+          "502    sysmon64",
+          "1024   /bin/bash",
+          "2048   python3 scripts/daily-digest.py",
+        ].join("\n"));
+        break;
+
+      case "ls":
+        print("alerts/  artifacts/  logs/  playbooks/  reports/  rules/  scripts/  tmp/", "t-info");
+        break;
+
+      case "uname":
+        print("Linux parrot 6.1.0-parrot1-amd64 #1 SMP Parrot 6.1 x86_64 GNU/Linux");
+        break;
+
+      case "clear":
+        output.innerHTML = "";
+        break;
+
+      case "exit":
+      case "quit":
+        print("Session closed. Stay secure.", "t-warn");
+        input.disabled = true;
+        break;
+
+      default:
+        if (base) print("bash: " + base + ": command not found — type 'help'", "t-err");
+    }
+  }
+
+  print(["╔═══════════════════════════════════════════╗",
+    "║   SOC TERMINAL — Subash Lama              ║",
+    "║   Parrot OS · Wazuh · Suricata · SIEM    ║",
+    "╚═══════════════════════════════════════════╝",
+    'Type "help" for available commands.',
+    "",
+  ].join("\n"), "t-info");
+
+  input.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+      const cmd = input.value.trim();
+      if (cmd) { history.unshift(cmd); histIdx = -1; run(cmd); }
+      input.value = "";
+    } else if (e.key === "ArrowUp") {
+      if (histIdx < history.length - 1) { histIdx++; input.value = history[histIdx] || ""; }
+      e.preventDefault();
+    } else if (e.key === "ArrowDown") {
+      if (histIdx > 0) { histIdx--; input.value = history[histIdx] || ""; }
+      else { histIdx = -1; input.value = ""; }
+      e.preventDefault();
+    }
+  });
+
+  document.querySelector(".terminal-window")?.addEventListener("click", () => input.focus());
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   UPGRADE 2 — Homelab click-to-detail panel
+   ───────────────────────────────────────────────────────────────── */
+function initHomelabClickDetail() {
+  const svg    = document.getElementById("homelabSvg");
+  const panel  = document.getElementById("hlDetailPanel");
+  if (!svg || !panel) return;
+
+  const nameEl = panel.querySelector(".hl-detail-name");
+  const bodyEl = panel.querySelector(".hl-detail-body");
+  const tagsEl = panel.querySelector(".hl-detail-tags");
+
+  const NODE_DATA = {
+    FW:   { name:"pfSense Firewall", body:"Internet gateway running pfSense 2.7. Manages firewall rules, NAT, VLAN segmentation, and traffic filtering. All traffic is logged and forwarded to Wazuh.", tags:["Firewall","NAT","VLAN"] },
+    IDS:  { name:"Suricata IDS/IPS", body:"Network IDS running Suricata 7.x with Emerging Threats Open rules. Monitors LAN traffic, generates alerts on anomalies, and ships events to Wazuh via UNIX socket.", tags:["IDS/IPS","ET Open Rules","PCAP"] },
+    SYS:  { name:"Sysmon (Windows)", body:"Sysmon on Windows endpoints captures process creation, network connections, registry changes, and file events. Config tuned to SwiftOnSecurity ruleset.", tags:["Windows Telemetry","EventID 1/3/7"] },
+    SIEM: { name:"Wazuh SIEM (Core)", body:"Core SIEM aggregating logs from all agents. Runs correlation rules, generates alerts with severity scoring, and provides dashboards for detection and response workflows.", tags:["SIEM","Log Correlation","Alerting","Dashboards"] },
+    CTR:  { name:"Docker (Lab Services)", body:"Containerised vulnerable apps and isolated network zones for attack simulation. Managed via Docker Compose with defined resource limits and network policies.", tags:["Docker","Isolation","Containers"] },
+    KALI: { name:"Kali Linux (Red Team)", body:"Kali Linux for adversary simulation — port scans, brute force, lateral movement, and payload generation. Used to generate telemetry that validates detection rules.", tags:["Kali","Metasploit","Nmap","Red Team"] },
+    SOC:  { name:"SOC Analyst (You)", body:"Monitoring Wazuh dashboards, triaging Suricata alerts, running threat hunts mapped to MITRE ATT&CK, and tuning detection rules based on observed attack patterns.", tags:["Alert Triage","Incident Response","MITRE"] }
+  };
+
+  let selected = null;
+
+  svg.querySelectorAll(".hl-node").forEach(node => {
+    node.setAttribute("role", "button");
+    node.setAttribute("tabindex", "0");
+    node.addEventListener("click", () => {
+      const label = node.querySelector(".hl-label")?.textContent?.trim();
+      const data  = NODE_DATA[label];
+      if (!data) return;
+
+      if (selected) selected.classList.remove("hl-selected");
+      node.classList.add("hl-selected");
+      selected = node;
+
+      if (nameEl) nameEl.textContent = data.name;
+      if (bodyEl) bodyEl.textContent = data.body;
+      if (tagsEl) {
+        tagsEl.innerHTML = "";
+        data.tags.forEach(t => {
+          const s = document.createElement("span");
+          s.className = "hl-detail-tag";
+          s.textContent = t;
+          tagsEl.appendChild(s);
+        });
+      }
+      panel.classList.add("hl-detail-visible");
+    });
+    node.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); node.click(); } });
+  });
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   UPGRADE 12 — Security Posture CIS L1 chart
+   ───────────────────────────────────────────────────────────────── */
+function initPostureChart() {
+  const ring     = document.getElementById("postureRingFill");
+  const pctLabel = document.getElementById("postureScorePct");
+  const cats     = document.querySelectorAll(".posture-cat");
+  if (!ring || !cats.length) return;
+
+  const CIRCUMFERENCE = 2 * Math.PI * 30;
+  ring.setAttribute("stroke-dasharray", CIRCUMFERENCE);
+  ring.setAttribute("stroke-dashoffset", CIRCUMFERENCE);
+
+  const scores = [82, 75, 88, 60, 70, 55];
+  const overall = Math.round(scores.reduce((a,b) => a+b, 0) / scores.length);
+
+  const COLORS = ["#00ff88","#5dcfff","#ffcc44","#ff6655","#c47aff","#ff9944"];
+
+  cats.forEach((cat, i) => {
+    const fill = cat.querySelector(".posture-bar-fill");
+    const pct  = cat.querySelector(".posture-cat-pct");
+    if (!fill) return;
+    fill.style.background = COLORS[i % COLORS.length];
+    setTimeout(() => {
+      fill.style.width = scores[i] + "%";
+      if (pct) pct.textContent = scores[i] + "%";
+    }, 400 + i * 120);
+  });
+
+  setTimeout(() => {
+    const offset = CIRCUMFERENCE * (1 - overall / 100);
+    ring.setAttribute("stroke-dashoffset", offset);
+    if (pctLabel) pctLabel.textContent = overall + "%";
+  }, 500);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   UPGRADE 13 — Currently Hunting (JSON-driven)
+   ───────────────────────────────────────────────────────────────── */
+function initCurrentlyHunting() {
+  const grid = document.getElementById("huntingGrid");
+  if (!grid) return;
+
+  fetch("data/hunting.json?t=" + Math.floor(Date.now() / 3600000))
+    .then(r => r.json())
+    .then(data => {
+      if (!data.items || !data.items.length) return;
+      grid.innerHTML = "";
+      data.items.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "hunting-card";
+        const tag = document.createElement("span");
+        tag.className = "hunting-card-tag hunting-card-tag--" + (item.type || "tool");
+        tag.textContent = (item.type || "tool").toUpperCase();
+        const h4 = document.createElement("h4");
+        h4.textContent = item.title;
+        const p = document.createElement("p");
+        p.textContent = item.detail;
+        card.appendChild(tag); card.appendChild(h4); card.appendChild(p);
+        grid.appendChild(card);
+      });
+      const dateEl = document.getElementById("huntingUpdated");
+      if (dateEl && data.updated) dateEl.textContent = data.updated;
+    })
+    .catch(() => {});
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   UPGRADE 14 — Resume Version Badge
+   ───────────────────────────────────────────────────────────────── */
+function initResumeVersionBadge() {
+  const badge = document.getElementById("resumeVersionBadge");
+  if (!badge) return;
+
+  fetch("data/resume-version.json?t=" + Math.floor(Date.now() / 86400000))
+    .then(r => r.json())
+    .then(data => {
+      const vEl = badge.querySelector(".rv-version");
+      if (vEl && data.version) vEl.textContent = "v" + data.version;
+    })
+    .catch(() => {});
+}

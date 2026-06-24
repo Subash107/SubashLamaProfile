@@ -1,0 +1,74 @@
+name: Interview Prep 3-Day Reminder
+
+on:
+  workflow_dispatch:
+    inputs:
+      company:
+        description: 'Company name'
+        required: true
+      role:
+        description: 'Job title / role'
+        required: true
+      interview_date:
+        description: 'Interview date (YYYY-MM-DD)'
+        required: true
+      notes:
+        description: 'Notes (tech stack, interviewer name, etc.)'
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  schedule-reminder:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Validate interview date
+        run: |
+          DATE="${{ inputs.interview_date }}"
+          TODAY=$(date -u +"%Y-%m-%d")
+          if [[ "$DATE" < "$TODAY" ]]; then
+            echo "Interview date is in the past — please check the date."
+            exit 1
+          fi
+          echo "Interview scheduled for $DATE"
+
+      - name: Send immediate Telegram confirmation
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          PREP_DATE=$(date -u -d "${{ inputs.interview_date }} - 3 days" +"%Y-%m-%d" 2>/dev/null || \
+                      date -u -v-3d -j -f "%Y-%m-%d" "${{ inputs.interview_date }}" +"%Y-%m-%d" 2>/dev/null || \
+                      echo "3 days before interview")
+
+          MSG=$(printf 'Interview Scheduled!\n\nCompany  : %s\nRole     : %s\nDate     : %s\nNotes    : %s\n\nPrep reminder will fire: %s\n\nImmediate action:\n  Research the company now\n  Confirm interview platform/link\n  Review your SOC lab talking points' \
+            "${{ inputs.company }}" "${{ inputs.role }}" "${{ inputs.interview_date }}" \
+            "${NOTES:-none}" "$PREP_DATE")
+
+          curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(printf '%s' "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"
+
+      - name: Send 3-day prep checklist
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          DAYS_UNTIL=$(python3 -c "
+from datetime import date
+interview = date.fromisoformat('${{ inputs.interview_date }}')
+today = date.today()
+print((interview - today).days)
+" 2>/dev/null || echo "?")
+
+          if [ "$DAYS_UNTIL" = "3" ] || [ "$DAYS_UNTIL" = "2" ] || [ "$DAYS_UNTIL" = "1" ]; then
+            MSG=$(printf 'INTERVIEW IN %s DAY(S) — %s at %s\n\nFull Prep Checklist:\n\n COMPANY RESEARCH\n  Company mission, products, revenue, recent news\n  Glassdoor reviews, team culture, tech stack\n  Hiring manager on LinkedIn\n\n TECHNICAL PREP\n  SOC lab tour rehearsal (Wazuh, Suricata, MITRE)\n  Review cert talking points: Cisco Ethical Hacker, Endpoint Security\n  Prepare 2 detection engineering stories (STAR format)\n  Know your homelab CVE patching workflow\n\n BEHAVIOURAL\n  Practiced 90-second intro (name, background, why cyber)\n  Why this company? Why SOC/GRC/IAM?\n  Salary: research market rate in advance\n\n LOGISTICS\n  Platform confirmed (Zoom/Teams/phone)\n  Camera, mic, background tested\n  2-3 questions to ask the interviewer\n\nNotes: %s\n\nYou are ready. Go get it.' \
+              "$DAYS_UNTIL" "${{ inputs.role }}" "${{ inputs.company }}" "${NOTES:-none}")
+
+            curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "{\"chat_id\":\"${CHAT}\",\"text\":$(printf '%s' "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"
+          fi
