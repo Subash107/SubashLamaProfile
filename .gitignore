@@ -42,3 +42,7 @@ Thumbs.db
 # Node/npm files
 node_modules/
 npm-debug.log
+
+# Wrangler build cache
+.wrangler/
+cloudflare-worker/.wrangler/

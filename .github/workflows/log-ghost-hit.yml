@@ -33,8 +33,8 @@ jobs:
 
       - name: Commit and push
         run: |
-          git config user.email "bbp-tracker@users.noreply.github.com"
-          git config user.name "BBP Ghost Tracker"
+          git config user.email "lamasubash107@gmail.com"
+          git config user.name "Subash Lama"
           git add download-logs/ghost-hits.txt
           git diff --staged --quiet && echo "No changes" && exit 0
           git commit -m "track: ghost hit [${{ github.event.client_payload.token }}] ${{ github.event.client_payload.timestamp }}"

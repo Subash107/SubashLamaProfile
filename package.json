@@ -4,8 +4,8 @@
   "description": "Cybersecurity Analyst portfolio — Subash Lama",
   "private": true,
   "scripts": {
-    "validate:css": "clean-css-cli public/assets/css/index.css -o /dev/null && clean-css-cli public/assets/css/motion.css -o /dev/null && clean-css-cli public/assets/css/parrot-fx.css -o /dev/null",
-    "validate:js": "terser public/assets/js/site.js -o /dev/null --compress --mangle && terser public/assets/js/index.js -o /dev/null --compress --mangle && terser public/assets/js/parrot-fx.js -o /dev/null --compress --mangle",
+    "validate:css": "npx clean-css-cli public/assets/css/index.css -o /dev/null && npx clean-css-cli public/assets/css/motion.css -o /dev/null && npx clean-css-cli public/assets/css/parrot-fx.css -o /dev/null",
+    "validate:js": "npx terser public/assets/js/site.js -o /dev/null --compress --mangle && npx terser public/assets/js/index.js -o /dev/null --compress --mangle && npx terser public/assets/js/parrot-fx.js -o /dev/null --compress --mangle",
     "validate": "npm run validate:css && npm run validate:js"
   },
   "devDependencies": {

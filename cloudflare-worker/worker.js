@@ -731,8 +731,8 @@ export default {
 
     /* ── Weekly SOC Digest — called by GitHub Actions every Monday ── */
     if (url.pathname === "/weekly-report" && request.method === "GET") {
-      const auth = (request.headers.get("Authorization") || "").replace("Bearer ", "");
-      if (!env.REPORT_SECRET || auth !== env.REPORT_SECRET) {
+      const auth = (request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
+      if (!env.REPORT_SECRET || auth !== env.REPORT_SECRET.trim()) {
         return new Response("Forbidden", { status: 403 });
       }
       if (!env.DOWNLOAD_KV) return new Response("No KV binding", { status: 500 });

@@ -25,8 +25,8 @@ jobs:
 
       - name: Commit stats.json
         run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name  "Subash Lama"
+          git config user.email "lamasubash107@gmail.com"
           git add public/stats.json
           if git diff --cached --quiet; then
             echo "No changes — stats.json already up to date"
