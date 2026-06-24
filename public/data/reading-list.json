@@ -1,0 +1,69 @@
+{
+  "updated": "2026-06-24",
+  "books": [
+    {
+      "title": "The Practice of Network Security Monitoring",
+      "author": "Richard Bejtlich",
+      "category": "SOC",
+      "status": "read",
+      "rating": 5,
+      "takeaway": "NSM methodology — collect, detect, analyse. Changed how I think about what to log and why."
+    },
+    {
+      "title": "Threat Modeling: Designing for Security",
+      "author": "Adam Shostack",
+      "category": "GRC",
+      "status": "read",
+      "rating": 5,
+      "takeaway": "STRIDE is just a starting point. The real value is building threat modeling as a habit, not a checklist."
+    },
+    {
+      "title": "The Art of Intrusion",
+      "author": "Kevin Mitnick",
+      "category": "Red Team",
+      "status": "read",
+      "rating": 4,
+      "takeaway": "Social engineering is always the weakest link. Technical controls mean nothing without awareness training."
+    },
+    {
+      "title": "Blue Team Handbook: SOC, SIEM, and Threat Hunting",
+      "author": "Don Murdoch",
+      "category": "SOC",
+      "status": "read",
+      "rating": 5,
+      "takeaway": "Best practical reference for SOC operations. Triage checklists and SIEM query patterns I use regularly."
+    },
+    {
+      "title": "CompTIA CySA+ Study Guide",
+      "author": "Mike Chapple & David Seidl",
+      "category": "Cert Prep",
+      "status": "reading",
+      "rating": null,
+      "takeaway": "Currently working through Chapter 7 — Threat Intelligence and Threat Hunting."
+    },
+    {
+      "title": "The Web Application Hacker's Handbook",
+      "author": "Stuttard & Pinto",
+      "category": "AppSec",
+      "status": "reading",
+      "rating": null,
+      "takeaway": "Reading alongside bug bounty practice. Chapters on authentication flaws and injection are essential."
+    },
+    {
+      "title": "NIST Cybersecurity Framework 2.0",
+      "author": "NIST",
+      "category": "GRC",
+      "status": "read",
+      "rating": 4,
+      "takeaway": "The GOVERN function in 2.0 is the biggest addition — risk management now has explicit executive ownership."
+    },
+    {
+      "title": "Defensive Security Handbook",
+      "author": "Lee Brotherston & Amanda Berlin",
+      "category": "SOC",
+      "status": "planned",
+      "rating": null,
+      "takeaway": null
+    }
+  ]
+}

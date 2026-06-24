@@ -1,0 +1,62 @@
+name: Cert Transparency Monitor
+
+on:
+  schedule:
+    - cron: '0 4 * * 3'   # Every Wednesday 9:45 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cert-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Check crt.sh for domain certificates
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          DOMAIN="subashlamaprofile.pages.dev"
+          STATE_FILE="download-logs/cert-transparency-state.json"
+
+          CERTS=$(curl -s --max-time 15 \
+            "https://crt.sh/?q=${DOMAIN}&output=json" 2>/dev/null || echo "[]")
+
+          COUNT=$(echo "$CERTS" | python3 -c "import json,sys; d=json.load(sys.stdin); print(len(d))" 2>/dev/null || echo 0)
+
+          LATEST=$(echo "$CERTS" | python3 -c "
+import json, sys, datetime
+d = json.load(sys.stdin)
+if not d: exit()
+latest = sorted(d, key=lambda x: x.get('not_before',''), reverse=True)[:3]
+for c in latest:
+    print(c.get('not_before','?')[:10], '|', c.get('common_name','?'), '|', c.get('issuer_name','?')[:40])
+" 2>/dev/null || echo "Could not parse")
+
+          # Check for unexpected/typosquat domains
+          UNEXPECTED=$(echo "$CERTS" | python3 -c "
+import json, sys
+d = json.load(sys.stdin)
+domain = '$DOMAIN'
+unexpected = [c.get('common_name','') for c in d if domain not in c.get('common_name','') and c.get('common_name','')]
+for u in unexpected[:5]:
+    print(u)
+" 2>/dev/null || echo "")
+
+          ALERT=""
+          [ -n "$UNEXPECTED" ] && ALERT="WARNING: Unexpected domains in cert log:\n$UNEXPECTED"
+
+          MSG=$(printf 'Cert Transparency Monitor\n\nDomain : %s\nDate   : %s\nTotal certs found: %s\n\nLatest certificates:\n%s\n\n%s\n\nSource: crt.sh' \
+            "$DOMAIN" "$(date -u +"%Y-%m-%d")" "$COUNT" "$LATEST" "${ALERT:-No unexpected domains detected.}")
+
+          curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(printf '%s' "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"

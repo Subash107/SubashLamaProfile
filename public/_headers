@@ -72,6 +72,39 @@
 /projects.html
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://gc.zgo.at; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self' https://gc.zgo.at; base-uri 'self'; object-src 'none'; frame-src 'none'; form-action 'self'
 
+/incidents.html
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self'; font-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; form-action 'self'
+
+/learning.html
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://raw.githubusercontent.com; img-src 'self'; font-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; form-action 'self'
+
+/funnel.html
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://raw.githubusercontent.com; img-src 'self'; font-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; form-action 'self'
+
+/cv.html
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; form-action 'self'
+
+/qr.html
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; form-action 'self'
+
+/attackmap.html
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; form-action 'self'
+
+/quiz.html
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; form-action 'self'
+
+/reading.html
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self'; font-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; form-action 'self'
+
+/casestudies.html
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self'; font-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; form-action 'self'
+
+/conferences.html
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self'; font-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; form-action 'self'
+
+/osint.html
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://observatory.mozilla.org https://securityheaders.com; img-src 'self'; font-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; form-action 'self'
+
 # Short cache for data files (updated by workflows)
 /data/*.json
   Cache-Control: public, max-age=3600

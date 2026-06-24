@@ -1,0 +1,35 @@
+{
+  "updated": "2026-06-24",
+  "entries": [
+    {
+      "date": "2026-06-20",
+      "id": "INC-001",
+      "title": "Port Scan Detected from Internal Kali Node",
+      "ttp": "T1046 — Network Service Discovery",
+      "tool": "Suricata",
+      "severity": "low",
+      "action": "Confirmed as authorized red-team scan. Updated Suricata rule to tag internal scans as 'authorized'.",
+      "outcome": "Closed — tuning applied"
+    },
+    {
+      "date": "2026-06-18",
+      "id": "INC-002",
+      "title": "Suspicious PowerShell Execution via Sysmon EventID 1",
+      "ttp": "T1059.001 — PowerShell",
+      "tool": "Wazuh + Sysmon",
+      "severity": "medium",
+      "action": "Traced to Windows Update helper process. Added exclusion rule with parent process hash validation.",
+      "outcome": "Closed — false positive tuned"
+    },
+    {
+      "date": "2026-06-15",
+      "id": "INC-003",
+      "title": "Repeated SSH Brute Force from External IP",
+      "ttp": "T1110.001 — Password Guessing",
+      "tool": "Wazuh",
+      "severity": "high",
+      "action": "pfSense rule created to block source subnet. Added Wazuh active response to auto-block after 5 failed attempts.",
+      "outcome": "Blocked — active response deployed"
+    }
+  ]
+}

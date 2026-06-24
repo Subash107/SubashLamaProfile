@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="SOC Lab Incident Log — Subash Lama. Real detections from a personal Wazuh, Suricata, and Sysmon homelab." />
+  <title>Lab Incident Log — Subash Lama</title>
+  <style>
+    :root { --bg:#07111c; --panel:#0d1e2e; --accent:#00ff88; --red:#ff6655; --yellow:#ffcc44; --blue:#5dcfff; --purple:#c47aff; --text:#e0e0e0; --muted:#6b7a8d; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg); color:var(--text); font-family:'Segoe UI',sans-serif; min-height:100vh; padding:24px 20px; max-width:900px; margin:0 auto; }
+    a { color:var(--accent); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+
+    .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; padding-bottom:14px; border-bottom:1px solid #1a2a3a; flex-wrap:wrap; gap:10px; }
+    .top-bar h1 { color:var(--accent); font-size:1.2rem; }
+    .top-bar p { color:var(--muted); font-size:0.8rem; margin-top:4px; }
+
+    .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; margin-bottom:24px; }
+    .stat { background:var(--panel); border:1px solid #1a2a3a; border-radius:8px; padding:14px; text-align:center; }
+    .stat .num { font-size:1.8rem; font-weight:700; color:var(--accent); }
+    .stat .lbl { font-size:0.74rem; color:var(--muted); margin-top:3px; }
+
+    .incident { background:var(--panel); border:1px solid #1a2a3a; border-radius:10px; padding:18px 20px; margin-bottom:14px; border-left:4px solid var(--muted); }
+    .incident.sev-critical { border-left-color:var(--red); }
+    .incident.sev-high     { border-left-color:#ff9944; }
+    .incident.sev-medium   { border-left-color:var(--yellow); }
+    .incident.sev-low      { border-left-color:var(--accent); }
+
+    .inc-header { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+    .inc-id   { font-size:0.72rem; color:var(--muted); font-family:monospace; }
+    .inc-date { font-size:0.72rem; color:var(--muted); }
+    .inc-title { font-size:0.95rem; font-weight:700; color:rgba(255,255,255,0.9); margin-bottom:6px; }
+    .inc-meta  { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+    .inc-tag   { display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.68rem; font-weight:600; }
+    .inc-tag-ttp  { background:rgba(196,122,255,0.12); color:var(--purple); border:1px solid rgba(196,122,255,0.22); }
+    .inc-tag-tool { background:rgba(0,255,136,0.08); color:var(--accent); border:1px solid rgba(0,255,136,0.18); }
+    .inc-tag-sev  { font-weight:700; }
+    .sev-critical .inc-tag-sev { background:rgba(255,102,85,0.15); color:var(--red); border:1px solid rgba(255,102,85,0.3); }
+    .sev-high .inc-tag-sev     { background:rgba(255,153,68,0.12); color:#ff9944; border:1px solid rgba(255,153,68,0.25); }
+    .sev-medium .inc-tag-sev   { background:rgba(255,204,68,0.12); color:var(--yellow); border:1px solid rgba(255,204,68,0.25); }
+    .sev-low .inc-tag-sev      { background:rgba(0,255,136,0.10); color:var(--accent); border:1px solid rgba(0,255,136,0.22); }
+
+    .inc-body { font-size:0.82rem; color:rgba(255,255,255,0.62); line-height:1.6; }
+    .inc-label { color:rgba(255,255,255,0.45); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; margin-top:8px; margin-bottom:2px; }
+    .inc-outcome { display:inline-block; margin-top:8px; padding:3px 10px; background:rgba(93,207,255,0.08); border:1px solid rgba(93,207,255,0.2); border-radius:10px; font-size:0.74rem; color:var(--blue); }
+
+    .disclaimer { background:rgba(255,204,68,0.06); border:1px solid rgba(255,204,68,0.18); border-radius:8px; padding:12px 16px; margin-bottom:24px; font-size:0.8rem; color:rgba(255,204,68,0.8); }
+    .empty { text-align:center; padding:40px; color:var(--muted); font-size:0.9rem; }
+    .back-link { color:var(--muted); font-size:0.82rem; }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div>
+      <h1>SOC Lab Incident Log</h1>
+      <p>Real detections from personal homelab — Wazuh &middot; Suricata &middot; Sysmon</p>
+    </div>
+    <a class="back-link" href="index.html">&larr; Back to portfolio</a>
+  </div>
+
+  <div class="disclaimer">
+    All incidents are from a personal homelab environment. No real production data, PII, or third-party systems involved. Shared for educational transparency and to demonstrate active detection engineering practice.
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="num" id="statTotal">—</div><div class="lbl">Total Incidents</div></div>
+    <div class="stat"><div class="num" id="statHigh">—</div><div class="lbl">High / Critical</div></div>
+    <div class="stat"><div class="num" id="statResolved">—</div><div class="lbl">Resolved</div></div>
+    <div class="stat"><div class="num" id="statTools">—</div><div class="lbl">Tools Used</div></div>
+  </div>
+
+  <div id="incidentList"><div class="empty">Loading incidents...</div></div>
+
+  <script>
+    fetch('data/incidents.json?t=' + Date.now())
+      .then(r => r.json())
+      .then(data => {
+        const entries = data.entries || [];
+        document.getElementById('statTotal').textContent    = entries.length;
+        document.getElementById('statHigh').textContent     = entries.filter(e => ['high','critical'].includes(e.severity)).length;
+        document.getElementById('statResolved').textContent = entries.filter(e => e.outcome && e.outcome.toLowerCase().includes('closed') || e.outcome.toLowerCase().includes('blocked')).length;
+        const tools = new Set(entries.map(e => e.tool));
+        document.getElementById('statTools').textContent    = tools.size;
+
+        if (!entries.length) {
+          document.getElementById('incidentList').innerHTML = '<div class="empty">No incidents logged yet.<br>Use the <strong>Log Lab Incident</strong> GitHub Actions workflow to add entries.</div>';
+          return;
+        }
+
+        document.getElementById('incidentList').innerHTML = entries.map(e => {
+          const sevClass = 'sev-' + (e.severity || 'low');
+          return '<div class="incident ' + sevClass + '">' +
+            '<div class="inc-header"><div><span class="inc-id">' + (e.id||'?') + '</span></div><span class="inc-date">' + (e.date||'') + '</span></div>' +
+            '<div class="inc-title">' + (e.title||'Untitled') + '</div>' +
+            '<div class="inc-meta">' +
+              (e.ttp ? '<span class="inc-tag inc-tag-ttp">' + e.ttp + '</span>' : '') +
+              (e.tool ? '<span class="inc-tag inc-tag-tool">' + e.tool + '</span>' : '') +
+              '<span class="inc-tag inc-tag-sev">' + (e.severity||'?').toUpperCase() + '</span>' +
+            '</div>' +
+            '<div class="inc-label">Action Taken</div>' +
+            '<div class="inc-body">' + (e.action||'—') + '</div>' +
+            '<div><span class="inc-outcome">' + (e.outcome||'—') + '</span></div>' +
+            '</div>';
+        }).join('');
+      })
+      .catch(() => {
+        document.getElementById('incidentList').innerHTML = '<div class="empty">Could not load incident data.</div>';
+      });
+  </script>
+</body>
+</html>

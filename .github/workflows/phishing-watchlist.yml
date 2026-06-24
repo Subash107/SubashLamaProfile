@@ -1,0 +1,70 @@
+name: Phishing Domain Watchlist
+
+on:
+  schedule:
+    - cron: '0 3 * * 5'   # Every Friday 8:45 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  phishing-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Check for typosquat and phishing domains
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          BASE="subashlamaprofile"
+          FINDINGS=""
+
+          # Generate common typosquats
+          TYPOSQUATS=(
+            "subashlamaproifle"
+            "subashlmaprofile"
+            "subashlamaprofile0"
+            "subash-lama-profile"
+            "subashlamaportfolio"
+            "subashlama"
+          )
+
+          for TYPO in "${TYPOSQUATS[@]}"; do
+            for TLD in ".com" ".net" ".org" ".io"; do
+              DOMAIN="${TYPO}${TLD}"
+              HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "https://${DOMAIN}" 2>/dev/null || echo "000")
+              if [ "$HTTP" != "000" ] && [ "$HTTP" != "404" ]; then
+                FINDINGS=$(printf '%s\n  [ALERT] %s responds (HTTP %s)' "$FINDINGS" "$DOMAIN" "$HTTP")
+              fi
+            done
+          done
+
+          # Check crt.sh for lookalike certs
+          LOOKALIKES=$(curl -s --max-time 10 \
+            "https://crt.sh/?q=%25${BASE}%25&output=json" 2>/dev/null | \
+            python3 -c "
+import json, sys
+d = json.load(sys.stdin)
+real = 'subashlamaprofile.pages.dev'
+others = list(set(c.get('common_name','') for c in d if real not in c.get('common_name','') and 'subash' in c.get('common_name','').lower()))
+for o in others[:5]: print(o)
+" 2>/dev/null || echo "")
+
+          [ -n "$LOOKALIKES" ] && FINDINGS=$(printf '%s\n  [WARN] Lookalike cert found:\n%s' "$FINDINGS" "$LOOKALIKES")
+
+          STATUS=$([ -n "$FINDINGS" ] && echo "ACTION REQUIRED" || echo "All Clear")
+
+          MSG=$(printf 'Phishing Domain Watchlist — %s\n\nStatus : %s\n\nTyposquat checks: %s domains\nLookalike certs  : %s\n\nAlerts:%s\n\nhttps://subashlamaprofile.pages.dev' \
+            "$(date -u +"%Y-%m-%d")" "$STATUS" "${#TYPOSQUATS[@]}" "${LOOKALIKES:-none}" "${FINDINGS:- none detected}")
+
+          curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(printf '%s' "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"

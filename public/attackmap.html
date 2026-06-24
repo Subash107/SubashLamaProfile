@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="SOC Lab Attack Map — Subash Lama. Live homelab threat detections visualized." />
+  <title>Attack Map — Subash Lama SOC Lab</title>
+  <style>
+    :root { --bg:#020e1a; --panel:#0a1828; --accent:#00ff88; --red:#ff3333; --yellow:#ffcc44; --blue:#5dcfff; --text:#e0e0e0; --muted:#4a6070; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg); color:var(--text); font-family:'Segoe UI',monospace; min-height:100vh; overflow:hidden; }
+    canvas#mapCanvas { position:fixed; inset:0; width:100%; height:100%; z-index:1; }
+    .ui { position:fixed; z-index:10; }
+    .top-bar { top:0; left:0; right:0; background:rgba(2,14,26,0.9); backdrop-filter:blur(8px); border-bottom:1px solid rgba(0,255,136,0.15); padding:10px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+    .top-bar h1 { color:var(--accent); font-size:0.95rem; letter-spacing:0.08em; text-transform:uppercase; }
+    .top-stats { display:flex; gap:18px; }
+    .top-stat { text-align:center; }
+    .top-stat .num { font-size:1.2rem; font-weight:700; color:var(--accent); }
+    .top-stat .lbl { font-size:0.62rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; }
+    .back { color:var(--muted); font-size:0.75rem; text-decoration:none; }
+    .back:hover { color:var(--accent); }
+    .feed { bottom:0; left:0; right:0; background:rgba(2,14,26,0.88); backdrop-filter:blur(6px); border-top:1px solid rgba(0,255,136,0.1); padding:8px 20px; max-height:140px; overflow-y:auto; }
+    .feed-entry { font-size:0.72rem; font-family:monospace; padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.03); display:flex; gap:10px; }
+    .feed-time { color:var(--muted); flex-shrink:0; width:60px; }
+    .feed-sev-high   { color:var(--red); }
+    .feed-sev-med    { color:var(--yellow); }
+    .feed-sev-low    { color:var(--accent); }
+    .legend { top:60px; right:16px; background:rgba(10,24,40,0.85); border:1px solid rgba(0,255,136,0.15); border-radius:8px; padding:10px 14px; font-size:0.7rem; }
+    .legend h4 { color:var(--accent); margin-bottom:6px; font-size:0.72rem; letter-spacing:0.06em; text-transform:uppercase; }
+    .legend-row { display:flex; align-items:center; gap:7px; margin-bottom:4px; color:var(--muted); }
+    .legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  </style>
+</head>
+<body>
+  <canvas id="mapCanvas"></canvas>
+
+  <div class="ui top-bar">
+    <h1>&#128737; SOC Lab — Live Attack Map</h1>
+    <div class="top-stats">
+      <div class="top-stat"><div class="num" id="statTotal">0</div><div class="lbl">Events</div></div>
+      <div class="top-stat"><div class="num" id="statHigh">0</div><div class="lbl">High</div></div>
+      <div class="top-stat"><div class="num" id="statBlocked">0</div><div class="lbl">Blocked</div></div>
+    </div>
+    <a class="back" href="index.html">&larr; Portfolio</a>
+  </div>
+
+  <div class="ui legend">
+    <h4>Legend</h4>
+    <div class="legend-row"><span class="legend-dot" style="background:#ff3333"></span>Brute Force</div>
+    <div class="legend-row"><span class="legend-dot" style="background:#ff9944"></span>Port Scan</div>
+    <div class="legend-row"><span class="legend-dot" style="background:#ffcc44"></span>Malware</div>
+    <div class="legend-row"><span class="legend-dot" style="background:#5dcfff"></span>Recon</div>
+    <div class="legend-row"><span class="legend-dot" style="background:#00ff88"></span>Blocked</div>
+  </div>
+
+  <div class="ui feed" id="alertFeed" style="bottom:0"></div>
+
+  <script>
+    const canvas = document.getElementById('mapCanvas');
+    const ctx    = canvas.getContext('2d');
+    const feed   = document.getElementById('alertFeed');
+
+    let W, H, totalEvents = 0, highEvents = 0, blockedEvents = 0;
+
+    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+    resize();
+    window.addEventListener('resize', resize);
+
+    /* World map simplified outline as polylines (x%,y% of canvas) */
+    const REGIONS = {
+      'North America':   { x:0.16, y:0.32 },
+      'South America':   { x:0.22, y:0.62 },
+      'Europe':          { x:0.46, y:0.25 },
+      'West Africa':     { x:0.43, y:0.52 },
+      'East Africa':     { x:0.52, y:0.55 },
+      'Russia':          { x:0.62, y:0.18 },
+      'Middle East':     { x:0.56, y:0.38 },
+      'South Asia':      { x:0.64, y:0.42 },
+      'East Asia':       { x:0.74, y:0.32 },
+      'Southeast Asia':  { x:0.74, y:0.50 },
+      'Australia':       { x:0.80, y:0.65 },
+    };
+
+    const HOME = { x:0.64, y:0.42 }; /* Nepal / SOC Lab */
+
+    const ATTACK_TYPES = [
+      { type:'SSH Brute Force',   color:'#ff3333', sev:'high',   ttp:'T1110.001' },
+      { type:'Port Scan',         color:'#ff9944', sev:'medium', ttp:'T1046' },
+      { type:'Malware C2 Beacon', color:'#ffcc44', sev:'high',   ttp:'T1071.001' },
+      { type:'Recon / OSINT',     color:'#5dcfff', sev:'low',    ttp:'T1592' },
+      { type:'Web App Probe',     color:'#c47aff', sev:'medium', ttp:'T1190' },
+      { type:'DNS Exfil Attempt', color:'#ff6655', sev:'high',   ttp:'T1048.003' },
+    ];
+
+    let arcs = [];
+    let particles = [];
+
+    /* Draw world outline */
+    function drawMap() {
+      ctx.clearRect(0, 0, W, H);
+
+      /* Background grid */
+      ctx.strokeStyle = 'rgba(0,255,136,0.04)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < W; x += 60) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+      for (let y = 0; y < H; y += 60) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+      /* Region dots */
+      Object.entries(REGIONS).forEach(([name, pos]) => {
+        const px = pos.x * W, py = pos.y * H;
+        ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(0,255,136,0.2)'; ctx.fill();
+        ctx.strokeStyle = 'rgba(0,255,136,0.4)'; ctx.lineWidth = 1; ctx.stroke();
+        ctx.fillStyle = 'rgba(0,255,136,0.5)';
+        ctx.font = '9px monospace'; ctx.textAlign = 'center';
+        ctx.fillText(name, px, py - 8);
+      });
+
+      /* SOC Lab marker */
+      const hx = HOME.x * W, hy = HOME.y * H;
+      ctx.beginPath(); ctx.arc(hx, hy, 8, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(0,255,136,0.15)'; ctx.fill();
+      ctx.strokeStyle = '#00ff88'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = '#00ff88'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center';
+      ctx.fillText('SOC LAB', hx, hy - 14);
+    }
+
+    function drawArcs() {
+      arcs.forEach((arc, i) => {
+        arc.progress += 0.012;
+        if (arc.progress >= 1) { arcs.splice(i, 1); return; }
+
+        const t   = arc.progress;
+        const sx  = arc.sx, sy = arc.sy, ex = arc.ex, ey = arc.ey;
+        const mx  = (sx + ex) / 2, my = (sy + ey) / 2 - Math.abs(ex-sx)*0.35;
+
+        ctx.beginPath();
+        ctx.strokeStyle = arc.color + Math.floor(t * 200 + 30).toString(16).padStart(2,'0');
+        ctx.lineWidth   = 1.5;
+        ctx.shadowColor = arc.color;
+        ctx.shadowBlur  = 6;
+
+        const steps = 40;
+        const endStep = Math.floor(t * steps);
+        for (let s = 0; s <= endStep; s++) {
+          const u = s / steps;
+          const x = (1-u)*(1-u)*sx + 2*(1-u)*u*mx + u*u*ex;
+          const y = (1-u)*(1-u)*sy + 2*(1-u)*u*my + u*u*ey;
+          s === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        /* Leading dot */
+        if (endStep >= 0) {
+          const u2 = endStep / steps;
+          const lx = (1-u2)*(1-u2)*sx + 2*(1-u2)*u2*mx + u2*u2*ex;
+          const ly = (1-u2)*(1-u2)*sy + 2*(1-u2)*u2*my + u2*u2*ey;
+          ctx.beginPath(); ctx.arc(lx, ly, 3, 0, Math.PI*2);
+          ctx.fillStyle = arc.color; ctx.fill();
+        }
+      });
+    }
+
+    function drawParticles() {
+      particles.forEach((p, i) => {
+        p.life -= 0.02;
+        if (p.life <= 0) { particles.splice(i, 1); return; }
+        p.x += p.vx; p.y += p.vy;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI*2);
+        ctx.fillStyle = p.color + Math.floor(p.life * 200).toString(16).padStart(2,'0');
+        ctx.fill();
+      });
+    }
+
+    function spawnImpact(x, y, color) {
+      for (let i = 0; i < 8; i++) {
+        const angle = (Math.PI * 2 / 8) * i;
+        particles.push({ x, y, vx: Math.cos(angle)*1.5, vy: Math.sin(angle)*1.5, r:4, life:1, color });
+      }
+    }
+
+    function spawnAttack() {
+      const regions = Object.values(REGIONS);
+      const src     = regions[Math.floor(Math.random() * regions.length)];
+      const attack  = ATTACK_TYPES[Math.floor(Math.random() * ATTACK_TYPES.length)];
+      const blocked = Math.random() > 0.25;
+
+      const sx = src.x * W, sy = src.y * H;
+      const ex = HOME.x * W, ey = HOME.y * H;
+
+      arcs.push({ sx, sy, ex, ey, color: attack.color, progress:0 });
+
+      totalEvents++;
+      if (attack.sev === 'high') highEvents++;
+      if (blocked) blockedEvents++;
+
+      document.getElementById('statTotal').textContent   = totalEvents;
+      document.getElementById('statHigh').textContent    = highEvents;
+      document.getElementById('statBlocked').textContent = blockedEvents;
+
+      const srcName = Object.entries(REGIONS).find(([,v]) => v === src)?.[0] || 'Unknown';
+      const now = new Date().toLocaleTimeString('en-GB', {hour12:false});
+      const sevClass = attack.sev === 'high' ? 'feed-sev-high' : attack.sev === 'medium' ? 'feed-sev-med' : 'feed-sev-low';
+
+      const entry = document.createElement('div');
+      entry.className = 'feed-entry';
+      entry.innerHTML = '<span class="feed-time">' + now + '</span>' +
+        '<span class="' + sevClass + '">[' + attack.sev.toUpperCase() + ']</span>' +
+        '<span>' + attack.type + ' from ' + srcName + ' &mdash; ' + attack.ttp + (blocked ? ' &mdash; <span style="color:#00ff88">BLOCKED</span>' : '') + '</span>';
+      feed.insertBefore(entry, feed.firstChild);
+
+      if (feed.children.length > 30) feed.removeChild(feed.lastChild);
+
+      /* Impact effect after arc completes */
+      setTimeout(() => spawnImpact(ex, ey, blocked ? '#00ff88' : attack.color), 1800);
+    }
+
+    function animate() {
+      drawMap();
+      drawArcs();
+      drawParticles();
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+    setTimeout(spawnAttack, 500);
+    setInterval(spawnAttack, 2200 + Math.random() * 1800);
+  </script>
+</body>
+</html>

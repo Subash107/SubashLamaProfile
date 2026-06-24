@@ -1,0 +1,102 @@
+name: Log Lab Incident
+
+on:
+  workflow_dispatch:
+    inputs:
+      title:
+        description: 'Incident title (what was detected)'
+        required: true
+      ttp:
+        description: 'MITRE TTP (e.g. T1059.001 — PowerShell)'
+        required: false
+      tool:
+        description: 'Detection tool (Wazuh / Suricata / Sysmon)'
+        required: true
+        default: 'Wazuh'
+      severity:
+        description: 'Severity'
+        required: true
+        type: choice
+        options: [low, medium, high, critical]
+      action:
+        description: 'What action did you take?'
+        required: true
+      outcome:
+        description: 'Outcome (e.g. Blocked, False positive tuned, Escalated)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Append incident to JSON
+        run: |
+          TODAY=$(date -u +"%Y-%m-%d")
+          python3 -c "
+import json, datetime
+path = 'public/data/incidents.json'
+try:
+    with open(path) as f:
+        data = json.load(f)
+except Exception:
+    data = {'updated': '', 'entries': []}
+
+existing = data.get('entries', [])
+last_id = 0
+for e in existing:
+    try:
+        n = int(e.get('id','INC-0').split('-')[1])
+        if n > last_id: last_id = n
+    except Exception:
+        pass
+
+new_entry = {
+    'date':     '$TODAY',
+    'id':       f'INC-{last_id+1:03d}',
+    'title':    '${{ inputs.title }}',
+    'ttp':      '${{ inputs.ttp }}',
+    'tool':     '${{ inputs.tool }}',
+    'severity': '${{ inputs.severity }}',
+    'action':   '${{ inputs.action }}',
+    'outcome':  '${{ inputs.outcome }}'
+}
+existing.insert(0, new_entry)
+data['entries'] = existing[:20]
+data['updated'] = '$TODAY'
+with open(path, 'w') as f:
+    json.dump(data, f, indent=2)
+print('Logged:', new_entry['id'], new_entry['title'])
+"
+
+      - name: Commit incident log
+        run: |
+          git config user.email "lamasubash107@gmail.com"
+          git config user.name "Subash Lama"
+          git add public/data/incidents.json
+          git diff --staged --quiet && echo "No changes" && exit 0
+          git commit -m "log: SOC incident — ${{ inputs.title }}"
+          git push
+
+      - name: Telegram notification
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          SEV="${{ inputs.severity }}"
+          ICON=$([ "$SEV" = "critical" ] && echo "🔴" || [ "$SEV" = "high" ] && echo "🟠" || [ "$SEV" = "medium" ] && echo "🟡" || echo "🟢")
+          MSG=$(printf '%s Lab Incident Logged\n\nTitle    : %s\nTTP      : %s\nTool     : %s\nSeverity : %s\nAction   : %s\nOutcome  : %s\n\nPublic log: https://subashlamaprofile.pages.dev/incidents.html' \
+            "$ICON" "${{ inputs.title }}" "${{ inputs.ttp }}" "${{ inputs.tool }}" \
+            "${{ inputs.severity }}" "${{ inputs.action }}" "${{ inputs.outcome }}")
+          curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(printf '%s' "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"

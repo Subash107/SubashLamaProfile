@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="SOC Case Studies — Subash Lama. Deep-dive analysis of real homelab detections with MITRE mapping and lessons learned." />
+  <title>Case Studies — Subash Lama SOC Lab</title>
+  <style>
+    :root { --bg:#07111c; --panel:#0d1e2e; --accent:#00ff88; --red:#ff6655; --yellow:#ffcc44; --blue:#5dcfff; --purple:#c47aff; --text:#e0e0e0; --muted:#6b7a8d; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg); color:var(--text); font-family:'Segoe UI',sans-serif; min-height:100vh; padding:24px 20px; max-width:900px; margin:0 auto; }
+    a { color:var(--accent); text-decoration:none; }
+
+    .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; padding-bottom:14px; border-bottom:1px solid #1a2a3a; flex-wrap:wrap; gap:10px; }
+    .top-bar h1 { color:var(--accent); font-size:1.2rem; }
+
+    .cs-card { background:var(--panel); border:1px solid rgba(255,255,255,0.08); border-radius:12px; margin-bottom:24px; overflow:hidden; }
+    .cs-header { padding:20px 24px 16px; border-bottom:1px solid rgba(255,255,255,0.06); }
+    .cs-id-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
+    .cs-id    { font-size:0.72rem; color:var(--muted); font-family:monospace; }
+    .cs-date  { font-size:0.72rem; color:var(--muted); }
+    .cs-sev   { padding:2px 8px; border-radius:8px; font-size:0.68rem; font-weight:700; }
+    .sev-high     { background:rgba(255,102,85,0.15); color:var(--red); border:1px solid rgba(255,102,85,0.3); }
+    .sev-medium   { background:rgba(255,204,68,0.12); color:var(--yellow); border:1px solid rgba(255,204,68,0.25); }
+    .sev-low      { background:rgba(0,255,136,0.1); color:var(--accent); border:1px solid rgba(0,255,136,0.22); }
+    .cs-title { font-size:1.05rem; font-weight:700; color:rgba(255,255,255,0.92); margin-bottom:8px; }
+    .cs-meta  { display:flex; flex-wrap:wrap; gap:8px; }
+    .cs-tag   { display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.68rem; font-weight:600; }
+    .cs-tag-ttp  { background:rgba(196,122,255,0.1); color:var(--purple); border:1px solid rgba(196,122,255,0.2); }
+    .cs-tag-tool { background:rgba(0,255,136,0.08); color:var(--accent); border:1px solid rgba(0,255,136,0.18); }
+
+    .cs-body { padding:20px 24px; }
+    .cs-section { margin-bottom:18px; }
+    .cs-section-title { font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:rgba(255,255,255,0.4); margin-bottom:10px; }
+
+    .timeline { position:relative; padding-left:20px; border-left:2px solid rgba(0,255,136,0.15); }
+    .tl-entry { position:relative; margin-bottom:12px; }
+    .tl-entry::before { content:''; position:absolute; left:-25px; top:6px; width:8px; height:8px; border-radius:50%; background:rgba(0,255,136,0.5); border:2px solid var(--accent); }
+    .tl-time  { font-size:0.7rem; color:var(--accent); font-family:monospace; margin-bottom:2px; }
+    .tl-event { font-size:0.82rem; color:rgba(255,255,255,0.7); line-height:1.5; }
+
+    .cs-text { font-size:0.83rem; color:rgba(255,255,255,0.65); line-height:1.65; }
+    .lessons-box { background:rgba(255,204,68,0.05); border:1px solid rgba(255,204,68,0.18); border-radius:8px; padding:14px 16px; font-size:0.82rem; color:rgba(255,204,68,0.85); line-height:1.6; }
+    .loading { text-align:center; padding:40px; color:var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div>
+      <h1>SOC Case Studies</h1>
+      <p style="color:var(--muted);font-size:0.78rem;margin-top:3px">Deep-dive analysis of real homelab detections — MITRE mapping, timelines, and lessons learned</p>
+    </div>
+    <a style="color:var(--muted);font-size:0.82rem" href="index.html">&larr; Portfolio</a>
+  </div>
+
+  <div id="csList"><div class="loading">Loading case studies...</div></div>
+
+  <script>
+    fetch('data/casestudies.json?t=' + Date.now())
+      .then(r => r.json())
+      .then(data => {
+        const studies = data.studies || [];
+        if (!studies.length) { document.getElementById('csList').innerHTML = '<div class="loading">No case studies yet.</div>'; return; }
+
+        document.getElementById('csList').innerHTML = studies.map(s => {
+          const sevClass = 'sev-' + s.severity;
+          const tl = (s.timeline || []).map(t =>
+            '<div class="tl-entry"><div class="tl-time">' + t.time + '</div><div class="tl-event">' + t.event + '</div></div>'
+          ).join('');
+          const tools = (s.tools || []).map(t => '<span class="cs-tag cs-tag-tool">' + t + '</span>').join('');
+
+          return '<div class="cs-card">' +
+            '<div class="cs-header">' +
+              '<div class="cs-id-row">' +
+                '<span class="cs-id">' + s.id + '</span>' +
+                '<span class="cs-date">' + s.date + '</span>' +
+                '<span class="cs-sev ' + sevClass + '">' + s.severity.toUpperCase() + '</span>' +
+              '</div>' +
+              '<div class="cs-title">' + s.title + '</div>' +
+              '<div class="cs-meta">' +
+                (s.ttp ? '<span class="cs-tag cs-tag-ttp">' + s.ttp + '</span>' : '') +
+                tools +
+              '</div>' +
+            '</div>' +
+            '<div class="cs-body">' +
+              (s.mitre ? '<div class="cs-section"><div class="cs-section-title">MITRE ATT&CK Mapping</div><div class="cs-text">' + s.mitre + '</div></div>' : '') +
+              (s.timeline?.length ? '<div class="cs-section"><div class="cs-section-title">Detection Timeline</div><div class="timeline">' + tl + '</div></div>' : '') +
+              (s.detection ? '<div class="cs-section"><div class="cs-section-title">Detection Logic</div><div class="cs-text">' + s.detection + '</div></div>' : '') +
+              (s.mitigation ? '<div class="cs-section"><div class="cs-section-title">Mitigation Applied</div><div class="cs-text">' + s.mitigation + '</div></div>' : '') +
+              (s.lessons ? '<div class="cs-section"><div class="cs-section-title">Lessons Learned</div><div class="lessons-box">' + s.lessons + '</div></div>' : '') +
+            '</div>' +
+            '</div>';
+        }).join('');
+      })
+      .catch(() => document.getElementById('csList').innerHTML = '<div class="loading">Could not load case studies.</div>');
+  </script>
+</body>
+</html>

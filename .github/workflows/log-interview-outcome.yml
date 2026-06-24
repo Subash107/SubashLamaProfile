@@ -1,0 +1,104 @@
+name: Log Interview Outcome
+
+on:
+  workflow_dispatch:
+    inputs:
+      company:
+        description: 'Company name'
+        required: true
+      role:
+        description: 'Job title / role'
+        required: true
+      stage:
+        description: 'Interview stage'
+        required: true
+        type: choice
+        options:
+          - Phone Screen
+          - Technical Round 1
+          - Technical Round 2
+          - HR Round
+          - Final Round
+          - Offer
+          - Rejected
+          - Ghosted
+          - Withdrawn
+      outcome:
+        description: 'Outcome / feedback received'
+        required: true
+      next_steps:
+        description: 'Next steps (if any)'
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Log outcome and update funnel
+        run: |
+          TODAY=$(date -u +"%Y-%m-%d")
+          python3 -c "
+import json, datetime
+path = 'download-logs/interview-outcomes.json'
+try:
+    with open(path) as f:
+        data = json.load(f)
+except Exception:
+    data = {'entries': [], 'funnel': {}}
+
+entry = {
+    'date':       '$TODAY',
+    'company':    '${{ inputs.company }}',
+    'role':       '${{ inputs.role }}',
+    'stage':      '${{ inputs.stage }}',
+    'outcome':    '${{ inputs.outcome }}',
+    'next_steps': '${{ inputs.next_steps }}'
+}
+data['entries'].insert(0, entry)
+data['entries'] = data['entries'][:50]
+
+funnel = {}
+for e in data['entries']:
+    s = e.get('stage', 'Unknown')
+    funnel[s] = funnel.get(s, 0) + 1
+data['funnel'] = funnel
+data['updated'] = '$TODAY'
+
+with open(path, 'w') as f:
+    json.dump(data, f, indent=2)
+print('Logged outcome for', '${{ inputs.company }}', '—', '${{ inputs.stage }}')
+"
+
+      - name: Commit outcome log
+        run: |
+          git config user.email "lamasubash107@gmail.com"
+          git config user.name "Subash Lama"
+          mkdir -p download-logs
+          git add download-logs/interview-outcomes.json
+          git diff --staged --quiet && echo "No changes" && exit 0
+          git commit -m "log: interview outcome — ${{ inputs.company }} (${{ inputs.stage }})"
+          git push
+
+      - name: Telegram notification
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          STAGE="${{ inputs.stage }}"
+          ICON=$([ "$STAGE" = "Offer" ] && echo "🎉" || [ "$STAGE" = "Rejected" ] && echo "❌" || [ "$STAGE" = "Ghosted" ] && echo "👻" || echo "📋")
+          MSG=$(printf '%s Interview Outcome Logged\n\nCompany    : %s\nRole       : %s\nStage      : %s\nOutcome    : %s\nNext Steps : %s\n\nView funnel: https://subashlamaprofile.pages.dev/funnel.html' \
+            "$ICON" "${{ inputs.company }}" "${{ inputs.role }}" "${{ inputs.stage }}" \
+            "${{ inputs.outcome }}" "${{ inputs.next_steps }}")
+          curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(printf '%s' "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"

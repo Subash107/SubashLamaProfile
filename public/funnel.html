@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Job Search Funnel — Subash Lama</title>
+  <style>
+    :root { --bg:#07111c; --panel:#0d1e2e; --accent:#00ff88; --red:#ff6655; --yellow:#ffcc44; --blue:#5dcfff; --text:#e0e0e0; --muted:#6b7a8d; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg); color:var(--text); font-family:'Segoe UI',sans-serif; min-height:100vh; padding:24px 20px; max-width:900px; margin:0 auto; }
+    a { color:var(--accent); text-decoration:none; }
+
+    .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; padding-bottom:14px; border-bottom:1px solid #1a2a3a; flex-wrap:wrap; gap:10px; }
+    .top-bar h1 { color:var(--accent); font-size:1.2rem; }
+
+    .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; margin-bottom:24px; }
+    .stat { background:var(--panel); border:1px solid #1a2a3a; border-radius:8px; padding:14px; text-align:center; }
+    .stat .num { font-size:1.8rem; font-weight:700; color:var(--accent); }
+    .stat .lbl { font-size:0.74rem; color:var(--muted); margin-top:3px; }
+
+    .section { background:var(--panel); border:1px solid #1a2a3a; border-radius:10px; padding:18px 20px; margin-bottom:16px; }
+    .section h2 { font-size:0.95rem; color:var(--accent); margin-bottom:14px; }
+
+    .funnel { display:flex; flex-direction:column; gap:6px; }
+    .funnel-row { display:flex; align-items:center; gap:10px; font-size:0.82rem; }
+    .funnel-label { width:160px; color:var(--text); }
+    .funnel-bar   { flex:1; background:#0a1828; border-radius:3px; height:28px; overflow:hidden; }
+    .funnel-fill  { height:28px; border-radius:3px; display:flex; align-items:center; padding:0 10px; font-size:0.78rem; font-weight:600; color:#000; transition:width 0.8s ease; width:0; }
+    .funnel-count { width:28px; text-align:right; color:var(--muted); font-size:0.78rem; }
+
+    table { width:100%; border-collapse:collapse; font-size:0.8rem; }
+    th { color:var(--muted); text-align:left; padding:6px 8px; border-bottom:1px solid #1a2a3a; font-weight:500; }
+    td { padding:7px 8px; border-bottom:1px solid #0d1e2e; vertical-align:top; }
+    tr:hover td { background:#0a1828; }
+    .badge { display:inline-block; padding:2px 7px; border-radius:10px; font-size:0.68rem; font-weight:600; }
+    .stage-offer    { background:rgba(0,255,136,0.15); color:var(--accent); border:1px solid rgba(0,255,136,0.3); }
+    .stage-interview{ background:rgba(93,207,255,0.12); color:var(--blue); border:1px solid rgba(93,207,255,0.25); }
+    .stage-rejected { background:rgba(255,102,85,0.12); color:var(--red); border:1px solid rgba(255,102,85,0.25); }
+    .stage-ghosted  { background:rgba(107,122,141,0.15); color:var(--muted); border:1px solid rgba(107,122,141,0.25); }
+    .stage-default  { background:rgba(255,204,68,0.1); color:var(--yellow); border:1px solid rgba(255,204,68,0.22); }
+
+    .empty { text-align:center; padding:30px; color:var(--muted); font-size:0.85rem; }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div>
+      <h1>Job Search Funnel</h1>
+      <p style="color:var(--muted);font-size:0.8rem;margin-top:4px">Interview pipeline tracker — private dashboard</p>
+    </div>
+    <a style="color:var(--muted);font-size:0.82rem" href="index.html">&larr; Portfolio</a>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="num" id="statApps">—</div><div class="lbl">Applications</div></div>
+    <div class="stat"><div class="num" id="statInterviews">—</div><div class="lbl">Interviews</div></div>
+    <div class="stat"><div class="num" id="statOffers">—</div><div class="lbl">Offers</div></div>
+    <div class="stat"><div class="num" id="statRate">—</div><div class="lbl">Interview Rate</div></div>
+  </div>
+
+  <div class="section">
+    <h2>Pipeline Funnel</h2>
+    <div class="funnel" id="funnelChart"><div class="empty">Loading...</div></div>
+  </div>
+
+  <div class="section">
+    <h2>Recent Outcomes</h2>
+    <div id="outcomeTable"><div class="empty">Loading...</div></div>
+  </div>
+
+  <script>
+    const STAGE_COLORS = {
+      'Phone Screen':        '#5dcfff',
+      'Technical Round 1':   '#64a0ff',
+      'Technical Round 2':   '#c47aff',
+      'HR Round':            '#ffb400',
+      'Final Round':         '#ff9944',
+      'Offer':               '#00ff88',
+      'Rejected':            '#ff6655',
+      'Ghosted':             '#6b7a8d',
+      'Withdrawn':           '#555',
+    };
+
+    fetch('https://raw.githubusercontent.com/Subash107/SubashLamaProfile/main/download-logs/interview-outcomes.json?t=' + Date.now())
+      .then(r => r.json())
+      .then(data => {
+        const entries = data.entries || [];
+        const funnel  = data.funnel  || {};
+
+        const interviews = entries.filter(e => e.stage && e.stage.includes('Round') || e.stage === 'Phone Screen' || e.stage === 'Final Round').length;
+        const offers     = entries.filter(e => e.stage === 'Offer').length;
+
+        document.getElementById('statApps').textContent       = entries.length;
+        document.getElementById('statInterviews').textContent = interviews;
+        document.getElementById('statOffers').textContent     = offers;
+        document.getElementById('statRate').textContent       = entries.length > 0 ? Math.round(interviews / entries.length * 100) + '%' : '—';
+
+        const sorted = Object.entries(funnel).sort((a,b) => b[1]-a[1]);
+        const maxVal = sorted[0]?.[1] || 1;
+        document.getElementById('funnelChart').innerHTML = sorted.map(([stage, count]) => {
+          const color = STAGE_COLORS[stage] || '#5dcfff';
+          return '<div class="funnel-row">' +
+            '<div class="funnel-label">' + stage + '</div>' +
+            '<div class="funnel-bar"><div class="funnel-fill" style="width:' + Math.round(count/maxVal*100) + '%;background:' + color + '">' + count + '</div></div>' +
+            '<div class="funnel-count">' + count + '</div>' +
+            '</div>';
+        }).join('') || '<div class="empty">No funnel data yet.</div>';
+
+        const recent = entries.slice(0, 15);
+        const stageClass = s => {
+          if (s === 'Offer') return 'stage-offer';
+          if (s && s.includes('Round') || s === 'Phone Screen' || s === 'Final Round') return 'stage-interview';
+          if (s === 'Rejected') return 'stage-rejected';
+          if (s === 'Ghosted') return 'stage-ghosted';
+          return 'stage-default';
+        };
+        document.getElementById('outcomeTable').innerHTML = recent.length ?
+          '<table><thead><tr><th>Date</th><th>Company</th><th>Role</th><th>Stage</th><th>Outcome</th></tr></thead><tbody>' +
+          recent.map(e => '<tr><td>' + (e.date||'—') + '</td><td>' + (e.company||'—') + '</td><td>' + (e.role||'—').slice(0,30) + '</td>' +
+            '<td><span class="badge ' + stageClass(e.stage) + '">' + (e.stage||'?') + '</span></td>' +
+            '<td style="color:rgba(255,255,255,0.55)">' + (e.outcome||'—').slice(0,50) + '</td></tr>').join('') +
+          '</tbody></table>' :
+          '<div class="empty">No outcomes logged yet. Use the Log Interview Outcome workflow.</div>';
+      })
+      .catch(() => {
+        ['statApps','statInterviews','statOffers'].forEach(id => document.getElementById(id).textContent = '0');
+        document.getElementById('statRate').textContent = '—';
+        document.getElementById('funnelChart').innerHTML = '<div class="empty">No data yet.</div>';
+        document.getElementById('outcomeTable').innerHTML = '<div class="empty">No data yet.</div>';
+      });
+  </script>
+</body>
+</html>

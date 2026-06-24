@@ -6759,3 +6759,85 @@
 .resume-version-badge { display:inline-flex; align-items:center; gap:5px; background:rgba(0,255,136,0.07); border:1px solid rgba(0,255,136,0.2); border-radius:12px; padding:2px 9px; font-size:0.7rem; color:rgba(0,255,136,0.8); margin-left:6px; vertical-align:middle; white-space:nowrap; }
 .rv-dot { width:6px; height:6px; border-radius:50%; background:#00ff88; animation:rvBlink 2.4s ease-in-out infinite; }
 @keyframes rvBlink { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+/* ═══════════════════════════════════════════════════════════════
+   UPGRADE 5 — Wireshark-style Packet Viewer
+   ═══════════════════════════════════════════════════════════════ */
+.wireshark-section { }
+.ws-desc { color:rgba(255,255,255,0.55); font-size:0.88rem; margin-bottom:14px; }
+.ws-window { background:#020e1a; border:1px solid rgba(93,207,255,0.2); border-radius:10px; overflow:hidden; font-family:'Courier New',Courier,monospace; }
+.ws-titlebar { background:#061624; padding:9px 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(93,207,255,0.1); }
+.ws-title { color:rgba(93,207,255,0.7); font-size:0.78rem; }
+.ws-controls { display:flex; gap:6px; }
+.ws-ctrl-btn { background:rgba(93,207,255,0.1); border:1px solid rgba(93,207,255,0.2); color:rgba(93,207,255,0.7); padding:2px 9px; border-radius:4px; font-size:0.72rem; cursor:pointer; font-family:'Courier New',monospace; }
+.ws-ctrl-btn:hover { background:rgba(93,207,255,0.18); }
+.ws-filter-bar { background:#030f1c; padding:6px 12px; border-bottom:1px solid rgba(93,207,255,0.08); display:flex; align-items:center; gap:8px; }
+.ws-filter-label { color:rgba(93,207,255,0.5); font-size:0.72rem; }
+.ws-filter-input { background:rgba(0,0,0,0.3); border:1px solid rgba(93,207,255,0.15); border-radius:3px; color:#5dcfff; font-family:'Courier New',monospace; font-size:0.72rem; padding:2px 8px; outline:none; width:200px; }
+.ws-table { width:100%; }
+.ws-thead { background:#040d1a; }
+.ws-thead td { padding:5px 8px; font-size:0.68rem; color:rgba(93,207,255,0.5); letter-spacing:0.04em; border-bottom:1px solid rgba(93,207,255,0.1); }
+.ws-body { max-height:240px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:rgba(93,207,255,0.2) transparent; }
+.ws-row { display:grid; grid-template-columns:42px 68px 120px 120px 60px 50px 1fr; padding:3px 8px; font-size:0.72rem; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.03); }
+.ws-row:hover { background:rgba(93,207,255,0.05); }
+.ws-row.selected { background:rgba(93,207,255,0.12); }
+.ws-row.proto-https { color:#00ff88; }
+.ws-row.proto-dns   { color:#ffcc44; }
+.ws-row.proto-tcp   { color:#5dcfff; }
+.ws-row.proto-arp   { color:#c47aff; }
+.ws-row.proto-icmp  { color:#ff9944; }
+.ws-row.proto-tls   { color:#00ff88; }
+.ws-detail { background:#030f1c; border-top:1px solid rgba(93,207,255,0.1); padding:10px 14px; font-size:0.72rem; color:rgba(93,207,255,0.7); min-height:50px; font-family:'Courier New',monospace; white-space:pre-wrap; }
+.ws-status { background:#040d1a; padding:4px 12px; border-top:1px solid rgba(93,207,255,0.08); font-size:0.68rem; color:rgba(93,207,255,0.4); display:flex; justify-content:space-between; }
+
+/* ═══════════════════════════════════════════════════════════════
+   UPGRADE 2 — Security Headlines Feed
+   ═══════════════════════════════════════════════════════════════ */
+.headlines-section { }
+.headlines-desc { color:rgba(255,255,255,0.55); font-size:0.88rem; margin-bottom:14px; }
+.headlines-list { display:flex; flex-direction:column; gap:10px; }
+.headline-card { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.07); border-radius:8px; padding:12px 14px; display:flex; gap:12px; align-items:flex-start; }
+.headline-cat  { flex-shrink:0; padding:2px 8px; border-radius:10px; font-size:0.67rem; font-weight:700; letter-spacing:0.03em; align-self:flex-start; margin-top:1px; }
+.headline-cat-vuln   { background:rgba(255,102,85,0.12); color:#ff6655; border:1px solid rgba(255,102,85,0.22); }
+.headline-cat-threat { background:rgba(255,180,0,0.1);  color:#ffb400; border:1px solid rgba(255,180,0,0.2); }
+.headline-cat-grc    { background:rgba(93,207,255,0.1); color:#5dcfff; border:1px solid rgba(93,207,255,0.2); }
+.headline-cat-tool   { background:rgba(0,255,136,0.09); color:#00ff88; border:1px solid rgba(0,255,136,0.18); }
+.headline-body h4 { font-size:0.83rem; color:rgba(255,255,255,0.85); font-weight:600; margin-bottom:3px; }
+.headline-body .hl-meta { font-size:0.72rem; color:rgba(255,255,255,0.38); }
+.headlines-updated { font-size:0.74rem; color:rgba(255,255,255,0.3); margin-top:10px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   UPGRADE 10 — Certification Roadmap
+   ═══════════════════════════════════════════════════════════════ */
+.cert-roadmap-section { }
+.cert-roadmap-desc { color:rgba(255,255,255,0.55); font-size:0.88rem; margin-bottom:18px; }
+.roadmap-track { position:relative; padding:0 0 8px; }
+.roadmap-line { position:absolute; top:22px; left:22px; right:22px; height:2px; background:rgba(255,255,255,0.08); z-index:0; }
+.roadmap-nodes { display:flex; justify-content:space-between; position:relative; z-index:1; flex-wrap:wrap; gap:12px; }
+.roadmap-node { display:flex; flex-direction:column; align-items:center; gap:6px; flex:1; min-width:80px; max-width:110px; }
+.roadmap-dot  { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.65rem; font-weight:700; text-align:center; line-height:1.2; flex-shrink:0; }
+.roadmap-dot--done    { background:rgba(0,255,136,0.18); border:2px solid #00ff88; color:#00ff88; }
+.roadmap-dot--active  { background:rgba(93,207,255,0.12); border:2px solid #5dcfff; color:#5dcfff; animation:roadmapPulse 2s ease-in-out infinite; }
+.roadmap-dot--planned { background:rgba(255,255,255,0.04); border:2px dashed rgba(255,255,255,0.2); color:rgba(255,255,255,0.3); }
+@keyframes roadmapPulse { 0%,100%{box-shadow:0 0 0 0 rgba(93,207,255,0.3)} 50%{box-shadow:0 0 0 8px rgba(93,207,255,0)} }
+
+/* ═══════════════════════════════════════════════════════════════
+   UPGRADE 11 — Light Mode
+   ═══════════════════════════════════════════════════════════════ */
+:root.light-mode { --page-bg:#f0f4f8; }
+.light-mode body { background:#f0f4f8; color:#1a2332; }
+.light-mode #bg-video, .light-mode #overlay { opacity:0.08; }
+.light-mode .glass-card { background:rgba(255,255,255,0.9); border-color:rgba(0,0,0,0.1); box-shadow:0 2px 20px rgba(0,0,0,0.08); }
+.light-mode .glass-card h2, .light-mode .glass-card h3 { color:#0a1a2e; }
+.light-mode .glass-card p, .light-mode .glass-card li { color:#334155; }
+.light-mode .footer { background:rgba(255,255,255,0.95); border-top:1px solid rgba(0,0,0,0.08); }
+.light-mode .footer-copy { color:#64748b; }
+.light-mode .skill-pill { background:rgba(0,0,0,0.06); color:#334155; border-color:rgba(0,0,0,0.1); }
+.light-mode .terminal-window { background:#1a1a2e; }
+.light-mode .ws-window { background:#1a1a2e; }
+.light-mode #themeToggle { background:rgba(0,0,0,0.08); border-color:rgba(0,0,0,0.2); color:#334155; }
+.roadmap-label { font-size:0.7rem; color:rgba(255,255,255,0.6); text-align:center; line-height:1.3; }
+.roadmap-date  { font-size:0.65rem; color:rgba(255,255,255,0.3); text-align:center; }
+.roadmap-legend { display:flex; gap:14px; flex-wrap:wrap; margin-top:14px; }
+.roadmap-legend-item { display:flex; align-items:center; gap:5px; font-size:0.72rem; color:rgba(255,255,255,0.45); }
+.roadmap-legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }

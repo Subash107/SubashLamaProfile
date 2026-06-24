@@ -1,0 +1,67 @@
+{
+  "updated": "2026-06-24",
+  "studies": [
+    {
+      "id": "CS-001",
+      "title": "SSH Brute Force Detection and Active Response",
+      "incident": "INC-003",
+      "date": "2026-06-15",
+      "severity": "high",
+      "ttp": "T1110.001",
+      "tools": ["Wazuh", "pfSense"],
+      "timeline": [
+        { "time": "14:32:01", "event": "Wazuh Rule 5551 fires — 5 failed SSH logins from 10.0.0.5 within 60 seconds" },
+        { "time": "14:32:02", "event": "Wazuh active response triggers — blocks source IP via iptables on endpoint" },
+        { "time": "14:32:05", "event": "Alert forwarded to Telegram via daily-digest workflow" },
+        { "time": "14:35:00", "event": "Manual review: source identified as external scan (not Kali red-team node)" },
+        { "time": "14:40:00", "event": "pfSense rule added to block entire /24 subnet permanently" },
+        { "time": "14:45:00", "event": "Wazuh threshold tuned: alert at 3 failures instead of 5 for non-internal IPs" }
+      ],
+      "detection": "Wazuh authentication rule 5551 with active response script configured to call iptables. Alert threshold: 5 failures in 60 seconds from same source IP.",
+      "mitre": "T1110.001 — Brute Force: Password Guessing. Adversary attempting to gain access to SSH service via credential stuffing.",
+      "mitigation": "Active response auto-block deployed. pfSense subnet rule added. Threshold reduced for external sources. SSH port-knock considered as future hardening.",
+      "lessons": "Active response is powerful but must be tuned carefully — a misconfigured threshold can block legitimate users. Always verify source IP before making permanent firewall rules."
+    },
+    {
+      "id": "CS-002",
+      "title": "False Positive Tuning — PowerShell via Sysmon EventID 1",
+      "incident": "INC-002",
+      "date": "2026-06-18",
+      "severity": "medium",
+      "ttp": "T1059.001",
+      "tools": ["Wazuh", "Sysmon"],
+      "timeline": [
+        { "time": "09:14:22", "event": "Sysmon EventID 1 fires — PowerShell.exe spawned by svchost.exe with encoded command" },
+        { "time": "09:14:23", "event": "Wazuh rule 92201 triggers — Suspicious PowerShell execution detected" },
+        { "time": "09:15:00", "event": "Alert reviewed: parent process is Windows Update service (svchost.exe -k netsvcs)" },
+        { "time": "09:20:00", "event": "Process hash verified against known-good Windows Update helper" },
+        { "time": "09:25:00", "event": "Wazuh exclusion rule added: whitelist specific parent process hash + command pattern" }
+      ],
+      "detection": "Sysmon EventID 1 (Process Create) with CommandLine containing Base64 encoded PowerShell (-EncodedCommand). Wazuh rule 92201 matches suspicious PS patterns.",
+      "mitre": "T1059.001 — Command and Scripting Interpreter: PowerShell. Legitimate use by Windows Update, misidentified as adversary technique.",
+      "mitigation": "Exclusion rule added with triple condition: parent process name + parent process hash + command substring. Avoids broad whitelisting that could mask real attacks.",
+      "lessons": "Never exclude by process name alone — always combine with hash or full path. Document every exclusion rule with the reason in a comment so future analysts understand the context."
+    },
+    {
+      "id": "CS-003",
+      "title": "Authorized Port Scan Detection — Red Team Exercise",
+      "incident": "INC-001",
+      "date": "2026-06-20",
+      "severity": "low",
+      "ttp": "T1046",
+      "tools": ["Suricata", "Wazuh"],
+      "timeline": [
+        { "time": "11:02:11", "event": "Suricata rule ET SCAN fires — Nmap SYN scan detected from 192.168.10.5 (Kali node)" },
+        { "time": "11:02:12", "event": "Alert forwarded to Wazuh via UNIX socket" },
+        { "time": "11:02:13", "event": "Wazuh Rule 40101 fires — Port Scan Detected" },
+        { "time": "11:05:00", "event": "Cross-reference internal IP list — 192.168.10.5 is the authorized Kali lab node" },
+        { "time": "11:10:00", "event": "Alert confirmed as authorized red-team activity" },
+        { "time": "11:15:00", "event": "Suricata rule updated — tag internal scans as INFO not ALERT when source is lab VLAN" }
+      ],
+      "detection": "Suricata ET SCAN Nmap Scripting Engine signature (SID 2010937). Triggered on TCP SYN packets to multiple ports in rapid succession.",
+      "mitre": "T1046 — Network Service Discovery. Red team node performing authorized service enumeration against lab targets.",
+      "mitigation": "Created Suricata suppress rule for lab VLAN (192.168.10.0/24) to reduce noise during authorized tests. Documented authorized scan schedule in lab runbook.",
+      "lessons": "Red team exercises generate massive alert noise. Pre-authorise with signed scope document and suppress rules — but keep logs for post-exercise review. Never delete logs from authorized tests."
+    }
+  ]
+}

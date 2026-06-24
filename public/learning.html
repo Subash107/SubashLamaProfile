@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Learning Log — Subash Lama. Weekly study progress in cybersecurity, SOC operations, and GRC." />
+  <title>Learning Log — Subash Lama</title>
+  <style>
+    :root { --bg:#07111c; --panel:#0d1e2e; --accent:#00ff88; --blue:#5dcfff; --yellow:#ffcc44; --text:#e0e0e0; --muted:#6b7a8d; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg); color:var(--text); font-family:'Segoe UI',sans-serif; min-height:100vh; padding:24px 20px; max-width:900px; margin:0 auto; }
+    a { color:var(--accent); text-decoration:none; }
+
+    .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; padding-bottom:14px; border-bottom:1px solid #1a2a3a; flex-wrap:wrap; gap:10px; }
+    .top-bar h1 { color:var(--accent); font-size:1.2rem; }
+    .back-link { color:var(--muted); font-size:0.82rem; }
+
+    .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:24px; }
+    .stat { background:var(--panel); border:1px solid #1a2a3a; border-radius:8px; padding:14px; text-align:center; }
+    .stat .num { font-size:1.8rem; font-weight:700; color:var(--accent); }
+    .stat .lbl { font-size:0.74rem; color:var(--muted); margin-top:3px; }
+
+    .section { background:var(--panel); border:1px solid #1a2a3a; border-radius:10px; padding:18px 20px; margin-bottom:16px; }
+    .section h2 { font-size:0.95rem; color:var(--accent); margin-bottom:14px; }
+
+    .streak-bar { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:8px; }
+    .streak-day { width:22px; height:22px; border-radius:4px; background:#0a1828; border:1px solid #1a2a3a; }
+    .streak-day.active { background:var(--accent); border-color:rgba(0,255,136,0.5); }
+    .streak-day.partial { background:rgba(0,255,136,0.3); border-color:rgba(0,255,136,0.3); }
+
+    .topic-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:0.82rem; }
+    .topic-label { width:180px; color:var(--text); }
+    .topic-bar   { flex:1; background:#0a1828; border-radius:3px; height:7px; }
+    .topic-fill  { height:7px; border-radius:3px; background:var(--accent); }
+    .topic-count { width:36px; text-align:right; color:var(--muted); font-size:0.76rem; }
+
+    .log-entry { border-bottom:1px solid #0d1e2e; padding:10px 0; font-size:0.82rem; }
+    .log-entry:last-child { border-bottom:none; }
+    .log-date    { color:var(--muted); font-size:0.72rem; margin-bottom:3px; }
+    .log-topic   { color:rgba(255,255,255,0.85); font-weight:600; }
+    .log-detail  { color:rgba(255,255,255,0.5); margin-top:2px; }
+    .log-duration { display:inline-block; padding:1px 7px; background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.18); border-radius:8px; font-size:0.68rem; color:var(--accent); margin-top:4px; }
+
+    .empty { text-align:center; padding:30px; color:var(--muted); font-size:0.85rem; }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div>
+      <h1>Learning Log</h1>
+      <p style="color:var(--muted);font-size:0.8rem;margin-top:4px">Weekly cybersecurity study progress — updated via GitHub Actions</p>
+    </div>
+    <a class="back-link" href="index.html">&larr; Back to portfolio</a>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="num" id="statSessions">—</div><div class="lbl">Study Sessions</div></div>
+    <div class="stat"><div class="num" id="statStreak">—</div><div class="lbl">Day Streak</div></div>
+    <div class="stat"><div class="num" id="statTopics">—</div><div class="lbl">Topics Covered</div></div>
+    <div class="stat"><div class="num" id="statHours">—</div><div class="lbl">Hours (est.)</div></div>
+  </div>
+
+  <div class="section">
+    <h2>30-Day Study Streak</h2>
+    <div class="streak-bar" id="streakBar"></div>
+    <p style="font-size:0.74rem;color:var(--muted);margin-top:6px">Green = study session logged &middot; Faded = partial &middot; Dark = no session</p>
+  </div>
+
+  <div class="section">
+    <h2>Top Topics This Month</h2>
+    <div id="topicBars"><div class="empty">Loading...</div></div>
+  </div>
+
+  <div class="section">
+    <h2>Recent Study Sessions</h2>
+    <div id="logEntries"><div class="empty">Loading...</div></div>
+  </div>
+
+  <script>
+    fetch('https://raw.githubusercontent.com/Subash107/SubashLamaProfile/main/download-logs/study-log.json?t=' + Date.now())
+      .then(r => r.json())
+      .then(entries => {
+        if (!Array.isArray(entries)) entries = [];
+
+        document.getElementById('statSessions').textContent = entries.length;
+
+        const topicMap = {};
+        entries.forEach(e => {
+          const t = e.topic || e.subject || 'General';
+          topicMap[t] = (topicMap[t] || 0) + 1;
+        });
+        document.getElementById('statTopics').textContent = Object.keys(topicMap).length;
+
+        const totalHours = entries.reduce((s, e) => s + (parseFloat(e.hours || e.duration || 1)), 0);
+        document.getElementById('statHours').textContent = Math.round(totalHours);
+
+        // Streak
+        const dateSet = new Set(entries.map(e => (e.date || '').slice(0, 10)));
+        let streak = 0;
+        const today = new Date();
+        for (let i = 0; i < 365; i++) {
+          const d = new Date(today); d.setDate(d.getDate() - i);
+          if (dateSet.has(d.toISOString().slice(0, 10))) streak++;
+          else if (i > 0) break;
+        }
+        document.getElementById('statStreak').textContent = streak + 'd';
+
+        // 30-day bar
+        const barEl = document.getElementById('streakBar');
+        barEl.innerHTML = '';
+        for (let i = 29; i >= 0; i--) {
+          const d = new Date(today); d.setDate(d.getDate() - i);
+          const key = d.toISOString().slice(0, 10);
+          const div = document.createElement('div');
+          div.className = 'streak-day' + (dateSet.has(key) ? ' active' : '');
+          div.title = key;
+          barEl.appendChild(div);
+        }
+
+        // Topic bars
+        const sorted = Object.entries(topicMap).sort((a, b) => b[1] - a[1]).slice(0, 8);
+        const max = sorted[0]?.[1] || 1;
+        document.getElementById('topicBars').innerHTML = sorted.map(([t, v]) =>
+          '<div class="topic-row"><div class="topic-label">' + t + '</div>' +
+          '<div class="topic-bar"><div class="topic-fill" style="width:' + Math.round(v / max * 100) + '%"></div></div>' +
+          '<div class="topic-count">' + v + 'x</div></div>'
+        ).join('') || '<div class="empty">No topics yet</div>';
+
+        // Recent entries
+        const recent = [...entries].reverse().slice(0, 12);
+        document.getElementById('logEntries').innerHTML = recent.map(e =>
+          '<div class="log-entry">' +
+          '<div class="log-date">' + (e.date || '').slice(0, 10) + '</div>' +
+          '<div class="log-topic">' + (e.topic || e.subject || 'Study session') + '</div>' +
+          (e.notes || e.detail ? '<div class="log-detail">' + (e.notes || e.detail) + '</div>' : '') +
+          (e.hours || e.duration ? '<span class="log-duration">' + (e.hours || e.duration) + 'h</span>' : '') +
+          '</div>'
+        ).join('') || '<div class="empty">No sessions logged yet. Use the Log Study workflow to add entries.</div>';
+      })
+      .catch(() => {
+        document.getElementById('logEntries').innerHTML = '<div class="empty">Study log not found. Use the <strong>Log Study</strong> GitHub Actions workflow to start tracking.</div>';
+        document.getElementById('topicBars').innerHTML = '';
+        ['statSessions','statStreak','statTopics','statHours'].forEach(id => {
+          document.getElementById(id).textContent = '0';
+        });
+        document.getElementById('streakBar').innerHTML = Array(30).fill('<div class="streak-day"></div>').join('');
+      });
+  </script>
+</body>
+</html>

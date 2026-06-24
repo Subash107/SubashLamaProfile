@@ -1,0 +1,51 @@
+{
+  "updated": "2026-06-24",
+  "currency_note": "All figures in USD annual equivalent. Remote figures are market rate for remote-first roles.",
+  "roles": [
+    {
+      "title": "SOC Analyst L1",
+      "markets": [
+        { "region": "Remote (Global)", "min": 35000, "max": 55000, "median": 44000 },
+        { "region": "United Kingdom",  "min": 28000, "max": 42000, "median": 34000 },
+        { "region": "Australia",        "min": 55000, "max": 75000, "median": 63000 },
+        { "region": "United States",    "min": 55000, "max": 80000, "median": 67000 },
+        { "region": "Singapore",        "min": 40000, "max": 60000, "median": 50000 },
+        { "region": "UAE",              "min": 30000, "max": 50000, "median": 40000 }
+      ]
+    },
+    {
+      "title": "SOC Analyst L2",
+      "markets": [
+        { "region": "Remote (Global)", "min": 55000, "max": 85000, "median": 68000 },
+        { "region": "United Kingdom",  "min": 42000, "max": 65000, "median": 52000 },
+        { "region": "Australia",        "min": 75000, "max": 105000, "median": 88000 },
+        { "region": "United States",    "min": 75000, "max": 110000, "median": 91000 },
+        { "region": "Singapore",        "min": 55000, "max": 82000, "median": 67000 },
+        { "region": "UAE",              "min": 45000, "max": 72000, "median": 57000 }
+      ]
+    },
+    {
+      "title": "GRC Analyst",
+      "markets": [
+        { "region": "Remote (Global)", "min": 50000, "max": 80000, "median": 63000 },
+        { "region": "United Kingdom",  "min": 38000, "max": 60000, "median": 48000 },
+        { "region": "Australia",        "min": 70000, "max": 100000, "median": 83000 },
+        { "region": "United States",    "min": 70000, "max": 105000, "median": 86000 },
+        { "region": "Singapore",        "min": 50000, "max": 78000, "median": 62000 },
+        { "region": "UAE",              "min": 42000, "max": 68000, "median": 53000 }
+      ]
+    },
+    {
+      "title": "IAM Specialist",
+      "markets": [
+        { "region": "Remote (Global)", "min": 60000, "max": 95000, "median": 76000 },
+        { "region": "United Kingdom",  "min": 45000, "max": 72000, "median": 57000 },
+        { "region": "Australia",        "min": 80000, "max": 115000, "median": 95000 },
+        { "region": "United States",    "min": 85000, "max": 130000, "median": 107000 },
+        { "region": "Singapore",        "min": 60000, "max": 92000, "median": 74000 },
+        { "region": "UAE",              "min": 50000, "max": 80000, "median": 63000 }
+      ]
+    }
+  ],
+  "source": "Aggregated from LinkedIn Salary, Glassdoor, PayScale, and Levels.fyi — June 2026"
+}

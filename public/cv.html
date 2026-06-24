@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Subash Lama — Cybersecurity Analyst CV. Print-optimized resume." />
+  <title>CV — Subash Lama | Cybersecurity Analyst</title>
+  <style>
+    :root { --accent:#0066cc; --text:#1a1a1a; --muted:#555; --border:#ddd; --bg:#fff; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { background:#f4f4f4; color:var(--text); font-family:'Segoe UI',Arial,sans-serif; font-size:11pt; line-height:1.5; }
+
+    .page { background:var(--bg); max-width:820px; margin:20px auto; padding:40px 48px; box-shadow:0 2px 20px rgba(0,0,0,0.12); }
+    .no-print { text-align:center; padding:12px; background:#1a2a3a; color:#fff; font-size:0.85rem; }
+    .no-print button { margin-left:12px; background:#00ff88; color:#000; border:none; padding:6px 16px; border-radius:4px; cursor:pointer; font-weight:700; }
+
+    /* Header */
+    .cv-header { border-bottom:2px solid var(--accent); padding-bottom:14px; margin-bottom:16px; }
+    .cv-name  { font-size:26pt; font-weight:700; color:var(--accent); letter-spacing:-0.5px; }
+    .cv-title { font-size:13pt; color:var(--muted); margin-top:2px; }
+    .cv-contact { display:flex; flex-wrap:wrap; gap:14px; margin-top:8px; font-size:9.5pt; color:var(--muted); }
+    .cv-contact a { color:var(--accent); text-decoration:none; }
+
+    /* Sections */
+    .cv-section { margin-bottom:18px; }
+    .cv-section-title { font-size:11pt; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--accent); border-bottom:1px solid var(--border); padding-bottom:4px; margin-bottom:10px; }
+
+    /* Summary */
+    .cv-summary p { font-size:10.5pt; color:var(--text); line-height:1.6; }
+
+    /* Experience */
+    .exp-entry { margin-bottom:14px; }
+    .exp-header { display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:4px; }
+    .exp-title   { font-weight:700; font-size:11pt; }
+    .exp-dates   { font-size:9.5pt; color:var(--muted); }
+    .exp-company { font-size:10pt; color:var(--accent); margin-top:1px; }
+    .exp-bullets { margin:5px 0 0 16px; }
+    .exp-bullets li { font-size:10pt; margin-bottom:2px; }
+    .exp-tech { font-size:9pt; color:var(--muted); margin-top:4px; font-style:italic; }
+
+    /* Skills */
+    .skills-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+    .skill-group h4 { font-size:10pt; font-weight:700; margin-bottom:4px; }
+    .skill-group p  { font-size:9.5pt; color:var(--muted); }
+
+    /* Certs */
+    .cert-list { display:grid; grid-template-columns:repeat(2,1fr); gap:6px; }
+    .cert-item { font-size:9.5pt; }
+    .cert-item strong { color:var(--text); }
+    .cert-item span   { color:var(--muted); }
+
+    /* Education */
+    .edu-entry { margin-bottom:8px; }
+    .edu-degree  { font-weight:700; font-size:10.5pt; }
+    .edu-school  { color:var(--accent); font-size:10pt; }
+    .edu-dates   { color:var(--muted); font-size:9.5pt; }
+
+    @media print {
+      body { background:#fff; font-size:10pt; }
+      .no-print { display:none !important; }
+      .page { margin:0; padding:20px 28px; box-shadow:none; max-width:100%; }
+      a { color:#0066cc !important; }
+    }
+    @page { margin:1.2cm 1.5cm; }
+  </style>
+</head>
+<body>
+  <div class="no-print">
+    Print-optimized CV &nbsp;|&nbsp; All formatting preserved when printed
+    <button onclick="window.print()">Print / Save PDF</button>
+    <a href="index.html" style="color:#aaa;margin-left:16px;font-size:0.82rem">&larr; Back to portfolio</a>
+  </div>
+
+  <div class="page">
+    <div class="cv-header">
+      <div class="cv-name">Subash Lama</div>
+      <div class="cv-title">Cybersecurity Analyst &mdash; SOC &middot; GRC &middot; IAM &middot; Detection Engineering</div>
+      <div class="cv-contact">
+        <span>&#128205; Kathmandu, Nepal &middot; UTC+5:45</span>
+        <a href="mailto:lamasubash107@gmail.com">lamasubash107@gmail.com</a>
+        <a href="https://subashlamaprofile.pages.dev" target="_blank">subashlamaprofile.pages.dev</a>
+        <a href="https://www.linkedin.com/in/subash-lama-b319a016b/" target="_blank">linkedin.com/in/subash-lama-b319a016b</a>
+        <a href="https://github.com/Subash107" target="_blank">github.com/Subash107</a>
+      </div>
+    </div>
+
+    <div class="cv-section cv-summary">
+      <div class="cv-section-title">Professional Summary</div>
+      <p>Cybersecurity Analyst with 12+ years in enterprise IT operations transitioning into SOC, detection engineering, GRC, and IAM. Hands-on homelab running Wazuh SIEM, Suricata IDS, Sysmon, and pfSense. Business degree combined with deep technical depth enables clear risk communication to both technical teams and management stakeholders. Available immediately for remote, hybrid, or on-site roles.</p>
+    </div>
+
+    <div class="cv-section">
+      <div class="cv-section-title">Experience</div>
+
+      <div class="exp-entry">
+        <div class="exp-header"><span class="exp-title">Information Technology System Administrator</span><span class="exp-dates">Jan 2020 &ndash; Feb 2025</span></div>
+        <div class="exp-company">Primuson Pvt. Ltd. &middot; Full-time &middot; Kathmandu</div>
+        <ul class="exp-bullets">
+          <li>Managed 150+ endpoints and multi-site infrastructure across 3 office locations</li>
+          <li>Deployed IDS/network monitoring stack, reducing security visibility gaps across the environment</li>
+          <li>Standardised patch management cycle, cutting unplanned downtime by ~40%</li>
+          <li>Led ethical hacking exercises to identify and remediate internal vulnerabilities</li>
+        </ul>
+        <div class="exp-tech">Ethical Hacking &middot; Network Monitoring &middot; System Administration &middot; IDS &middot; Infrastructure Security</div>
+      </div>
+
+      <div class="exp-entry">
+        <div class="exp-header"><span class="exp-title">Information Technology Specialist</span><span class="exp-dates">Mar 2018 &ndash; Apr 2019</span></div>
+        <div class="exp-company">State Bank of India &middot; Contract via Green IT Solutions Pvt. Ltd. &middot; Kathmandu</div>
+        <ul class="exp-bullets">
+          <li>Administered Active Directory for 200+ banking staff across Kathmandu branches</li>
+          <li>Configured and hardened proxy server routing all outbound banking traffic</li>
+          <li>Enforced endpoint security policies across 80+ workstations meeting banking compliance standards</li>
+        </ul>
+        <div class="exp-tech">Proxy Server &middot; Active Directory &middot; Identity Management &middot; Endpoint Security</div>
+      </div>
+
+      <div class="exp-entry">
+        <div class="exp-header"><span class="exp-title">Support Engineer</span><span class="exp-dates">Mar 2016 &ndash; Apr 2019</span></div>
+        <div class="exp-company">Green IT Solutions Pvt. Ltd. &middot; Full-time &middot; Kathmandu</div>
+        <ul class="exp-bullets">
+          <li>Delivered network and infrastructure support across 20+ client organisations</li>
+          <li>Managed SAN/storage virtualisation deployments for enterprise clients</li>
+          <li>Maintained Linux server environments achieving 99%+ uptime across client engagements</li>
+        </ul>
+        <div class="exp-tech">Storage Virtualization &middot; Proxy Server &middot; Network Support &middot; Linux Administration</div>
+      </div>
+
+      <div class="exp-entry">
+        <div class="exp-header"><span class="exp-title">Information Technology Consultant</span><span class="exp-dates">Jan 2017 &ndash; Dec 2017</span></div>
+        <div class="exp-company">Unilever &middot; Contract via Green IT Solutions Pvt. Ltd. &middot; Nepal</div>
+        <ul class="exp-bullets">
+          <li>Consulted on IT governance and infrastructure for FMCG operations across Nepal</li>
+          <li>Designed and documented Cisco network topology for distribution facilities</li>
+          <li>Supported Active Directory migration aligned with Unilever global IT standards</li>
+        </ul>
+        <div class="exp-tech">Cisco Networking &middot; Active Directory &middot; IT Governance &middot; Infrastructure Consulting</div>
+      </div>
+
+      <div class="exp-entry">
+        <div class="exp-header"><span class="exp-title">Information Technology Trainee</span><span class="exp-dates">Mar 2014 &ndash; May 2016</span></div>
+        <div class="exp-company">Platinum Hotel &amp; SPA &middot; Full-time &middot; Kathmandu</div>
+        <ul class="exp-bullets">
+          <li>Provided end-to-end IT support for 100+ hospitality staff</li>
+          <li>Managed POS system integration and network connectivity for hotel services</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cv-section">
+      <div class="cv-section-title">Core Skills</div>
+      <div class="skills-grid">
+        <div class="skill-group"><h4>Security Operations &amp; GRC</h4><p>SOC Operations, SIEM, Detection Engineering, Incident Response, Alert Triage, GRC, IAM, Cyber Threat Intelligence, MITRE ATT&amp;CK</p></div>
+        <div class="skill-group"><h4>Security Tools</h4><p>Wazuh, Suricata, Sysmon, pfSense, IDS/IPS, Endpoint Security, Ethical Hacking, Vulnerability Assessment</p></div>
+        <div class="skill-group"><h4>Infrastructure &amp; Networking</h4><p>Cisco Networking, Active Directory, DNS, Linux Administration, Windows Server, Docker, Terraform, Storage Virtualisation</p></div>
+        <div class="skill-group"><h4>Scripting &amp; Automation</h4><p>Python, Bash, PowerShell, GitHub Actions, CI/CD, IaC, Log Analysis, Data Analysis</p></div>
+      </div>
+    </div>
+
+    <div class="cv-section">
+      <div class="cv-section-title">Certifications</div>
+      <div class="cert-list">
+        <div class="cert-item"><strong>Cisco &mdash; Endpoint Security</strong><br><span>Issued Jun 2026 &middot; credly.com/badges/ed2914e2</span></div>
+        <div class="cert-item"><strong>Cisco &mdash; Ethical Hacker</strong><br><span>Issued Apr 2026 &middot; credly.com/badges/e91207eb</span></div>
+        <div class="cert-item"><strong>Cisco &mdash; Introduction to Cybersecurity</strong><br><span>Issued Mar 2026 &middot; credly.com/badges/55a7fb68</span></div>
+        <div class="cert-item"><strong>IBM &mdash; Cybersecurity Fundamentals</strong><br><span>Issued Mar 2026 &middot; credly.com/badges/8ba85b9c</span></div>
+        <div class="cert-item"><strong>IBM &mdash; Python for Data Science</strong><br><span>credly.com/badges/05bd1d30</span></div>
+        <div class="cert-item"><strong>Google &mdash; Ads Video Certification</strong><br><span>skillshop.credential.net/182626545</span></div>
+        <div class="cert-item"><strong>IBM &mdash; Data Analysis with Python</strong><br><span>IBM SkillsBuild</span></div>
+      </div>
+    </div>
+
+    <div class="cv-section">
+      <div class="cv-section-title">Education</div>
+      <div class="edu-entry">
+        <div class="edu-degree">Bachelor of Business Administration (BBA)</div>
+        <div class="edu-school">Tribhuvan University &middot; Kathmandu, Nepal</div>
+      </div>
+    </div>
+
+    <div class="cv-section">
+      <div class="cv-section-title">Languages</div>
+      <p style="font-size:10pt">English (Professional) &middot; Nepali (Native) &middot; Hindi (Conversational)</p>
+    </div>
+
+    <div style="margin-top:18px;padding-top:10px;border-top:1px solid var(--border);font-size:8.5pt;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px">
+      <span>Available immediately &middot; Remote worldwide &middot; On-site / hybrid in Kathmandu</span>
+      <span>Portfolio: subashlamaprofile.pages.dev</span>
+    </div>
+  </div>
+</body>
+</html>

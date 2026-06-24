@@ -1,0 +1,64 @@
+name: Geofenced Recruiter Alert
+
+on:
+  push:
+    paths:
+      - 'download-logs/resume-downloads.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  geo-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Check for target-region downloads
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          LOG="download-logs/resume-downloads.txt"
+          [ ! -f "$LOG" ] && exit 0
+
+          TARGET_REGIONS="United Kingdom|Australia|United States|UAE|United Arab Emirates|Germany|Singapore|Canada|Netherlands|New Zealand|Switzerland|Sweden|Norway|Denmark|Finland"
+
+          TODAY=$(date -u +"%Y-%m-%d")
+          MATCHES=$(grep "^${TODAY}" "$LOG" | grep -iE "$TARGET_REGIONS" || true)
+
+          [ -z "$MATCHES" ] && echo "No target-region downloads today." && exit 0
+
+          while IFS= read -r line; do
+            [ -z "$line" ] && continue
+            TS=$(echo "$line"       | cut -d'|' -f1 | tr -d ' ')
+            LOCATION=$(echo "$line" | cut -d'|' -f3 | tr -d ' ')
+            ORG=$(echo "$line"      | cut -d'|' -f4 | tr -d ' ')
+
+            COUNTRY=$(echo "$LOCATION" | awk -F',' '{print $NF}' | tr -d ' ')
+            FLAG=""
+            case "$COUNTRY" in
+              "UnitedKingdom"|"UK") FLAG="🇬🇧" ;;
+              "Australia")           FLAG="🇦🇺" ;;
+              "UnitedStates"|"US")   FLAG="🇺🇸" ;;
+              "UAE"|"UnitedArabEmirates") FLAG="🇦🇪" ;;
+              "Germany")             FLAG="🇩🇪" ;;
+              "Singapore")           FLAG="🇸🇬" ;;
+              "Canada")              FLAG="🇨🇦" ;;
+              "Netherlands")         FLAG="🇳🇱" ;;
+              *)                     FLAG="🌍" ;;
+            esac
+
+            MSG=$(printf '%s GEO ALERT — Resume Downloaded\n\nRegion : %s\nOrg    : %s\nTime   : %s\n\nA recruiter from a target hiring region just downloaded your CV.\nCheck LinkedIn for new connection requests.' \
+              "$FLAG" "$LOCATION" "${ORG:-Unknown}" "$TS")
+
+            curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "{\"chat_id\":\"${CHAT}\",\"text\":$(printf '%s' "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"
+          done <<< "$MATCHES"

@@ -1,0 +1,40 @@
+{
+  "updated": "2026-06-24",
+  "items": [
+    {
+      "title": "CISA Warns of Active Exploitation of Ivanti Connect Secure Vulnerability",
+      "source": "CISA",
+      "category": "vuln",
+      "url": "https://www.cisa.gov/news-events/alerts",
+      "date": "2026-06-24"
+    },
+    {
+      "title": "New Ransomware Group Targets Healthcare Sector with Double Extortion",
+      "source": "BleepingComputer",
+      "category": "threat",
+      "url": "https://www.bleepingcomputer.com",
+      "date": "2026-06-23"
+    },
+    {
+      "title": "NIST Updates Cybersecurity Framework with AI Security Guidance",
+      "source": "NIST",
+      "category": "grc",
+      "url": "https://www.nist.gov/cyberframework",
+      "date": "2026-06-23"
+    },
+    {
+      "title": "Critical RCE in OpenSSH Affects Millions of Linux Servers",
+      "source": "Krebs on Security",
+      "category": "vuln",
+      "url": "https://krebsonsecurity.com",
+      "date": "2026-06-22"
+    },
+    {
+      "title": "Wazuh 4.8 Released — New MITRE ATT&CK Detection Rules",
+      "source": "Wazuh Blog",
+      "category": "tool",
+      "url": "https://wazuh.com/blog",
+      "date": "2026-06-22"
+    }
+  ]
+}

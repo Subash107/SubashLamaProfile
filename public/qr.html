@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subash Lama — Portfolio QR Card</title>
+  <style>
+    :root { --bg:#07111c; --accent:#00ff88; --text:#e0e0e0; --muted:#6b7a8d; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg); color:var(--text); font-family:'Segoe UI',sans-serif; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
+
+    .card { background:#0d1e2e; border:1px solid rgba(0,255,136,0.2); border-radius:16px; padding:36px 40px; text-align:center; max-width:360px; width:100%; }
+    .card-name  { font-size:1.4rem; font-weight:700; color:var(--accent); margin-bottom:4px; }
+    .card-title { font-size:0.88rem; color:var(--muted); margin-bottom:24px; }
+
+    .qr-wrap { background:#fff; border-radius:10px; padding:14px; display:inline-block; margin-bottom:20px; }
+    .qr-wrap img, .qr-wrap svg { width:180px; height:180px; display:block; }
+
+    .card-url   { font-size:0.78rem; color:rgba(0,255,136,0.7); margin-bottom:6px; font-family:monospace; word-break:break-all; }
+    .card-meta  { font-size:0.76rem; color:var(--muted); line-height:1.6; }
+    .card-tags  { display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin:14px 0; }
+    .card-tag   { background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.18); border-radius:10px; padding:2px 9px; font-size:0.7rem; color:var(--accent); }
+
+    .print-btn  { margin-top:20px; background:var(--accent); color:#000; border:none; padding:9px 24px; border-radius:8px; font-weight:700; font-size:0.88rem; cursor:pointer; }
+    .back-link  { margin-top:14px; color:var(--muted); font-size:0.78rem; text-decoration:none; }
+    .back-link:hover { color:var(--accent); }
+
+    .qr-placeholder { width:180px; height:180px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:8px; }
+    .qr-placeholder p { font-size:0.72rem; color:#555; text-align:center; }
+
+    @media print {
+      body { background:#fff; min-height:auto; }
+      .card { border:2px solid #000; background:#fff; color:#000; }
+      .card-name { color:#000; }
+      .card-title, .card-meta, .card-url { color:#333; }
+      .card-tag { background:#eee; border-color:#ccc; color:#333; }
+      .print-btn, .back-link { display:none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="card-name">Subash Lama</div>
+    <div class="card-title">Cybersecurity Analyst &middot; SOC &middot; GRC &middot; IAM</div>
+
+    <div class="qr-wrap">
+      <div id="qrContainer">
+        <canvas id="qrCanvas" width="180" height="180"></canvas>
+      </div>
+    </div>
+
+    <div class="card-url">subashlamaprofile.pages.dev</div>
+    <div class="card-tags">
+      <span class="card-tag">SOC Operations</span>
+      <span class="card-tag">Wazuh SIEM</span>
+      <span class="card-tag">GRC</span>
+      <span class="card-tag">IAM</span>
+      <span class="card-tag">Suricata</span>
+      <span class="card-tag">MITRE ATT&CK</span>
+    </div>
+    <div class="card-meta">
+      Kathmandu, Nepal &middot; UTC+5:45<br>
+      lamasubash107@gmail.com<br>
+      Available immediately &middot; Remote worldwide
+    </div>
+
+    <button class="print-btn" onclick="window.print()">Print Business Card</button><br>
+    <a class="back-link" href="index.html">&larr; Back to portfolio</a>
+  </div>
+
+  <script>
+    /* Minimal QR code renderer for a fixed URL */
+    (function() {
+      const URL = 'https://subashlamaprofile.pages.dev/?utm_source=qr&utm_medium=businesscard';
+      const canvas = document.getElementById('qrCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const SIZE = 180;
+
+      /* Try to load pre-generated QR SVG first */
+      fetch('assets/qr-code.svg')
+        .then(r => { if (!r.ok) throw new Error(); return r.text(); })
+        .then(svg => {
+          const img = new Image();
+          img.onload = () => ctx.drawImage(img, 0, 0, SIZE, SIZE);
+          img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+        })
+        .catch(() => {
+          /* Fallback: draw a branded placeholder */
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, SIZE, SIZE);
+
+          ctx.fillStyle = '#000000';
+          /* Corner squares */
+          [[10,10],[130,10],[10,130]].forEach(([x,y]) => {
+            ctx.fillRect(x, y, 40, 40);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(x+7, y+7, 26, 26);
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(x+13, y+13, 14, 14);
+          });
+
+          /* Center text */
+          ctx.fillStyle = '#333333';
+          ctx.font = '9px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('Scan to visit portfolio', SIZE/2, 95);
+          ctx.fillText('subashlamaprofile.pages.dev', SIZE/2, 108);
+          ctx.fillStyle = '#00aa55';
+          ctx.fillRect(35, 115, 110, 3);
+        });
+    })();
+  </script>
+</body>
+</html>

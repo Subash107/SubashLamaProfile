@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="SOC Analyst Quiz — Test your cybersecurity knowledge. 10 questions on MITRE, CVEs, log analysis, and incident response." />
+  <title>SOC Analyst Quiz — Subash Lama</title>
+  <style>
+    :root { --bg:#07111c; --panel:#0d1e2e; --accent:#00ff88; --red:#ff6655; --yellow:#ffcc44; --blue:#5dcfff; --text:#e0e0e0; --muted:#6b7a8d; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg); color:var(--text); font-family:'Segoe UI',sans-serif; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
+    a { color:var(--accent); text-decoration:none; }
+
+    .quiz-card { background:var(--panel); border:1px solid rgba(0,255,136,0.2); border-radius:14px; padding:32px 36px; max-width:660px; width:100%; }
+    .quiz-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:8px; }
+    .quiz-title  { color:var(--accent); font-size:1.1rem; font-weight:700; }
+    .quiz-progress { font-size:0.78rem; color:var(--muted); }
+    .progress-bar  { width:100%; background:rgba(255,255,255,0.06); border-radius:4px; height:4px; margin-bottom:24px; }
+    .progress-fill { height:4px; border-radius:4px; background:var(--accent); transition:width 0.4s ease; }
+
+    .question { font-size:1rem; font-weight:600; color:rgba(255,255,255,0.92); margin-bottom:20px; line-height:1.5; }
+    .question .q-tag { display:inline-block; padding:1px 8px; border-radius:8px; font-size:0.68rem; font-weight:700; margin-right:8px; background:rgba(0,255,136,0.1); color:var(--accent); border:1px solid rgba(0,255,136,0.2); }
+
+    .options { display:flex; flex-direction:column; gap:10px; }
+    .option { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:12px 16px; cursor:pointer; font-size:0.88rem; color:rgba(255,255,255,0.75); transition:all 0.18s ease; display:flex; align-items:center; gap:10px; }
+    .option:hover { background:rgba(0,255,136,0.06); border-color:rgba(0,255,136,0.3); color:#fff; }
+    .option.correct  { background:rgba(0,255,136,0.12); border-color:#00ff88; color:#00ff88; }
+    .option.wrong    { background:rgba(255,102,85,0.1); border-color:#ff6655; color:#ff6655; }
+    .option.disabled { cursor:default; pointer-events:none; }
+    .option-letter { width:24px; height:24px; border-radius:50%; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:700; flex-shrink:0; }
+
+    .explanation { margin-top:16px; padding:12px 14px; background:rgba(93,207,255,0.06); border:1px solid rgba(93,207,255,0.18); border-radius:8px; font-size:0.82rem; color:rgba(93,207,255,0.85); line-height:1.6; display:none; }
+    .explanation.show { display:block; }
+
+    .next-btn { margin-top:18px; width:100%; padding:12px; background:var(--accent); color:#000; border:none; border-radius:8px; font-weight:700; font-size:0.92rem; cursor:pointer; display:none; }
+    .next-btn.show { display:block; }
+
+    .result-card { text-align:center; }
+    .result-score { font-size:3rem; font-weight:700; color:var(--accent); margin:16px 0 8px; }
+    .result-label { font-size:1rem; color:rgba(255,255,255,0.7); margin-bottom:20px; }
+    .result-breakdown { display:grid; grid-template-columns:repeat(auto-fit,minmax(100px,1fr)); gap:10px; margin:20px 0; }
+    .rb-stat { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:12px; text-align:center; }
+    .rb-stat .num { font-size:1.5rem; font-weight:700; color:var(--accent); }
+    .rb-stat .lbl { font-size:0.7rem; color:var(--muted); margin-top:2px; }
+    .restart-btn { background:transparent; border:1px solid var(--accent); color:var(--accent); padding:10px 28px; border-radius:8px; font-weight:700; cursor:pointer; font-size:0.88rem; }
+    .back-link   { display:block; margin-top:14px; font-size:0.78rem; color:var(--muted); }
+
+    .start-screen { text-align:center; }
+    .start-screen h1 { color:var(--accent); font-size:1.5rem; margin-bottom:8px; }
+    .start-screen p  { color:var(--muted); font-size:0.88rem; margin-bottom:24px; line-height:1.6; }
+    .start-btn { background:var(--accent); color:#000; border:none; padding:12px 36px; border-radius:8px; font-weight:700; font-size:1rem; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <div class="quiz-card" id="quizCard">
+    <div id="startScreen" class="start-screen">
+      <h1>SOC Analyst Quiz</h1>
+      <p>10 questions covering MITRE ATT&CK, CVEs, log analysis, incident response, and detection engineering.<br>Test your blue team knowledge.</p>
+      <button class="start-btn" onclick="startQuiz()">Start Quiz</button>
+      <a class="back-link" href="index.html">&larr; Back to portfolio</a>
+    </div>
+    <div id="quizScreen" style="display:none">
+      <div class="quiz-header">
+        <span class="quiz-title">SOC Analyst Quiz</span>
+        <span class="quiz-progress" id="qProgress">Question 1 of 10</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="qProgressBar" style="width:10%"></div></div>
+      <div class="question" id="qText"></div>
+      <div class="options" id="qOptions"></div>
+      <div class="explanation" id="qExplanation"></div>
+      <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next Question &rarr;</button>
+    </div>
+    <div id="resultScreen" style="display:none" class="result-card">
+      <div style="font-size:2rem">🛡️</div>
+      <div class="result-score" id="rScore"></div>
+      <div class="result-label" id="rLabel"></div>
+      <div class="result-breakdown">
+        <div class="rb-stat"><div class="num" id="rCorrect">—</div><div class="lbl">Correct</div></div>
+        <div class="rb-stat"><div class="num" id="rWrong">—</div><div class="lbl">Wrong</div></div>
+        <div class="rb-stat"><div class="num" id="rTime">—</div><div class="lbl">Seconds</div></div>
+      </div>
+      <button class="restart-btn" onclick="restartQuiz()">Try Again</button>
+      <a class="back-link" href="index.html">&larr; Back to portfolio</a>
+    </div>
+  </div>
+
+  <script>
+    const QUESTIONS = [
+      { tag:'MITRE', q:'Which MITRE ATT&CK technique covers adversaries using PowerShell for execution?', options:['T1059.001','T1046','T1110.001','T1071'], answer:0, explain:'T1059.001 is Command and Scripting Interpreter: PowerShell. T1046 is Network Service Discovery, T1110.001 is Brute Force, T1071 is Application Layer Protocol.' },
+      { tag:'SOC',   q:'In the PICERL incident response model, what does the "E" stand for?', options:['Escalation','Eradication','Evidence','Enumeration'], answer:1, explain:'PICERL = Preparation, Identification, Containment, Eradication, Recovery, Lessons Learned. Eradication means removing the threat from the environment.' },
+      { tag:'SIEM',  q:'A Wazuh rule fires on EventID 4625 (Windows). What does this indicate?', options:['Successful logon','Failed logon attempt','User account created','Audit policy changed'], answer:1, explain:'Windows EventID 4625 = An account failed to log on. Multiple 4625 events from the same source is a classic brute force pattern in SIEM detection.' },
+      { tag:'CVE',   q:'CVE-2021-44228 is the famous Log4Shell vulnerability. What type of attack does it enable?', options:['SQL Injection','Remote Code Execution via JNDI lookup','Cross-Site Scripting','Buffer Overflow'], answer:1, explain:'Log4Shell exploits Apache Log4j\'s JNDI lookup feature. An attacker can send a malicious string in a logged field that triggers outbound JNDI LDAP requests, leading to RCE.' },
+      { tag:'MITRE', q:'Which MITRE technique involves adversaries monitoring network traffic to capture credentials?', options:['T1040','T1555','T1056','T1003'], answer:0, explain:'T1040 is Network Sniffing — adversaries use network sniffers to capture credentials and other data. T1555 is Credentials from Password Stores, T1056 is Input Capture, T1003 is OS Credential Dumping.' },
+      { tag:'GRC',   q:'In the NIST CSF 2.0 framework, which NEW function was added compared to CSF 1.1?', options:['DETECT','GOVERN','RESPOND','PROTECT'], answer:1, explain:'GOVERN is the new function added in NIST CSF 2.0. It establishes organizational context, risk management strategy, and cybersecurity supply chain risk management at the executive level.' },
+      { tag:'SOC',   q:'You see many outbound DNS requests to random subdomains of a known domain. What TTP is this?', options:['T1566 Phishing','T1048.003 DNS Exfiltration','T1071 C2 via HTTP','T1046 Port Scan'], answer:1, explain:'T1048.003 — Exfiltration Over Alternative Protocol: DNS. Attackers encode data in DNS subdomain queries to exfiltrate data while bypassing firewalls that allow DNS traffic.' },
+      { tag:'IAM',   q:'What is the principle of least privilege?', options:['Users get maximum access to do their job','Users get only the minimum access needed for their role','Admins should share credentials securely','All users get equal access levels'], answer:1, explain:'Least Privilege means granting only the minimum permissions required to perform a job function. It limits the blast radius if an account is compromised and reduces insider threat risk.' },
+      { tag:'SIEM',  q:'Suricata fires alert SID 2010937 — ET SCAN Nmap Scripting Engine. What should your first action be?', options:['Immediately block the source IP','Identify if the source is an authorized internal scanner','Escalate to CISO','Ignore — Nmap is safe'], answer:1, explain:'Always verify before blocking. The source could be an authorized pen test, internal vulnerability scanner, or red team exercise. Blocking without verification can disrupt legitimate security operations.' },
+      { tag:'MITRE', q:'T1110 covers brute force. Which sub-technique specifically targets valid accounts with commonly used passwords?', options:['T1110.001 Password Guessing','T1110.003 Password Spraying','T1110.002 Password Cracking','T1110.004 Credential Stuffing'], answer:1, explain:'T1110.003 Password Spraying uses a few common passwords against many accounts to avoid lockouts. T1110.001 is many passwords against one account. Spraying is harder to detect because it stays below lockout thresholds.' },
+    ];
+
+    let current = 0, score = 0, wrong = 0, startTime;
+
+    function startQuiz() {
+      document.getElementById('startScreen').style.display = 'none';
+      document.getElementById('quizScreen').style.display = 'block';
+      startTime = Date.now();
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = QUESTIONS[current];
+      document.getElementById('qProgress').textContent = 'Question ' + (current+1) + ' of ' + QUESTIONS.length;
+      document.getElementById('qProgressBar').style.width = ((current+1)/QUESTIONS.length*100) + '%';
+      document.getElementById('qText').innerHTML = '<span class="q-tag">' + q.tag + '</span>' + q.q;
+      document.getElementById('qExplanation').className = 'explanation';
+      document.getElementById('nextBtn').className = 'next-btn';
+
+      const letters = ['A','B','C','D'];
+      document.getElementById('qOptions').innerHTML = q.options.map((opt, i) =>
+        '<div class="option" onclick="selectAnswer(' + i + ')">' +
+        '<span class="option-letter">' + letters[i] + '</span>' + opt + '</div>'
+      ).join('');
+    }
+
+    function selectAnswer(idx) {
+      const q = QUESTIONS[current];
+      const opts = document.querySelectorAll('.option');
+      opts.forEach(o => o.classList.add('disabled'));
+      opts[idx].classList.add(idx === q.answer ? 'correct' : 'wrong');
+      if (idx !== q.answer) { opts[q.answer].classList.add('correct'); wrong++; }
+      else { score++; }
+      const exp = document.getElementById('qExplanation');
+      exp.textContent = q.explain;
+      exp.className = 'explanation show';
+      document.getElementById('nextBtn').className = 'next-btn show';
+      document.getElementById('nextBtn').textContent = current < QUESTIONS.length-1 ? 'Next Question →' : 'See Results →';
+    }
+
+    function nextQuestion() {
+      current++;
+      if (current >= QUESTIONS.length) showResult();
+      else renderQuestion();
+    }
+
+    function showResult() {
+      document.getElementById('quizScreen').style.display = 'none';
+      const r = document.getElementById('resultScreen');
+      r.style.display = 'block';
+      const pct = Math.round(score / QUESTIONS.length * 100);
+      const label = pct >= 90 ? 'Expert Analyst — Outstanding!' : pct >= 70 ? 'Strong Analyst — Well done!' : pct >= 50 ? 'Developing Analyst — Keep studying!' : 'Keep Learning — Review the explanations!';
+      document.getElementById('rScore').textContent = pct + '%';
+      document.getElementById('rLabel').textContent = label;
+      document.getElementById('rCorrect').textContent = score;
+      document.getElementById('rWrong').textContent = wrong;
+      document.getElementById('rTime').textContent = Math.round((Date.now()-startTime)/1000);
+    }
+
+    function restartQuiz() {
+      current = 0; score = 0; wrong = 0;
+      document.getElementById('resultScreen').style.display = 'none';
+      document.getElementById('quizScreen').style.display = 'block';
+      startTime = Date.now();
+      renderQuestion();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Conference Calendar — Subash Lama. Cybersecurity conferences I follow and attend." />
+  <title>Conference Calendar — Subash Lama</title>
+  <style>
+    :root { --bg:#07111c; --panel:#0d1e2e; --accent:#00ff88; --blue:#5dcfff; --yellow:#ffcc44; --text:#e0e0e0; --muted:#6b7a8d; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg); color:var(--text); font-family:'Segoe UI',sans-serif; min-height:100vh; padding:24px 20px; max-width:860px; margin:0 auto; }
+    a { color:var(--accent); text-decoration:none; }
+    .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; padding-bottom:14px; border-bottom:1px solid #1a2a3a; flex-wrap:wrap; gap:10px; }
+    .top-bar h1 { color:var(--accent); font-size:1.2rem; }
+    .events { display:flex; flex-direction:column; gap:12px; }
+    .event-card { background:var(--panel); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:16px 20px; display:grid; grid-template-columns:70px 1fr auto; gap:14px; align-items:start; }
+    .event-date-box { background:rgba(0,255,136,0.06); border:1px solid rgba(0,255,136,0.15); border-radius:8px; padding:8px 4px; text-align:center; }
+    .event-month { font-size:0.62rem; text-transform:uppercase; color:var(--accent); letter-spacing:0.08em; }
+    .event-day   { font-size:1.5rem; font-weight:700; color:rgba(255,255,255,0.9); line-height:1; }
+    .event-name  { font-size:0.92rem; font-weight:700; color:rgba(255,255,255,0.9); margin-bottom:4px; }
+    .event-loc   { font-size:0.78rem; color:var(--muted); margin-bottom:6px; }
+    .event-notes { font-size:0.78rem; color:rgba(255,255,255,0.5); line-height:1.5; }
+    .event-status { padding:3px 10px; border-radius:10px; font-size:0.68rem; font-weight:700; white-space:nowrap; align-self:flex-start; }
+    .status-registered { background:rgba(0,255,136,0.12); color:var(--accent); border:1px solid rgba(0,255,136,0.25); }
+    .status-planning   { background:rgba(93,207,255,0.1); color:var(--blue); border:1px solid rgba(93,207,255,0.22); }
+    .status-watching   { background:rgba(255,255,255,0.05); color:var(--muted); border:1px solid rgba(255,255,255,0.1); }
+    .loading { text-align:center; padding:40px; color:var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div>
+      <h1>Conference Calendar</h1>
+      <p style="color:var(--muted);font-size:0.78rem;margin-top:3px">Cybersecurity events I am attending, planning, or watching</p>
+    </div>
+    <a style="color:var(--muted);font-size:0.82rem" href="index.html">&larr; Portfolio</a>
+  </div>
+  <div class="events" id="eventsList"><div class="loading">Loading...</div></div>
+  <script>
+    fetch('data/conference-calendar.json?t=' + Date.now())
+      .then(r => r.json())
+      .then(data => {
+        const events = (data.events || []).sort((a,b) => a.date.localeCompare(b.date));
+        document.getElementById('eventsList').innerHTML = events.map(e => {
+          const d = new Date(e.date);
+          const month = d.toLocaleString('default',{month:'short'}).toUpperCase();
+          const day   = d.getDate();
+          const scls  = 'event-status status-' + e.status;
+          return '<div class="event-card">' +
+            '<div class="event-date-box"><div class="event-month">' + month + '</div><div class="event-day">' + day + '</div></div>' +
+            '<div>' +
+              '<div class="event-name">' + (e.url ? '<a href="' + e.url + '" target="_blank" rel="noopener">' + e.name + '</a>' : e.name) + '</div>' +
+              '<div class="event-loc">&#128205; ' + e.location + '</div>' +
+              (e.notes ? '<div class="event-notes">' + e.notes + '</div>' : '') +
+            '</div>' +
+            '<span class="' + scls + '">' + e.status.charAt(0).toUpperCase() + e.status.slice(1) + '</span>' +
+            '</div>';
+        }).join('') || '<div class="loading">No events yet.</div>';
+      })
+      .catch(() => document.getElementById('eventsList').innerHTML = '<div class="loading">Could not load events.</div>');
+  </script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+name: Log LinkedIn Profile View
+
+on:
+  workflow_dispatch:
+    inputs:
+      viewer_hint:
+        description: 'Any info about viewer (company, title — from LinkedIn notification)'
+        required: false
+      note:
+        description: 'Optional note'
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  correlate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Log view and correlate with portfolio visits
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          NOW=$(date -u +"%Y-%m-%dT%H:%M")
+          TODAY=$(date -u +"%Y-%m-%d")
+          HOUR=$(date -u +"%H")
+          PREV_HOUR=$(date -u -d "-2 hours" +"%H" 2>/dev/null || date -u -v-2H +"%H" 2>/dev/null || echo "00")
+
+          mkdir -p download-logs
+          VIEWS_FILE="download-logs/linkedin-views.json"
+
+          python3 -c "
+import json, datetime
+path = '$VIEWS_FILE'
+try:
+    with open(path) as f:
+        data = json.load(f)
+except Exception:
+    data = []
+data.insert(0, {
+    'timestamp': '$NOW',
+    'hint':  '${{ inputs.viewer_hint }}',
+    'note':  '${{ inputs.note }}'
+})
+data = data[:50]
+with open(path, 'w') as f:
+    json.dump(data, f, indent=2)
+print('Logged LinkedIn view at', '$NOW')
+"
+
+          DOWNLOAD_LOG="download-logs/resume-downloads.txt"
+          CORRELATED=""
+          if [ -f "$DOWNLOAD_LOG" ]; then
+            CORRELATED=$(grep "^${TODAY}" "$DOWNLOAD_LOG" | grep -E "T(${PREV_HOUR}|${HOUR}):" 2>/dev/null | head -3 || true)
+          fi
+
+          if [ -n "$CORRELATED" ]; then
+            CORRELATION_MSG=$(printf '\n\nCORRELATION MATCH!\nPortfolio download(s) within 2 hours:\n%s\n\nLikely same person visited both.' "$CORRELATED")
+          else
+            CORRELATION_MSG=$(printf '\n\nNo portfolio download in the last 2 hours from this viewer.')
+          fi
+
+          MSG=$(printf 'LinkedIn Profile View Logged\n\nTime   : %s\nViewer : %s\nNote   : %s%s' \
+            "$NOW" "${LI_HINT:-not specified}" "${NOTE:-none}" "$CORRELATION_MSG")
+
+          curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(printf '%s' "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"
+
+      - name: Commit linkedin views log
+        run: |
+          git config user.email "lamasubash107@gmail.com"
+          git config user.name "Subash Lama"
+          git add download-logs/linkedin-views.json
+          git diff --staged --quiet && exit 0
+          git commit -m "log: LinkedIn profile view $(date -u +"%Y-%m-%d %H:%M")"
+          git push

@@ -1,0 +1,50 @@
+{
+  "updated": "2026-06-24",
+  "events": [
+    {
+      "name": "DEF CON 34",
+      "date": "2026-08-08",
+      "location": "Las Vegas, USA",
+      "type": "conference",
+      "url": "https://defcon.org",
+      "status": "watching",
+      "notes": "Attending virtually — tracking talks on cloud security and red team tooling"
+    },
+    {
+      "name": "Black Hat USA 2026",
+      "date": "2026-08-02",
+      "location": "Las Vegas, USA",
+      "type": "conference",
+      "url": "https://blackhat.com",
+      "status": "watching",
+      "notes": "Briefings on supply chain attacks and detection engineering"
+    },
+    {
+      "name": "BSides Kathmandu 2026",
+      "date": "2026-09-15",
+      "location": "Kathmandu, Nepal",
+      "type": "bsides",
+      "url": "https://bsides.org",
+      "status": "planning",
+      "notes": "Local security community event — planning to attend in person"
+    },
+    {
+      "name": "SANS Blue Team Summit",
+      "date": "2026-10-05",
+      "location": "Online",
+      "type": "summit",
+      "url": "https://www.sans.org",
+      "status": "registered",
+      "notes": "Registered for virtual sessions on SOC automation and MITRE ATT&CK coverage"
+    },
+    {
+      "name": "ISC2 Security Congress 2026",
+      "date": "2026-10-20",
+      "location": "Las Vegas, USA",
+      "type": "conference",
+      "url": "https://isc2.org",
+      "status": "watching",
+      "notes": "GRC and IAM tracks relevant to cert path"
+    }
+  ]
+}

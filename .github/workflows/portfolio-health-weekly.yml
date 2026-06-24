@@ -1,0 +1,98 @@
+name: Portfolio Health Score (Weekly)
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'   # Every Monday 7:45 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 10
+
+      - name: Run health checks
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          SCORE=0
+          MAX=100
+          ISSUES=""
+          PASSES=""
+
+          check() {
+            local label="$1" result="$2" points="$3"
+            if [ "$result" = "pass" ]; then
+              SCORE=$((SCORE + points))
+              PASSES=$(printf '%s\n  ✓ %s (+%s)' "$PASSES" "$label" "$points")
+            else
+              ISSUES=$(printf '%s\n  ✗ %s' "$ISSUES" "$label")
+            fi
+          }
+
+          # 1. Live site reachable
+          HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 8 "https://subashlamaprofile.pages.dev" || echo "000")
+          [ "$HTTP" = "200" ] && check "Live site reachable" "pass" 20 || check "Live site reachable (HTTP $HTTP)" "fail" 20
+
+          # 2. Commit in last 7 days
+          LAST_COMMIT=$(git log --oneline -1 --format="%ar" 2>/dev/null || echo "unknown")
+          git log --since="7 days ago" --oneline | grep -q . && check "Committed in last 7 days" "pass" 15 || check "No commits in 7 days ($LAST_COMMIT)" "fail" 15
+
+          # 3. hunting.json updated in last 14 days
+          HUNTING="public/data/hunting.json"
+          if [ -f "$HUNTING" ]; then
+            HUNT_DATE=$(python3 -c "import json; print(json.load(open('$HUNTING')).get('updated',''))" 2>/dev/null || echo "")
+            HUNT_AGE=$(( ( $(date -u +%s) - $(date -u -d "$HUNT_DATE" +%s 2>/dev/null || echo 0) ) / 86400 ))
+            [ "$HUNT_AGE" -lt 14 ] && check "Currently Hunting updated recently" "pass" 10 || check "Currently Hunting stale ($HUNT_AGE days)" "fail" 10
+          else
+            check "hunting.json missing" "fail" 10
+          fi
+
+          # 4. threat-intel page reachable
+          HTTP2=$(curl -s -o /dev/null -w "%{http_code}" --max-time 8 "https://subashlamaprofile.pages.dev/threat-intel.html" || echo "000")
+          [ "$HTTP2" = "200" ] && check "Threat Intel page live" "pass" 10 || check "Threat Intel page unreachable (HTTP $HTTP2)" "fail" 10
+
+          # 5. Resume download log has entries
+          LOG="download-logs/resume-downloads.txt"
+          [ -f "$LOG" ] && check "Resume download log exists" "pass" 10 || check "No resume download log" "fail" 10
+
+          # 6. Cert expiry file present
+          CERT_FILE="download-logs/cert-expiry.json"
+          [ -f "$CERT_FILE" ] && check "Cert expiry config present" "pass" 10 || check "Cert expiry file missing" "fail" 10
+
+          # 7. Badge SVG exists and recent
+          [ -f "public/assets/badge.svg" ] && check "Skills badge present" "pass" 10 || check "Skills badge missing" "fail" 10
+
+          # 8. headlines updated recently
+          HEADLINES="public/data/headlines.json"
+          if [ -f "$HEADLINES" ]; then
+            H_DATE=$(python3 -c "import json; print(json.load(open('$HEADLINES')).get('updated',''))" 2>/dev/null || echo "")
+            H_AGE=$(( ( $(date -u +%s) - $(date -u -d "$H_DATE" +%s 2>/dev/null || echo 0) ) / 86400 ))
+            [ "$H_AGE" -lt 3 ] && check "Headlines feed fresh" "pass" 15 || check "Headlines feed stale ($H_AGE days)" "fail" 15
+          else
+            check "Headlines JSON missing" "fail" 15
+          fi
+
+          GRADE=""
+          [ "$SCORE" -ge 90 ] && GRADE="A — Excellent" || \
+          [ "$SCORE" -ge 75 ] && GRADE="B — Good" || \
+          [ "$SCORE" -ge 60 ] && GRADE="C — Needs attention" || \
+          GRADE="D — Action required"
+
+          MSG=$(printf 'Weekly Portfolio Health Report\n\nScore : %s/%s — %s\nDate  : %s\n\nPassed:%s\n\nFailed:%s\n\nhttps://subashlamaprofile.pages.dev' \
+            "$SCORE" "$MAX" "$GRADE" "$(date -u +"%Y-%m-%d")" "${PASSES:-(none)}" "${ISSUES:-(none)}")
+
+          curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(printf '%s' "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"
+
+          echo "Health score: $SCORE/$MAX — $GRADE"

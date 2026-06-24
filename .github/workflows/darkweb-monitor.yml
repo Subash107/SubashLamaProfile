@@ -1,0 +1,71 @@
+name: Dark Web Self-Monitor
+
+on:
+  schedule:
+    - cron: '0 5 * * 1'   # Every Monday 10:45 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Check GitHub for exposed credentials
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          FINDINGS=""
+          EMAIL="lamasubash107@gmail.com"
+          DOMAIN="subashlamaprofile.pages.dev"
+          NAME="Subash Lama"
+
+          # Check GitHub public search for email exposure
+          GH_RESULT=$(curl -s --max-time 10 \
+            "https://api.github.com/search/code?q=${EMAIL}+in:file&per_page=5" \
+            -H "Accept: application/vnd.github.v3+json" 2>/dev/null || echo '{"total_count":0}')
+
+          GH_COUNT=$(echo "$GH_RESULT" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('total_count',0))" 2>/dev/null || echo 0)
+
+          if [ "$GH_COUNT" -gt 0 ]; then
+            FINDINGS=$(printf '%s\n  [WARN] Email found in %s GitHub public files' "$FINDINGS" "$GH_COUNT")
+          fi
+
+          # Check Have I Been Pwned for email breach (public API)
+          HIBP=$(curl -s --max-time 8 \
+            -H "User-Agent: SubashLamaPortfolioMonitor/1.0" \
+            "https://haveibeenpwned.com/api/v3/breachedaccount/${EMAIL}?truncateResponse=true" \
+            -o /dev/null -w "%{http_code}" 2>/dev/null || echo "000")
+
+          if [ "$HIBP" = "200" ]; then
+            FINDINGS=$(printf '%s\n  [HIGH] Email found in HIBP breach database' "$FINDINGS")
+          elif [ "$HIBP" = "404" ]; then
+            FINDINGS=$(printf '%s\n  [OK] No HIBP breaches found for email' "$FINDINGS")
+          fi
+
+          # Check crt.sh for unexpected certs
+          CERTS=$(curl -s --max-time 10 \
+            "https://crt.sh/?q=${DOMAIN}&output=json" 2>/dev/null | \
+            python3 -c "import json,sys; d=json.load(sys.stdin); print(len(d))" 2>/dev/null || echo 0)
+
+          if [ "$CERTS" -gt 0 ]; then
+            FINDINGS=$(printf '%s\n  [OK] %s SSL certs found for domain (expected)' "$FINDINGS" "$CERTS")
+          fi
+
+          STATUS=$([ -n "$(echo "$FINDINGS" | grep WARN\|HIGH)" ] && echo "ACTION REQUIRED" || echo "All Clear")
+
+          MSG=$(printf 'Dark Web Monitor — Weekly Report\n\nDate   : %s\nStatus : %s\n\nFindings:%s\n\nChecks: GitHub exposure, HIBP breaches, SSL cert transparency\n\nView OSINT audit: https://subashlamaprofile.pages.dev/osint.html' \
+            "$(date -u +"%Y-%m-%d")" "$STATUS" "${FINDINGS:- none}")
+
+          curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":\"${CHAT}\",\"text\":$(printf '%s' "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"

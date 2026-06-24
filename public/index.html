@@ -1338,6 +1338,66 @@
       </div>
     </section>
 
+    <!-- UPGRADE 10: Certification Roadmap -->
+    <section id="cert-roadmap" class="glass-card cert-roadmap-section">
+      <div class="section-inner">
+        <div class="section-content">
+          <h2>Certification Roadmap</h2>
+          <p class="cert-roadmap-desc">My certification journey — from IT foundations to specialist cybersecurity credentials, with the path ahead clearly mapped.</p>
+          <div class="roadmap-track">
+            <div class="roadmap-line"></div>
+            <div class="roadmap-nodes">
+              <div class="roadmap-node">
+                <div class="roadmap-dot roadmap-dot--done">IT<br>Base</div>
+                <div class="roadmap-label">IT Foundations</div>
+                <div class="roadmap-date">12+ yrs</div>
+              </div>
+              <div class="roadmap-node">
+                <div class="roadmap-dot roadmap-dot--done">CC</div>
+                <div class="roadmap-label">Cisco Intro to Cyber</div>
+                <div class="roadmap-date">Mar 2026</div>
+              </div>
+              <div class="roadmap-node">
+                <div class="roadmap-dot roadmap-dot--done">IBM<br>CF</div>
+                <div class="roadmap-label">IBM Cybersecurity Fundamentals</div>
+                <div class="roadmap-date">Mar 2026</div>
+              </div>
+              <div class="roadmap-node">
+                <div class="roadmap-dot roadmap-dot--done">ES</div>
+                <div class="roadmap-label">Cisco Endpoint Security</div>
+                <div class="roadmap-date">Jun 2026</div>
+              </div>
+              <div class="roadmap-node">
+                <div class="roadmap-dot roadmap-dot--done">EH</div>
+                <div class="roadmap-label">Cisco Ethical Hacker</div>
+                <div class="roadmap-date">Apr 2026</div>
+              </div>
+              <div class="roadmap-node">
+                <div class="roadmap-dot roadmap-dot--active">CySA+</div>
+                <div class="roadmap-label">CompTIA CySA+</div>
+                <div class="roadmap-date">In progress</div>
+              </div>
+              <div class="roadmap-node">
+                <div class="roadmap-dot roadmap-dot--planned">SEC+</div>
+                <div class="roadmap-label">CompTIA Security+</div>
+                <div class="roadmap-date">Planned</div>
+              </div>
+              <div class="roadmap-node">
+                <div class="roadmap-dot roadmap-dot--planned">ISC2</div>
+                <div class="roadmap-label">ISC2 CC</div>
+                <div class="roadmap-date">Planned</div>
+              </div>
+            </div>
+          </div>
+          <div class="roadmap-legend">
+            <span class="roadmap-legend-item"><span class="roadmap-legend-dot" style="background:#00ff88;border:2px solid #00ff88"></span>Achieved</span>
+            <span class="roadmap-legend-item"><span class="roadmap-legend-dot" style="background:rgba(93,207,255,0.2);border:2px solid #5dcfff"></span>In Progress</span>
+            <span class="roadmap-legend-item"><span class="roadmap-legend-dot" style="background:rgba(255,255,255,0.05);border:2px dashed rgba(255,255,255,0.2)"></span>Planned</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- UPGRADE 3: Compliance Mapping -->
     <section id="compliance-mapping" class="glass-card compliance-section">
       <div class="section-inner">
@@ -1678,6 +1738,54 @@
         </div>
       </section>
 
+      <!-- UPGRADE 5: Wireshark-style Packet Viewer -->
+      <section id="packet-viewer" class="glass-card wireshark-section">
+        <div class="section-inner">
+          <div class="section-content">
+            <h2>Network Packet Analysis</h2>
+            <p class="ws-desc">Live capture simulation from the SOC homelab — demonstrating network analysis, protocol identification, and detection alerting.</p>
+            <div class="ws-window">
+              <div class="ws-titlebar">
+                <span class="ws-title">Wireshark &mdash; SOC Lab Capture [eth0]</span>
+                <div class="ws-controls">
+                  <button class="ws-ctrl-btn" id="wsToggle">Capture</button>
+                  <button class="ws-ctrl-btn" id="wsClear">Clear</button>
+                </div>
+              </div>
+              <div class="ws-filter-bar">
+                <span class="ws-filter-label">Filter:</span>
+                <input class="ws-filter-input" value="tcp or dns or tls or arp" readonly aria-label="Packet filter" />
+              </div>
+              <table class="ws-table" aria-label="Packet capture table">
+                <thead class="ws-thead"><tr>
+                  <td>No.</td><td>Time</td><td>Source</td><td>Destination</td><td>Proto</td><td>Len</td><td>Info</td>
+                </tr></thead>
+              </table>
+              <div class="ws-body" id="wsBody" aria-live="polite"></div>
+              <div class="ws-detail" id="wsDetail">Click a packet row to inspect details.</div>
+              <div class="ws-status">
+                <span>SOC Lab &mdash; Interface: eth0 &mdash; Wazuh agent active</span>
+                <span id="wsStatusRight">Simulated capture</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- UPGRADE 2: Security Headlines Feed -->
+      <section id="security-headlines" class="glass-card headlines-section">
+        <div class="section-inner">
+          <div class="section-content">
+            <h2>Security Headlines</h2>
+            <p class="headlines-desc">Daily threat intelligence and cybersecurity news filtered for SOC, GRC, and IAM relevance &mdash; auto-updated every morning.</p>
+            <div class="headlines-list" id="headlinesList">
+              <p style="color:rgba(255,255,255,0.3);font-size:0.82rem">Loading headlines...</p>
+            </div>
+            <p class="headlines-updated" id="headlinesUpdated"></p>
+          </div>
+        </div>
+      </section>
+
       <!-- UPGRADE 1: SOC Terminal -->
       <section id="soc-terminal" class="glass-card soc-terminal-section">
         <div class="section-inner">
@@ -1892,7 +2000,21 @@
       <p style="margin-bottom:10px;text-align:center">
         <img src="assets/badge.svg" alt="Subash Lama — SOC Analyst skills badge: certs, study streak, CTF score" width="340" height="20" style="border-radius:3px;max-width:100%" loading="lazy" />
       </p>
-      <p class="footer-copy">&copy; <span id="footerYear">2026</span> Subash Lama. All rights reserved. &middot; <a href="threat-intel.html" style="color:rgba(0,255,136,0.6);font-size:0.75rem">Threat Intel</a></p>
+      <p style="font-size:0.72rem;text-align:center;color:rgba(255,255,255,0.25);margin-bottom:8px;flex-wrap:wrap;display:flex;justify-content:center;gap:8px">
+        <a href="threat-intel.html" style="color:rgba(0,255,136,0.5)">Threat Intel</a>
+        <a href="incidents.html" style="color:rgba(0,255,136,0.5)">Lab Incidents</a>
+        <a href="casestudies.html" style="color:rgba(0,255,136,0.5)">Case Studies</a>
+        <a href="learning.html" style="color:rgba(0,255,136,0.5)">Learning Log</a>
+        <a href="reading.html" style="color:rgba(0,255,136,0.5)">Reading List</a>
+        <a href="conferences.html" style="color:rgba(0,255,136,0.5)">Conferences</a>
+        <a href="quiz.html" style="color:rgba(0,255,136,0.5)">SOC Quiz</a>
+        <a href="attackmap.html" style="color:rgba(0,255,136,0.5)">Attack Map</a>
+        <a href="osint.html" style="color:rgba(0,255,136,0.5)">OSINT Audit</a>
+        <a href="cv.html" style="color:rgba(0,255,136,0.5)">Print CV</a>
+        <a href="qr.html" style="color:rgba(0,255,136,0.5)">QR Card</a>
+        <a href="funnel.html" style="color:rgba(0,255,136,0.5)">Job Funnel</a>
+      </p>
+      <p class="footer-copy">&copy; <span id="footerYear">2026</span> Subash Lama. All rights reserved.</p>
     </div>
   </div>
   <!-- Hacker score HUD — hidden; gamification removed for professional presentation -->
@@ -1912,6 +2034,7 @@
     <p class="bkm-empty" id="bkmEmpty">No bookmarks yet — pin a section with 📌</p>
   </div>
   <button type="button" id="bkmToggle" aria-label="Toggle bookmarks" title="Bookmarks">&#128204;</button>
+  <button type="button" id="themeToggle" aria-label="Switch to light mode" title="Switch to light mode" style="position:fixed;bottom:60px;right:16px;z-index:900;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);color:#00ff88;border-radius:50%;width:36px;height:36px;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">&#9788;</button>
 
   <!-- Confetti canvas -->
   <canvas id="confettiCanvas" aria-hidden="true"></canvas>

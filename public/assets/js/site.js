@@ -3373,6 +3373,10 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
     initPostureChart();
     initCurrentlyHunting();
     initResumeVersionBadge();
+    initWiresharkViewer();
+    initSecurityHeadlines();
+    initDarkLightToggle();
+    initMatrixEasterEgg();
 
     const scheduleNonCriticalStartup = () => {
       scheduleDeferredTask(initResumeDownload, { timeout: 1200 });
@@ -3719,4 +3723,208 @@ function initResumeVersionBadge() {
       if (vEl && data.version) vEl.textContent = "v" + data.version;
     })
     .catch(() => {});
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   UPGRADE 5 — Wireshark-style Packet Viewer
+   ───────────────────────────────────────────────────────────────── */
+function initWiresharkViewer() {
+  const body   = document.getElementById("wsBody");
+  const detail = document.getElementById("wsDetail");
+  const status = document.getElementById("wsStatus");
+  const toggleBtn = document.getElementById("wsToggle");
+  const clearBtn  = document.getElementById("wsClear");
+  if (!body || !detail) return;
+
+  const PACKETS = [
+    { no:1,  time:"0.000000", src:"192.168.1.5",       dst:"8.8.8.8",          proto:"DNS",   len:74,  info:"Standard query A subashlamaprofile.pages.dev",      detail:"Domain Name System (query)\n  Transaction ID: 0x4a21\n  Flags: 0x0100 Standard query\n  Questions: 1\n    subashlamaprofile.pages.dev: type A, class IN" },
+    { no:2,  time:"0.012481", src:"8.8.8.8",            dst:"192.168.1.5",     proto:"DNS",   len:106, info:"Standard query response A 104.21.48.1",             detail:"Domain Name System (response)\n  Transaction ID: 0x4a21\n  Answers: 2\n    subashlamaprofile.pages.dev: A 104.21.48.1\n    subashlamaprofile.pages.dev: A 172.67.148.25" },
+    { no:3,  time:"0.013204", src:"192.168.1.5",        dst:"104.21.48.1",     proto:"TCP",   len:74,  info:"58432 → 443 [SYN] Seq=0 Win=64240",                 detail:"Transmission Control Protocol\n  Source Port: 58432\n  Destination Port: 443 (HTTPS)\n  Flags: SYN\n  Window Size: 64240" },
+    { no:4,  time:"0.024891", src:"104.21.48.1",        dst:"192.168.1.5",     proto:"TCP",   len:74,  info:"443 → 58432 [SYN, ACK] Seq=0 Ack=1",               detail:"Transmission Control Protocol\n  Source Port: 443\n  Destination Port: 58432\n  Flags: SYN, ACK\n  Window Size: 65535" },
+    { no:5,  time:"0.025003", src:"192.168.1.5",        dst:"104.21.48.1",     proto:"TLS",   len:583, info:"Client Hello (SNI=subashlamaprofile.pages.dev)",     detail:"Transport Layer Security\n  TLS 1.3 Record Layer: Handshake Protocol: Client Hello\n  Server Name Indication: subashlamaprofile.pages.dev\n  Cipher Suites: TLS_AES_256_GCM_SHA384, TLS_CHACHA20_POLY1305" },
+    { no:6,  time:"0.038721", src:"104.21.48.1",        dst:"192.168.1.5",     proto:"TLS",   len:1418,"info":"Server Hello, Certificate, Server Hello Done",     detail:"Transport Layer Security\n  TLS 1.3 Record Layer: Handshake Protocol: Server Hello\n  Certificate: Cloudflare Inc ECC CA-3\n  ALPN: h2" },
+    { no:7,  time:"0.039100", src:"192.168.1.5",        dst:"104.21.48.1",     proto:"HTTPS", len:492, info:"GET / HTTP/2 (application/octet-stream)",            detail:"Hypertext Transfer Protocol 2\n  Stream ID: 1\n  Method: GET\n  Path: /\n  Host: subashlamaprofile.pages.dev\n  User-Agent: Mozilla/5.0" },
+    { no:8,  time:"0.051882", src:"104.21.48.1",        dst:"192.168.1.5",     proto:"HTTPS", len:1460,"info":"HTTP/2 200 OK (text/html)",                        detail:"Hypertext Transfer Protocol 2\n  Stream ID: 1\n  Status: 200 OK\n  Content-Type: text/html; charset=utf-8\n  CF-Cache-Status: HIT\n  Server: cloudflare" },
+    { no:9,  time:"0.062341", src:"192.168.1.5",        dst:"192.168.1.1",     proto:"ARP",   len:42,  info:"Who has 192.168.1.1? Tell 192.168.1.5",             detail:"Address Resolution Protocol\n  Hardware type: Ethernet (1)\n  Protocol type: IPv4\n  Opcode: request (1)\n  Sender: 192.168.1.5\n  Target: 192.168.1.1" },
+    { no:10, time:"0.063002", src:"192.168.1.1",        dst:"192.168.1.5",     proto:"ARP",   len:42,  info:"192.168.1.1 is at aa:bb:cc:dd:ee:ff",               detail:"Address Resolution Protocol\n  Opcode: reply (2)\n  Sender MAC: aa:bb:cc:dd:ee:ff\n  Sender IP: 192.168.1.1" },
+    { no:11, time:"1.002241", src:"10.0.0.5",           dst:"192.168.1.5",     proto:"TCP",   len:60,  info:"[SYN] Port Scan detected — port 22",                detail:"Suspicious inbound SYN scan\n  Source: 10.0.0.5 (Kali red-team node)\n  Target: 192.168.1.5:22 (SSH)\n  Wazuh Rule 40101: Port scan detected\n  MITRE ATT&CK: T1046 — Network Service Discovery" },
+    { no:12, time:"1.002890", src:"Suricata",           dst:"Wazuh SIEM",      proto:"ALERT", len:0,   info:"[1:2010937] ET SCAN Nmap Scripting Engine User-Agent", detail:"Suricata Alert\n  SID: 2010937\n  Category: Attempted Information Leak\n  Severity: 2\n  Source: 10.0.0.5\n  Rule: ET SCAN Nmap Scripting Engine\n  Action: Alerted — forwarded to Wazuh" },
+  ];
+
+  const PROTO_CLASS = { HTTPS:"proto-https", DNS:"proto-dns", TCP:"proto-tcp", ARP:"proto-arp", ICMP:"proto-icmp", TLS:"proto-tls", ALERT:"proto-https" };
+
+  let running = false;
+  let interval = null;
+  let idx = 0;
+  let selected = null;
+
+  function addRow(pkt) {
+    const row = document.createElement("div");
+    row.className = "ws-row " + (PROTO_CLASS[pkt.proto] || "proto-tcp");
+    row.innerHTML = [pkt.no, pkt.time, pkt.src.slice(0,14), pkt.dst.slice(0,14), pkt.proto, pkt.len||"—", pkt.info].map(v => "<span>" + v + "</span>").join("");
+    row.addEventListener("click", () => {
+      if (selected) selected.classList.remove("selected");
+      row.classList.add("selected");
+      selected = row;
+      if (detail) detail.textContent = pkt.detail || pkt.info;
+    });
+    body.appendChild(row);
+    body.scrollTop = body.scrollHeight;
+    if (status) status.querySelector("#wsCount") && (status.querySelector("#wsCount").textContent = body.children.length);
+  }
+
+  function start() {
+    if (running) return;
+    running = true;
+    idx = 0;
+    if (toggleBtn) toggleBtn.textContent = "Stop";
+    interval = setInterval(() => {
+      if (idx < PACKETS.length) {
+        addRow(PACKETS[idx++]);
+      } else {
+        idx = 0;
+      }
+    }, 600);
+  }
+
+  function stop() {
+    running = false;
+    clearInterval(interval);
+    if (toggleBtn) toggleBtn.textContent = "Capture";
+  }
+
+  if (toggleBtn) toggleBtn.addEventListener("click", () => running ? stop() : start());
+  if (clearBtn)  clearBtn.addEventListener("click",  () => { stop(); body.innerHTML = ""; if (detail) detail.textContent = "Click a packet to see details."; });
+
+  setTimeout(start, 800);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   UPGRADE 2 — Security Headlines Feed
+   ───────────────────────────────────────────────────────────────── */
+function initSecurityHeadlines() {
+  const list    = document.getElementById("headlinesList");
+  const updated = document.getElementById("headlinesUpdated");
+  if (!list) return;
+
+  fetch("data/headlines.json?t=" + Math.floor(Date.now() / 3600000))
+    .then(r => r.json())
+    .then(data => {
+      if (updated && data.updated) updated.textContent = "Updated " + data.updated;
+      const items = data.items || [];
+      if (!items.length) { list.innerHTML = "<p style='color:rgba(255,255,255,0.3);font-size:0.82rem'>No headlines yet — workflow runs daily.</p>"; return; }
+      list.innerHTML = items.slice(0, 6).map(h => {
+        const catCls = "headline-cat headline-cat-" + (h.category || "tool");
+        const catLabel = (h.category || "tool").toUpperCase();
+        const link = h.url ? '<a href="' + h.url + '" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">' + h.title + '</a>' : h.title;
+        return '<div class="headline-card">' +
+          '<span class="' + catCls + '">' + catLabel + '</span>' +
+          '<div class="headline-body"><h4>' + link + '</h4>' +
+          '<div class="hl-meta">' + (h.source||"") + (h.date ? " &middot; " + h.date : "") + "</div>" +
+          "</div></div>";
+      }).join("");
+    })
+    .catch(() => { list.innerHTML = "<p style='color:rgba(255,255,255,0.3);font-size:0.82rem'>Headlines unavailable.</p>"; });
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   UPGRADE 11 — Dark / Light Mode Toggle
+   ───────────────────────────────────────────────────────────────── */
+function initDarkLightToggle() {
+  const btn = document.getElementById("themeToggle");
+  if (!btn) return;
+
+  const saved = localStorage.getItem("theme");
+  if (saved === "light") document.documentElement.classList.add("light-mode");
+
+  btn.addEventListener("click", () => {
+    const isLight = document.documentElement.classList.toggle("light-mode");
+    localStorage.setItem("theme", isLight ? "light" : "dark");
+    btn.setAttribute("aria-label", isLight ? "Switch to dark mode" : "Switch to light mode");
+    btn.title = isLight ? "Switch to dark mode" : "Switch to light mode";
+  });
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   UPGRADE 12 — Matrix Rain Easter Egg (Konami code)
+   ───────────────────────────────────────────────────────────────── */
+function initMatrixEasterEgg() {
+  const KONAMI = [38,38,40,40,37,39,37,39,66,65];
+  let seq = [];
+  let matrixActive = false;
+  let matrixCanvas = null;
+  let matrixCtx = null;
+  let matrixRaf = null;
+  let drops = [];
+
+  document.addEventListener("keydown", e => {
+    seq.push(e.keyCode);
+    if (seq.length > KONAMI.length) seq.shift();
+    if (seq.join(",") === KONAMI.join(",")) {
+      matrixActive ? stopMatrix() : startMatrix();
+    }
+  });
+
+  function startMatrix() {
+    matrixActive = true;
+    matrixCanvas = document.createElement("canvas");
+    matrixCanvas.id = "matrixCanvas";
+    matrixCanvas.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;pointer-events:auto;cursor:pointer;";
+    matrixCanvas.title = "Click or press any key to exit";
+    document.body.appendChild(matrixCanvas);
+    matrixCtx = matrixCanvas.getContext("2d");
+
+    resize();
+    window.addEventListener("resize", resize);
+    matrixCanvas.addEventListener("click", stopMatrix);
+    document.addEventListener("keydown", stopOnAny);
+
+    animateMatrix();
+
+    const hint = document.createElement("div");
+    hint.id = "matrixHint";
+    hint.style.cssText = "position:fixed;bottom:20px;left:50%;transform:translateX(-50%);color:rgba(0,255,136,0.6);font-size:0.78rem;font-family:monospace;z-index:10000;pointer-events:none;";
+    hint.textContent = "[ Click or press any key to exit ]";
+    document.body.appendChild(hint);
+  }
+
+  function stopMatrix() {
+    matrixActive = false;
+    cancelAnimationFrame(matrixRaf);
+    matrixCanvas?.remove();
+    document.getElementById("matrixHint")?.remove();
+    window.removeEventListener("resize", resize);
+    document.removeEventListener("keydown", stopOnAny);
+  }
+
+  function stopOnAny(e) {
+    if (e.keyCode !== KONAMI[KONAMI.length-1]) stopMatrix();
+  }
+
+  function resize() {
+    if (!matrixCanvas) return;
+    matrixCanvas.width  = window.innerWidth;
+    matrixCanvas.height = window.innerHeight;
+    const cols = Math.floor(matrixCanvas.width / 16);
+    drops = Array(cols).fill(1);
+  }
+
+  function animateMatrix() {
+    if (!matrixActive || !matrixCtx) return;
+    const W = matrixCanvas.width, H = matrixCanvas.height;
+    matrixCtx.fillStyle = "rgba(0,0,0,0.05)";
+    matrixCtx.fillRect(0, 0, W, H);
+    matrixCtx.fillStyle = "#00ff88";
+    matrixCtx.font = "14px monospace";
+
+    const CHARS = "アイウエオカキクケコサシスセソタチツテトナニヌネノABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    drops.forEach((y, i) => {
+      const char = CHARS[Math.floor(Math.random() * CHARS.length)];
+      matrixCtx.fillStyle = y * 16 < 80 ? "#ffffff" : "#00ff88";
+      matrixCtx.fillText(char, i * 16, y * 16);
+      if (y * 16 > H && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    });
+    matrixRaf = requestAnimationFrame(animateMatrix);
+  }
 }
