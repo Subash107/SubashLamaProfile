@@ -1,6 +1,9 @@
 name: GitHub Streak Warning
 
 on:
+  push:
+    paths:
+      - '.github/workflows/NONEXISTENT_PATH_TRIGGER'
   schedule:
     - cron: '15 13 * * *'   # 7:00 PM Nepal Time (UTC+5:45)
   workflow_dispatch:
