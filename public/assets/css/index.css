@@ -6679,7 +6679,7 @@
 .terminal-output .t-out { color:#7aad8a; white-space:pre-wrap; }
 .terminal-output .t-err { color:#ff6655; }
 .terminal-output .t-warn { color:#ffcc44; }
-.terminal-output .t-info { color:#5dcfff; }
+.terminal-output .t-info { color:#5dcfff; white-space:pre-wrap; }
 .terminal-input-row { display:flex; align-items:center; padding:8px 14px; border-top:1px solid rgba(0,255,136,0.10); gap:8px; }
 .terminal-prompt-label { color:#00ff88; font-size:0.8rem; white-space:nowrap; user-select:none; }
 .terminal-cmd-input { background:transparent; border:none; outline:none; color:#00ff88; font-family:'Courier New',Courier,monospace; font-size:0.8rem; flex:1; caret-color:#00ff88; }

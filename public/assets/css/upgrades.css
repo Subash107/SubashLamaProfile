@@ -1,0 +1,459 @@
+/* ==========================================================
+   UPGRADES.CSS — 7 Cybersecurity Frontend Features
+   ========================================================== */
+
+/* ── FEATURE 1: Parrot OS Boot Sequence ────────────────── */
+#parrot-boot {
+  position: fixed;
+  inset: 0;
+  background: #060606;
+  z-index: 99999;
+  font-family: 'Courier New', Courier, monospace;
+  color: #00ff88;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 2rem;
+  overflow: hidden;
+  transition: opacity 0.7s ease;
+}
+
+#parrot-boot.boot-done {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#parrot-boot.boot-hidden {
+  display: none;
+}
+
+.pb-header {
+  border-bottom: 1px solid #00ff8825;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.pb-logo {
+  font-size: clamp(0.55rem, 1.1vw, 0.85rem);
+  line-height: 1.25;
+  color: #00cc66;
+  white-space: pre;
+  margin: 0 0 0.4rem;
+}
+
+.pb-subtitle {
+  font-size: 0.78rem;
+  color: #006633;
+}
+
+.pb-log {
+  flex: 1;
+  overflow: hidden;
+  font-size: clamp(0.72rem, 1.4vw, 0.86rem);
+  line-height: 1.65;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.pb-line {
+  display: block;
+  opacity: 0;
+  transform: translateX(-6px);
+  animation: pbLineIn 0.12s ease forwards;
+  white-space: pre;
+}
+
+.pb-ts  { color: #005522; }
+.pb-ok  { color: #00ff88; }
+.pb-svc { color: #00aaff; }
+.pb-err { color: #ff4455; }
+
+.pb-cursor {
+  display: inline-block;
+  width: 9px;
+  height: 0.9em;
+  background: #00ff88;
+  vertical-align: text-bottom;
+  margin-left: 1px;
+  animation: pbCursorBlink 0.75s step-end infinite;
+}
+
+.pb-footer {
+  margin-top: 0.75rem;
+  border-top: 1px solid #00ff8820;
+  padding-top: 0.6rem;
+}
+
+.pb-progress-track {
+  height: 3px;
+  background: #0d0d0d;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 0.4rem;
+}
+
+.pb-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #00ff88, #00ccff);
+  border-radius: 2px;
+  transition: width 0.25s ease;
+  box-shadow: 0 0 10px #00ff8880;
+}
+
+.pb-status {
+  font-size: 0.72rem;
+  color: #004422;
+}
+
+@keyframes pbLineIn {
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pbCursorBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+
+/* ── FEATURE 2: NMAP Skills Panel ──────────────────────── */
+.nmap-panel {
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid #00ff8830;
+  border-radius: 8px;
+  padding: 1rem 1.25rem 1rem;
+  margin-top: 1.25rem;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: clamp(0.68rem, 1.3vw, 0.82rem);
+  overflow-x: auto;
+}
+
+.nmap-head {
+  color: #00aaff;
+  font-size: 0.75rem;
+  margin-bottom: 0.6rem;
+  opacity: 0.75;
+}
+
+.nmap-head span { color: #00ff8850; }
+
+.nmap-cols {
+  display: grid;
+  grid-template-columns: 11rem 4rem 11rem 1fr 3rem;
+  gap: 0 0.5rem;
+  border-bottom: 1px solid #00ff8818;
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.35rem;
+  color: #00ff8855;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+.nmap-row {
+  display: grid;
+  grid-template-columns: 11rem 4rem 11rem 1fr 3rem;
+  gap: 0 0.5rem;
+  padding: 0.18rem 0;
+  align-items: center;
+}
+
+.nmap-row:hover { background: rgba(0,255,136,0.04); }
+
+.nm-port  { color: #00aaff; }
+.nm-state { color: #00ff88; }
+.nm-svc   { color: rgba(255,255,255,0.85); }
+.nm-bar   {
+  color: #00ff8870;
+  letter-spacing: -1px;
+  font-size: 0.78rem;
+  overflow: hidden;
+}
+.nm-bar-fill { color: #00ff88; }
+.nm-pct   { color: #00ff88; font-size: 0.75rem; }
+
+.nmap-foot {
+  color: #004422;
+  font-size: 0.72rem;
+  margin-top: 0.6rem;
+  border-top: 1px solid #00ff8815;
+  padding-top: 0.4rem;
+}
+
+@media (max-width: 600px) {
+  .nmap-cols, .nmap-row {
+    grid-template-columns: 8rem 3.5rem 1fr 2.5rem;
+  }
+  .nm-svc { display: none; }
+}
+
+
+/* ── FEATURE 3: CVE-style Project Cards ────────────────── */
+.cve-header {
+  background: rgba(8, 4, 0, 0.6);
+  border: 1px solid #ff664420;
+  border-bottom: 2px solid #ff664415;
+  border-radius: 6px 6px 0 0;
+  padding: 0.55rem 0.85rem;
+  margin: -0.5rem -0.5rem 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.cve-id {
+  font-size: 0.76rem;
+  font-weight: bold;
+  color: #ff9955;
+  letter-spacing: 0.05em;
+  flex: 1;
+  min-width: 120px;
+}
+
+.cve-badge {
+  font-size: 0.68rem;
+  font-weight: bold;
+  padding: 0.12rem 0.45rem;
+  border-radius: 3px;
+  font-family: 'Courier New', Courier, monospace;
+  letter-spacing: 0.04em;
+}
+
+.cveb-critical { background: #ff002220; color: #ff3344; border: 1px solid #ff002240; }
+.cveb-high     { background: #ff440020; color: #ff7744; border: 1px solid #ff440040; }
+.cveb-medium   { background: #ff880020; color: #ffaa44; border: 1px solid #ff880040; }
+.cveb-resolved { background: #00ff4420; color: #00ff88; border: 1px solid #00ff4440; }
+
+.cve-cvss {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.35);
+  font-family: 'Courier New', Courier, monospace;
+}
+
+
+/* ── FEATURE 4: DEFCON Threat Level Meter ──────────────── */
+.defcon-meter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 0.45rem 0.9rem;
+  margin: 0.6rem 0;
+  font-family: 'Courier New', Courier, monospace;
+  position: relative;
+  overflow: hidden;
+}
+
+.defcon-meter::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--defcon-glow, rgba(0,255,136,0.04));
+  pointer-events: none;
+  transition: background 0.5s ease;
+}
+
+.defcon-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.defcon-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  transition: background 0.4s ease, box-shadow 0.4s ease;
+}
+
+.defcon-dot.lit-5 { background: #00ff88; box-shadow: 0 0 6px #00ff88; }
+.defcon-dot.lit-4 { background: #00aaff; box-shadow: 0 0 6px #00aaff; }
+.defcon-dot.lit-3 { background: #ffdd00; box-shadow: 0 0 6px #ffdd00; }
+.defcon-dot.lit-2 { background: #ff8800; box-shadow: 0 0 6px #ff8800; }
+.defcon-dot.lit-1 { background: #ff1133; box-shadow: 0 0 8px #ff1133; }
+
+.defcon-text { display: flex; flex-direction: column; gap: 1px; }
+
+.defcon-level {
+  font-size: 0.78rem;
+  font-weight: bold;
+  transition: color 0.4s ease;
+}
+
+.defcon-level.dc-5 { color: #00ff88; }
+.defcon-level.dc-4 { color: #00aaff; }
+.defcon-level.dc-3 { color: #ffdd00; }
+.defcon-level.dc-2 { color: #ff8800; }
+.defcon-level.dc-1 { color: #ff1133; }
+
+.defcon-desc { font-size: 0.68rem; color: rgba(255,255,255,0.4); }
+
+.defcon-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: defconPulse 2s ease-in-out infinite;
+  align-self: center;
+  margin-left: 0.15rem;
+  transition: color 0.4s ease;
+}
+
+@keyframes defconPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.3; transform: scale(1.6); }
+}
+
+
+/* ── FEATURE 5: Holographic Cert Badges ────────────────── */
+.cert-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.cert-card:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 8px 32px rgba(0, 187, 255, 0.15), 0 0 0 1px rgba(0, 255, 136, 0.2);
+}
+
+.cert-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg,
+    transparent 0%,
+    transparent 25%,
+    rgba(0, 255, 136, 0.09) 40%,
+    rgba(0, 187, 255, 0.13) 50%,
+    rgba(140, 0, 255, 0.07) 60%,
+    transparent 75%,
+    transparent 100%
+  );
+  background-size: 250% 250%;
+  animation: holoShimmer 5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+.cert-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(255,255,255,0.03) 20deg,
+    transparent 40deg
+  );
+  animation: holoRotate 8s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.cert-card > * { position: relative; z-index: 2; }
+
+.cert-card:hover::before { animation-duration: 1.2s; }
+
+@keyframes holoShimmer {
+  0%   { background-position: 200% 0%; }
+  100% { background-position: -200% 0%; }
+}
+
+@keyframes holoRotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+
+/* ── FEATURE 7: OSINT Report Card ──────────────────────── */
+.osint-report-wrapper {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.osint-classification-bar {
+  background: rgba(200, 0, 0, 0.1);
+  border: 1px solid rgba(255, 30, 30, 0.25);
+  border-radius: 4px;
+  padding: 0.35rem 0.8rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+.osint-class-label {
+  font-size: 0.76rem;
+  font-weight: bold;
+  color: #ff4444;
+  letter-spacing: 0.18em;
+  animation: classFlash 4s ease infinite;
+}
+
+.osint-class-meta {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 0.04em;
+}
+
+@keyframes classFlash {
+  0%, 85%, 100% { opacity: 1; }
+  90%            { opacity: 0.3; }
+}
+
+.osint-subject-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.18rem 1.2rem;
+  margin-bottom: 0.85rem;
+  font-size: 0.8rem;
+  padding: 0.6rem 0.8rem;
+  background: rgba(0, 255, 136, 0.03);
+  border-left: 2px solid #00ff8830;
+  border-radius: 0 4px 4px 0;
+}
+
+.osint-key   { color: #00ff8865; white-space: nowrap; }
+.osint-val   { color: rgba(255, 255, 255, 0.82); }
+
+.osint-val.redacted {
+  background: rgba(255,255,255,0.15);
+  color: transparent;
+  border-radius: 2px;
+  user-select: none;
+  cursor: not-allowed;
+}
+
+.osint-val.redacted:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.osint-assessment-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  color: #00ff8850;
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.osint-divider {
+  border: none;
+  border-top: 1px solid rgba(0,255,136,0.1);
+  margin: 0.7rem 0;
+}
+
+.osint-body-text {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.7;
+}

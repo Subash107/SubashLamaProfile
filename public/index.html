@@ -72,6 +72,7 @@
   <link rel="stylesheet" href="assets/css/motion.css" />
   <link rel="stylesheet" href="assets/css/index.css" />
   <link rel="stylesheet" href="assets/css/parrot-fx.css" />
+  <link rel="stylesheet" href="assets/css/upgrades.css" />
   <noscript>
     <style>
       body.loader-active {
@@ -155,6 +156,23 @@
     <a href="#contact"        class="snd" data-snd="contact"        title="Contact"></a>
   </nav>
   <div id="cursorTrailCanvas" aria-hidden="true"></div>
+
+  <!-- Feature 1: Parrot OS Boot Sequence -->
+  <div id="parrot-boot" aria-hidden="true" aria-label="Parrot OS boot sequence">
+    <div class="pb-header">
+      <pre class="pb-logo">    ____                      __     ____  _____
+   / __ \____ _______________  / /_   / __ \/ ___/
+  / /_/ / __ `/ ___/ ___/ __ \/ __/  / / / /\__ \
+ / ____/ /_/ / /  / /  / /_/ / /_   / /_/ /___/ /
+/_/    \__,_/_/  /_/   \____/\__/   \____//____/</pre>
+      <div class="pb-subtitle">Parrot Security OS 6.2 Rolling &nbsp;|&nbsp; SOC Portfolio &nbsp;|&nbsp; Kernel 6.1.0-parrot1-amd64</div>
+    </div>
+    <div class="pb-log" id="parrotBootLog"></div>
+    <div class="pb-footer">
+      <div class="pb-progress-track"><div class="pb-progress-bar" id="parrotBootBar"></div></div>
+      <span class="pb-status" id="parrotBootStatus">Initializing secure environment...</span>
+    </div>
+  </div>
 
   <div class="portfolio-loader" data-loader data-loader-style="boot" aria-live="polite" aria-hidden="false">
     <div class="portfolio-loader__backdrop" aria-hidden="true">
@@ -588,6 +606,21 @@
         <span class="tf-badge">LIVE</span>
         <span id="threatFeedText" class="tf-text">SOC monitor active</span>
       </div>
+      <!-- Feature 4: DEFCON Threat Level Meter -->
+      <div class="defcon-meter" id="defcon-meter" aria-label="Current threat level">
+        <div class="defcon-dots">
+          <div class="defcon-dot" title="DEFCON 5 — Normal"></div>
+          <div class="defcon-dot" title="DEFCON 4 — Increased"></div>
+          <div class="defcon-dot" title="DEFCON 3 — Elevated"></div>
+          <div class="defcon-dot" title="DEFCON 2 — High"></div>
+          <div class="defcon-dot" title="DEFCON 1 — Maximum"></div>
+        </div>
+        <div class="defcon-text">
+          <span class="defcon-level dc-3">DEFCON 3</span>
+          <span class="defcon-desc">Elevated — Active threat hunting</span>
+        </div>
+        <div class="defcon-pulse"></div>
+      </div>
       <button type="button" id="pitchBtn" class="btn btn-outline-light pitch-btn" title="Hear my 30-second pitch">&#9654; 30-sec Pitch</button>
       <div class="cta-group">
         <a href="assets/docs/cv/latest-resume.pdf" class="btn btn-outline-light btn-resume" data-resume-download data-resume-manifest="assets/docs/cv/resume-manifest.json" download="Subash-Lama-Resume.pdf">Download Resume <span id="resumeDownloadCount" style="font-size:0.75em;opacity:0.7;"></span></a>
@@ -629,6 +662,23 @@
           <article class="book-card-face book-card-front">
             <div class="section-inner">
               <div class="section-content about-panel">
+                <!-- Feature 7: OSINT Report Card -->
+                <div class="osint-report-wrapper">
+                  <div class="osint-classification-bar">
+                    <span class="osint-class-label">&#9632; RESTRICTED &mdash; OSINT INTELLIGENCE REPORT</span>
+                    <span class="osint-class-meta">CASE-ID: SL-2024-SOC &nbsp;|&nbsp; ANALYST: [REDACTED] &nbsp;|&nbsp; TLP: WHITE</span>
+                  </div>
+                  <div class="osint-subject-grid">
+                    <span class="osint-key">SUBJECT</span>    <span class="osint-val">Subash Lama</span>
+                    <span class="osint-key">LOCATION</span>   <span class="osint-val">Kathmandu, Nepal (UTC+5:45)</span>
+                    <span class="osint-key">ROLE</span>       <span class="osint-val">Cybersecurity Analyst &mdash; SOC / GRC / IAM</span>
+                    <span class="osint-key">STATUS</span>     <span class="osint-val">ACTIVE &mdash; Open to opportunities</span>
+                    <span class="osint-key">CLEARANCE</span>  <span class="osint-val redacted" title="Classified">REDACTED</span>
+                    <span class="osint-key">THREAT</span>    <span class="osint-val" style="color:#00ff88">&#10003; FRIENDLY</span>
+                  </div>
+                  <hr class="osint-divider">
+                  <span class="osint-assessment-label">ANALYST ASSESSMENT</span>
+                </div>
                 <h2 data-scramble>About Me</h2>
                 <p>I am a Cybersecurity Analyst with 12+ years in IT and a business degree, with hands-on experience in security operations, detection engineering, and GRC.</p>
                 <p>My enterprise IT background spans system administration at Primuson Pvt. Ltd., network support engineering at Green IT Solutions Pvt. Ltd., and IT contract deployments at State Bank of India and Unilever on behalf of Green IT Solutions. This gives me a deep operational foundation for understanding how attackers move through real infrastructure.</p>
@@ -828,6 +878,13 @@
                         <text x="263" y="42" class="pd-lbl">✓</text>
                       </svg>
                     </div>
+                    <!-- Feature 3: CVE-style header -->
+                    <div class="cve-header">
+                      <span class="cve-id">CVE-LAB-2024-001</span>
+                      <span class="cve-badge cveb-medium">MEDIUM</span>
+                      <span class="cve-cvss">CVSS&thinsp;6.5</span>
+                      <span class="cve-badge cveb-resolved">&#10003;&thinsp;RESOLVED</span>
+                    </div>
                     <h4>Secure Virtual Lab Automation</h4>
                     <p class="project-purpose"><strong>Problem:</strong> Manual lab setup slowed onboarding and caused inconsistency.</p>
                     <p class="project-purpose"><strong>Built:</strong> Docker templates, bootstrap scripts, and CI checks.</p>
@@ -860,6 +917,12 @@
                         <text x="263" y="42" class="pd-lbl">✓</text>
                       </svg>
                     </div>
+                    <div class="cve-header">
+                      <span class="cve-id">CVE-GOV-2024-002</span>
+                      <span class="cve-badge cveb-high">HIGH</span>
+                      <span class="cve-cvss">CVSS&thinsp;7.8</span>
+                      <span class="cve-badge cveb-resolved">&#10003;&thinsp;RESOLVED</span>
+                    </div>
                     <h4>Cloud Migration &amp; Governance Suite</h4>
                     <p class="project-purpose"><strong>Problem:</strong> Cloud rollouts needed clearer controls and less drift.</p>
                     <p class="project-purpose"><strong>Built:</strong> Terraform environments with plan checks and release gates.</p>
@@ -891,6 +954,12 @@
                         <rect x="248" y="20" width="30" height="32" rx="6" class="pd-box pd-box-ok"/>
                         <text x="263" y="42" class="pd-lbl">✓</text>
                       </svg>
+                    </div>
+                    <div class="cve-header">
+                      <span class="cve-id">CVE-SOC-2024-003</span>
+                      <span class="cve-badge cveb-critical">CRITICAL</span>
+                      <span class="cve-cvss">CVSS&thinsp;9.1</span>
+                      <span class="cve-badge cveb-resolved">&#10003;&thinsp;RESOLVED</span>
                     </div>
                     <h4>Personal SOC Lab</h4>
                     <p class="project-purpose"><strong>Problem:</strong> Needed hands-on telemetry and alerts.</p>
@@ -952,6 +1021,22 @@
                       <div class="skill-bar-track" aria-hidden="true"><div class="skill-bar-fill" data-pct="65"></div></div>
                     </div>
                   </div>
+                  <!-- Feature 2: NMAP Scan Skills Display -->
+                  <div class="nmap-panel" aria-label="Skills displayed as nmap scan output">
+                    <div class="nmap-head">Starting Nmap 7.94 ( https://nmap.org ) &nbsp;&mdash;&nbsp; <span>Scan report for subash-lama.cybersec.local (10.0.0.1)</span></div>
+                    <div class="nmap-cols">
+                      <span>PORT</span><span>STATE</span><span>SERVICE</span><span>PROFICIENCY</span><span>LEVEL</span>
+                    </div>
+                    <div class="nmap-row"><span class="nm-port">siem/wazuh</span><span class="nm-state">open</span><span class="nm-svc">SIEM Operations</span><span class="nm-bar"><span class="nm-bar-fill">██████████</span></span><span class="nm-pct">90%</span></div>
+                    <div class="nmap-row"><span class="nm-port">endpoint-sec</span><span class="nm-state">open</span><span class="nm-svc">Endpoint Security</span><span class="nm-bar"><span class="nm-bar-fill">█████████</span>░</span><span class="nm-pct">88%</span></div>
+                    <div class="nmap-row"><span class="nm-port">network-mon</span><span class="nm-state">open</span><span class="nm-svc">Network Monitor</span><span class="nm-bar"><span class="nm-bar-fill">███████</span>░░░</span><span class="nm-pct">75%</span></div>
+                    <div class="nmap-row"><span class="nm-port">scripting/py</span><span class="nm-state">open</span><span class="nm-svc">Scripting &amp; Auto.</span><span class="nm-bar"><span class="nm-bar-fill">███████</span>░░░</span><span class="nm-pct">72%</span></div>
+                    <div class="nmap-row"><span class="nm-port">grc/detect</span><span class="nm-state">open</span><span class="nm-svc">GRC &amp; Detection</span><span class="nm-bar"><span class="nm-bar-fill">██████</span>░░░░</span><span class="nm-pct">65%</span></div>
+                    <div class="nmap-row"><span class="nm-port">iam/access</span><span class="nm-state">open</span><span class="nm-svc">Identity &amp; Access</span><span class="nm-bar"><span class="nm-bar-fill">█████</span>░░░░░</span><span class="nm-pct">58%</span></div>
+                    <div class="nmap-row"><span class="nm-port">cloud-sec</span><span class="nm-state">open</span><span class="nm-svc">Cloud Security</span><span class="nm-bar"><span class="nm-bar-fill">█████</span>░░░░░</span><span class="nm-pct">55%</span></div>
+                    <div class="nmap-foot">Nmap done: 1 IP address (1 host up) scanned in 0.12 seconds &nbsp;&mdash;&nbsp; 7 ports open</div>
+                  </div>
+
                   <div class="skills-visual-row">
                     <canvas id="skillRadar" width="220" height="190" aria-label="Skill radar chart" role="img"></canvas>
                     <div class="security-ring-wrap" aria-hidden="true">
@@ -2264,6 +2349,7 @@
   <button type="button" class="audio-corner-toggle" data-audio-toggle data-audio-storage-key="portfolio_audio_enabled" data-audio-label-on="&#9834;" data-audio-label-off="&#9834;" aria-pressed="false" aria-label="Toggle ambient sound" title="Toggle ambient sound">&#9834;</button>
   <script src="assets/js/index.js" defer></script>
   <script src="assets/js/parrot-fx.js" defer></script>
+  <script src="assets/js/upgrades.js" defer></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
