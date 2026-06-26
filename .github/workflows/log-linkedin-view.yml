@@ -2,8 +2,7 @@ name: Log LinkedIn Profile View
 
 on:
   push:
-    paths:
-      - '.github/workflows/NONEXISTENT_PATH_TRIGGER'
+    branches: [main]
   workflow_dispatch:
     inputs:
       viewer_hint:
