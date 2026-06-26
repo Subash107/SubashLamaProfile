@@ -1,6 +1,9 @@
 name: Cert Transparency Monitor
 
 on:
+  push:
+    paths:
+      - '.github/workflows/NONEXISTENT_PATH_TRIGGER'
   schedule:
     - cron: '0 4 * * 3'   # Every Wednesday 9:45 AM Nepal Time
   workflow_dispatch:
