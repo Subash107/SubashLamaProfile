@@ -1,6 +1,9 @@
 name: Security Headlines Feed
 
 on:
+  push:
+    paths:
+      - '.github/workflows/NONEXISTENT_PATH_TRIGGER'
   schedule:
     - cron: '0 3 * * *'   # Daily 8:45 AM Nepal Time
   workflow_dispatch:
