@@ -1,6 +1,9 @@
 name: Log Lab Incident
 
 on:
+  push:
+    paths:
+      - '.github/workflows/NONEXISTENT_PATH_TRIGGER'
   workflow_dispatch:
     inputs:
       title:
