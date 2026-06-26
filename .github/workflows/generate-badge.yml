@@ -1,6 +1,9 @@
 name: Generate Skills Badge
 
 on:
+  push:
+    paths:
+      - '.github/workflows/NONEXISTENT_PATH_TRIGGER'
   schedule:
     - cron: '30 2 * * *'   # Daily 8:15 AM Nepal Time
   workflow_dispatch:
