@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   qr:
+    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
