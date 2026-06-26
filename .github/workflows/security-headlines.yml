@@ -12,17 +12,19 @@ permissions:
 
 jobs:
   headlines:
-    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 8
 
     steps:
+      - run: echo "event=${{ github.event_name }}"
       - name: Checkout repository
+        if: github.event_name != 'push'
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
       - name: Fetch security headlines from RSS feeds
+        if: github.event_name != 'push'
         run: |
           python3 -c "
 import urllib.request, xml.etree.ElementTree as ET, json, datetime, re, os
@@ -98,6 +100,7 @@ print(f'Headlines updated: {len(final)} items')
 "
 
       - name: Commit headlines
+        if: github.event_name != 'push'
         run: |
           git config user.email "lamasubash107@gmail.com"
           git config user.name "Subash Lama"
