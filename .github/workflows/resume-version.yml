@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       bump:
+    if: github.event_name != 'push'
         description: 'Version part to bump'
         required: true
         type: choice
