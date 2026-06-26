@@ -2,8 +2,7 @@ name: Salary Intelligence Update
 
 on:
   push:
-    paths:
-      - '.github/workflows/NONEXISTENT_PATH_TRIGGER'
+    branches: [main]
   schedule:
     - cron: '0 3 1 * *'   # 1st of every month
   workflow_dispatch:
