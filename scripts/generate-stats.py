@@ -1,6 +1,6 @@
 """
 Generate public/stats.json for the live portfolio dashboard.
-Run via GitHub Actions — reads env vars GH_TOKEN and HTB_USERNAME.
+Run via GitHub Actions — reads env vars GH_TOKEN.
 """
 import os
 import json
@@ -9,7 +9,6 @@ import urllib.error
 from datetime import datetime, timedelta, timezone
 
 gh_token   = os.environ.get('GH_TOKEN', '')
-htb_user   = os.environ.get('HTB_USERNAME', '')
 today      = datetime.utcnow().strftime('%Y-%m-%d')
 week_ago   = (datetime.utcnow() - timedelta(days=7)).strftime('%Y-%m-%d')
 ts         = int(datetime.utcnow().timestamp())
@@ -62,32 +61,6 @@ try:
 except Exception as e:
     print(f'  Resume log error: {e}')
 
-# ── HackTheBox rank ───────────────────────────────────────────────────
-htb_rank      = None
-htb_points    = None
-htb_rank_text = None
-htb_profile   = 'https://app.hackthebox.com'
-if htb_user:
-    try:
-        data  = fetch_json(
-            f'https://www.hackthebox.com/api/v4/search/fetch?query={htb_user}&tags=users&page=1',
-            {'User-Agent': 'StatsBot/1.0'}
-        )
-        users = data.get('users', [])
-        if users:
-            u             = users[0]
-            htb_rank      = u.get('rank')
-            htb_points    = u.get('points')
-            htb_rank_text = u.get('rank_text')
-            htb_profile   = f"https://app.hackthebox.com/users/{u.get('id', '')}"
-            print(f'  HTB rank: #{htb_rank} ({htb_rank_text}), points: {htb_points}')
-        else:
-            print('  HTB: user not found in search results')
-    except Exception as e:
-        print(f'  HTB error: {e}')
-else:
-    print('  HTB_USERNAME not set — skipping')
-
 # ── Job applications this week ────────────────────────────────────────
 apps_week = 0
 try:
@@ -109,12 +82,6 @@ stats = {
     'resume': {
         'downloads_week':  downloads_week,
         'downloads_total': downloads_total
-    },
-    'htb': {
-        'rank':      htb_rank,
-        'points':    htb_points,
-        'rank_text': htb_rank_text,
-        'profile':   htb_profile
     },
     'jobs': {
         'applications_week': apps_week

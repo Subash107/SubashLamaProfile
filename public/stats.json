@@ -9,13 +9,7 @@
     "downloads_week": 5,
     "downloads_total": 10
   },
-  "htb": {
-    "rank": null,
-    "points": null,
-    "rank_text": null,
-    "profile": "https://app.hackthebox.com"
-  },
-  "jobs": {
+"jobs": {
     "applications_week": 0
   },
   "certs": 7,
