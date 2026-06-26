@@ -2,8 +2,7 @@ name: Interview Prep 3-Day Reminder
 
 on:
   push:
-    paths:
-      - '.github/workflows/NONEXISTENT_PATH_TRIGGER'
+    branches: [main]
   workflow_dispatch:
     inputs:
       company:
