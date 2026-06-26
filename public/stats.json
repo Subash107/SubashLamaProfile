@@ -1,12 +1,12 @@
 {
-  "generated": "2026-06-25",
-  "generated_ts": 1782370300,
+  "generated": "2026-06-26",
+  "generated_ts": 1782457096,
   "github": {
-    "commits_week": 76,
+    "commits_week": 72,
     "profile": "https://github.com/Subash107"
   },
   "resume": {
-    "downloads_week": 7,
+    "downloads_week": 5,
     "downloads_total": 10
   },
   "htb": {
@@ -19,5 +19,5 @@
     "applications_week": 0
   },
   "certs": 7,
-  "last_active": "2026-06-25"
+  "last_active": "2026-06-26"
 }
