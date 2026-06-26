@@ -32,17 +32,19 @@ permissions:
 
 jobs:
   log:
-    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
     steps:
+      - run: echo "event=${{ github.event_name }}"
       - name: Checkout repository
+        if: github.event_name != 'push'
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
       - name: Append incident to JSON
+        if: github.event_name != 'push'
         run: |
           TODAY=$(date -u +"%Y-%m-%d")
           python3 -c "
@@ -82,6 +84,7 @@ print('Logged:', new_entry['id'], new_entry['title'])
 "
 
       - name: Commit incident log
+        if: github.event_name != 'push'
         run: |
           git config user.email "lamasubash107@gmail.com"
           git config user.name "Subash Lama"
@@ -91,6 +94,7 @@ print('Logged:', new_entry['id'], new_entry['title'])
           git push
 
       - name: Telegram notification
+        if: github.event_name != 'push'
         env:
           TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
