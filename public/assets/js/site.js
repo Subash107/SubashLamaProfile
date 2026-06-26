@@ -745,14 +745,14 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
       const raw = input.value.trim();
       const cmd = raw.toLowerCase();
       input.value = "";
-      addLine("prompt", '<span style="color:#8ae8ff">subash@portfolio:~$</span> ' + raw);
+      addLine("prompt", '<span style="color:#8ae8ff">subash@portfolio:~$</span> ' + raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
       if (!cmd) return;
       const fn = cmds[cmd];
       if (fn) {
         const out = fn();
         if (out != null) addLine("out", out);
       } else {
-        addLine("err", "bash: " + cmd + ": command not found. Type 'help'.");
+        addLine("err", "bash: " + cmd.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + ": command not found. Type 'help'.");
       }
     });
   }
@@ -2580,7 +2580,7 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
         io.unobserve(entry.target);
         const el = entry.target;
         const original = el.textContent;
-        el.innerHTML = original.split("").map(c => `<span class="cipher-char">${c}</span>`).join("");
+        el.innerHTML = original.split("").map(c => { const s = document.createElement("span"); s.className = "cipher-char"; s.textContent = c; return s.outerHTML; }).join("");
         const spans = el.querySelectorAll(".cipher-char");
         spans.forEach((span, i) => {
           const orig = span.textContent;
