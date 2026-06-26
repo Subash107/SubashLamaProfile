@@ -12,17 +12,19 @@ permissions:
 
 jobs:
   parse-emails:
-    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 8
 
     steps:
+      - run: echo "event=${{ github.event_name }}"
       - name: Checkout repository
+        if: github.event_name != 'push'
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
       - name: Parse application confirmation emails via Gmail API
+        if: github.event_name != 'push'
         env:
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
         run: |
@@ -86,6 +88,7 @@ print(f'Auto-logged {len(new_apps)} new application(s) from email.')
 "
 
       - name: Commit parsed applications
+        if: github.event_name != 'push'
         run: |
           git config user.email "lamasubash107@gmail.com"
           git config user.name "Subash Lama"
