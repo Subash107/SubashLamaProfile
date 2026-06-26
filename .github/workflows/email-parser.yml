@@ -1,6 +1,9 @@
 name: Job Application Email Parser
 
 on:
+  push:
+    paths:
+      - '.github/workflows/NONEXISTENT_PATH_TRIGGER'
   schedule:
     - cron: '0 5 * * *'   # Daily 10:45 AM Nepal Time
   workflow_dispatch:
