@@ -13,20 +13,23 @@ permissions:
 
 jobs:
   qr:
-    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
     steps:
+      - run: echo "event=${{ github.event_name }}"
       - name: Checkout repository
+        if: github.event_name != 'push'
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
       - name: Install qrcode library
+        if: github.event_name != 'push'
         run: pip install qrcode[pil] 2>/dev/null || pip3 install qrcode 2>/dev/null || true
 
       - name: Generate QR code SVG
+        if: github.event_name != 'push'
         run: |
           python3 -c "
 try:
@@ -55,6 +58,7 @@ except ImportError:
 "
 
       - name: Commit QR code
+        if: github.event_name != 'push'
         run: |
           git config user.email "lamasubash107@gmail.com"
           git config user.name "Subash Lama"
