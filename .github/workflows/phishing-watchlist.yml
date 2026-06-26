@@ -2,8 +2,7 @@ name: Phishing Domain Watchlist
 
 on:
   push:
-    paths:
-      - '.github/workflows/NONEXISTENT_PATH_TRIGGER'
+    branches: [main]
   schedule:
     - cron: '0 3 * * 5'   # Every Friday 8:45 AM Nepal Time
   workflow_dispatch:
