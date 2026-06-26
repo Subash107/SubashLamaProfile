@@ -2,8 +2,7 @@ name: Job Application Response Analytics
 
 on:
   push:
-    paths:
-      - '.github/workflows/NONEXISTENT_PATH_TRIGGER'
+    branches: [main]
   schedule:
     - cron: '0 3 * * 1'   # Every Monday 8:45 AM Nepal Time
   workflow_dispatch:
