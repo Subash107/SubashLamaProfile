@@ -21,16 +21,25 @@
   Link: </assets/js/site.js>; rel=preload; as=script
   Link: </assets/images/bg-poster.jpg>; rel=preload; as=image
 
-# Immutable asset caching — hashed filenames, cache forever
+# HTML pages — always revalidate so updates are instant for all visitors
+/
+  Cache-Control: no-cache, must-revalidate
+
+/*.html
+  Cache-Control: no-cache, must-revalidate
+
+# CSS/JS — no content hashes in filenames so must revalidate on every visit
 /assets/css/*
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: no-cache, must-revalidate
 
 /assets/js/*
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: no-cache, must-revalidate
 
+# Images — safe to cache long-term (filenames don't change, content rarely does)
 /assets/images/*
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=604800
 
+# Vendor libs — versioned by vendor, safe to cache long-term
 /assets/vendor/*
   Cache-Control: public, max-age=31536000, immutable
 
