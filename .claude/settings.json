@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "py \"${CLAUDE_PROJECT_DIR}/scripts/log-session-start.py\"",
+            "timeout": 30,
+            "async": true,
+            "statusMessage": "Logging today's activity entry..."
+          }
+        ]
+      }
+    ]
+  }
+}
