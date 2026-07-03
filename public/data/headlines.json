@@ -1,6 +1,13 @@
 {
-  "updated": "2026-06-24",
+  "updated": "2026-07-03",
   "items": [
+    {
+      "title": "Who Runs the Ransomware Group \u2018The Gentlemen?\u2019",
+      "source": "Krebs on Security",
+      "category": "threat",
+      "url": "https://krebsonsecurity.com/2026/06/who-runs-the-ransomware-group-the-gentlemen/",
+      "date": "2026-07-03"
+    },
     {
       "title": "CISA Warns of Active Exploitation of Ivanti Connect Secure Vulnerability",
       "source": "CISA",
@@ -30,7 +37,7 @@
       "date": "2026-06-22"
     },
     {
-      "title": "Wazuh 4.8 Released — New MITRE ATT&CK Detection Rules",
+      "title": "Wazuh 4.8 Released \u2014 New MITRE ATT&CK Detection Rules",
       "source": "Wazuh Blog",
       "category": "tool",
       "url": "https://wazuh.com/blog",
