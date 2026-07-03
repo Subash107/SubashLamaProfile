@@ -1,8 +1,6 @@
 name: Log Lab Incident
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       title:
@@ -45,43 +43,16 @@ jobs:
 
       - name: Append incident to JSON
         if: github.event_name != 'push'
+        env:
+          TITLE:    ${{ inputs.title }}
+          TTP:      ${{ inputs.ttp }}
+          TOOL:     ${{ inputs.tool }}
+          SEVERITY: ${{ inputs.severity }}
+          ACTION:   ${{ inputs.action }}
+          OUTCOME:  ${{ inputs.outcome }}
         run: |
           TODAY=$(date -u +"%Y-%m-%d")
-          python3 -c "
-import json, datetime
-path = 'public/data/incidents.json'
-try:
-    with open(path) as f:
-        data = json.load(f)
-except Exception:
-    data = {'updated': '', 'entries': []}
-
-existing = data.get('entries', [])
-last_id = 0
-for e in existing:
-    try:
-        n = int(e.get('id','INC-0').split('-')[1])
-        if n > last_id: last_id = n
-    except Exception:
-        pass
-
-new_entry = {
-    'date':     '$TODAY',
-    'id':       f'INC-{last_id+1:03d}',
-    'title':    '${{ inputs.title }}',
-    'ttp':      '${{ inputs.ttp }}',
-    'tool':     '${{ inputs.tool }}',
-    'severity': '${{ inputs.severity }}',
-    'action':   '${{ inputs.action }}',
-    'outcome':  '${{ inputs.outcome }}'
-}
-existing.insert(0, new_entry)
-data['entries'] = existing[:20]
-data['updated'] = '$TODAY'
-with open(path, 'w') as f:
-    json.dump(data, f, indent=2)
-print('Logged:', new_entry['id'], new_entry['title'])
-"
+          TODAY="$TODAY" python3 scripts/log-incident-append.py
 
       - name: Commit incident log
         if: github.event_name != 'push'

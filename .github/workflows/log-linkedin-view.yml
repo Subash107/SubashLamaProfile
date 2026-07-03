@@ -1,8 +1,6 @@
 name: Log LinkedIn Profile View
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       viewer_hint:
@@ -33,6 +31,8 @@ jobs:
         env:
           TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
+          VIEWER_HINT: ${{ inputs.viewer_hint }}
+          NOTE: ${{ inputs.note }}
         run: |
           NOW=$(date -u +"%Y-%m-%dT%H:%M")
           TODAY=$(date -u +"%Y-%m-%d")
@@ -42,24 +42,7 @@ jobs:
           mkdir -p download-logs
           VIEWS_FILE="download-logs/linkedin-views.json"
 
-          python3 -c "
-import json, datetime
-path = '$VIEWS_FILE'
-try:
-    with open(path) as f:
-        data = json.load(f)
-except Exception:
-    data = []
-data.insert(0, {
-    'timestamp': '$NOW',
-    'hint':  '${{ inputs.viewer_hint }}',
-    'note':  '${{ inputs.note }}'
-})
-data = data[:50]
-with open(path, 'w') as f:
-    json.dump(data, f, indent=2)
-print('Logged LinkedIn view at', '$NOW')
-"
+          VIEWS_FILE="$VIEWS_FILE" NOW="$NOW" python3 scripts/log-linkedin-view-append.py
 
           DOWNLOAD_LOG="download-logs/resume-downloads.txt"
           CORRELATED=""
@@ -74,7 +57,7 @@ print('Logged LinkedIn view at', '$NOW')
           fi
 
           MSG=$(printf 'LinkedIn Profile View Logged\n\nTime   : %s\nViewer : %s\nNote   : %s%s' \
-            "$NOW" "${LI_HINT:-not specified}" "${NOTE:-none}" "$CORRELATION_MSG")
+            "$NOW" "${VIEWER_HINT:-not specified}" "${NOTE:-none}" "$CORRELATION_MSG")
 
           curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
             -H "Content-Type: application/json" \

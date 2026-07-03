@@ -1,8 +1,6 @@
 name: Phishing Domain Watchlist
 
 on:
-  push:
-    branches: [main]
   schedule:
     - cron: '0 3 * * 5'   # Every Friday 8:45 AM Nepal Time
   workflow_dispatch:
@@ -55,13 +53,7 @@ jobs:
           # Check crt.sh for lookalike certs
           LOOKALIKES=$(curl -s --max-time 10 \
             "https://crt.sh/?q=%25${BASE}%25&output=json" 2>/dev/null | \
-            python3 -c "
-import json, sys
-d = json.load(sys.stdin)
-real = 'subashlamaprofile.pages.dev'
-others = list(set(c.get('common_name','') for c in d if real not in c.get('common_name','') and 'subash' in c.get('common_name','').lower()))
-for o in others[:5]: print(o)
-" 2>/dev/null || echo "")
+            python3 scripts/phishing-watchlist-lookalikes.py 2>/dev/null || echo "")
 
           [ -n "$LOOKALIKES" ] && FINDINGS=$(printf '%s\n  [WARN] Lookalike cert found:\n%s' "$FINDINGS" "$LOOKALIKES")
 

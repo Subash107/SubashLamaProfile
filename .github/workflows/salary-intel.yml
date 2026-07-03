@@ -1,8 +1,6 @@
 name: Salary Intelligence Update
 
 on:
-  push:
-    branches: [main]
   schedule:
     - cron: '0 3 1 * *'   # 1st of every month
   workflow_dispatch:
@@ -41,35 +39,15 @@ jobs:
 
       - name: Update salary data
         if: github.event_name != 'push'
+        env:
+          ROLE:       ${{ inputs.role }}
+          REGION:     ${{ inputs.region }}
+          MIN_USD:    ${{ inputs.min_usd }}
+          MAX_USD:    ${{ inputs.max_usd }}
+          MEDIAN_USD: ${{ inputs.median_usd }}
         run: |
           TODAY=$(date -u +"%Y-%m-%d")
-          python3 -c "
-import json
-path = 'public/data/salary-intel.json'
-with open(path) as f:
-    data = json.load(f)
-
-role_input   = '${{ inputs.role }}'.strip()
-region_input = '${{ inputs.region }}'.strip()
-min_v    = '${{ inputs.min_usd }}'.strip()
-max_v    = '${{ inputs.max_usd }}'.strip()
-med_v    = '${{ inputs.median_usd }}'.strip()
-
-if role_input and region_input and min_v and max_v:
-    for role in data.get('roles', []):
-        if role.get('title') == role_input:
-            for market in role.get('markets', []):
-                if market.get('region') == region_input:
-                    market['min']    = int(min_v)
-                    market['max']    = int(max_v)
-                    market['median'] = int(med_v) if med_v else (int(min_v)+int(max_v))//2
-                    print(f'Updated: {role_input} — {region_input}')
-
-data['updated'] = '$TODAY'
-with open(path, 'w') as f:
-    json.dump(data, f, indent=2)
-print('Salary data saved.')
-"
+          TODAY="$TODAY" python3 scripts/salary-intel-update.py
 
       - name: Commit update
         if: github.event_name != 'push'
@@ -87,17 +65,7 @@ print('Salary data saved.')
           TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          SUMMARY=$(python3 -c "
-import json
-with open('public/data/salary-intel.json') as f:
-    data = json.load(f)
-lines = []
-for role in data.get('roles',[]):
-    medians = [m['median'] for m in role.get('markets',[]) if 'median' in m]
-    if medians:
-        lines.append(f'{role[\"title\"]}: USD {min(medians):,} — {max(medians):,} (median range)')
-print('\n'.join(lines))
-")
+          SUMMARY=$(python3 scripts/salary-intel-summary.py)
           MSG=$(printf 'Monthly Salary Intelligence\n\nDate: %s\n\n%s\n\nSource: LinkedIn Salary, Glassdoor, PayScale\nView full data: https://subashlamaprofile.pages.dev/funnel.html' \
             "$(date -u +"%Y-%m-%d")" "$SUMMARY")
           curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \

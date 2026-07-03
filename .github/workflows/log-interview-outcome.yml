@@ -1,8 +1,6 @@
 name: Log Interview Outcome
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       company:
@@ -50,39 +48,15 @@ jobs:
 
       - name: Log outcome and update funnel
         if: github.event_name != 'push'
+        env:
+          COMPANY:    ${{ inputs.company }}
+          ROLE:       ${{ inputs.role }}
+          STAGE:      ${{ inputs.stage }}
+          OUTCOME:    ${{ inputs.outcome }}
+          NEXT_STEPS: ${{ inputs.next_steps }}
         run: |
           TODAY=$(date -u +"%Y-%m-%d")
-          python3 -c "
-import json, datetime
-path = 'download-logs/interview-outcomes.json'
-try:
-    with open(path) as f:
-        data = json.load(f)
-except Exception:
-    data = {'entries': [], 'funnel': {}}
-
-entry = {
-    'date':       '$TODAY',
-    'company':    '${{ inputs.company }}',
-    'role':       '${{ inputs.role }}',
-    'stage':      '${{ inputs.stage }}',
-    'outcome':    '${{ inputs.outcome }}',
-    'next_steps': '${{ inputs.next_steps }}'
-}
-data['entries'].insert(0, entry)
-data['entries'] = data['entries'][:50]
-
-funnel = {}
-for e in data['entries']:
-    s = e.get('stage', 'Unknown')
-    funnel[s] = funnel.get(s, 0) + 1
-data['funnel'] = funnel
-data['updated'] = '$TODAY'
-
-with open(path, 'w') as f:
-    json.dump(data, f, indent=2)
-print('Logged outcome for', '${{ inputs.company }}', '—', '${{ inputs.stage }}')
-"
+          TODAY="$TODAY" python3 scripts/log-interview-outcome-append.py
 
       - name: Commit outcome log
         if: github.event_name != 'push'

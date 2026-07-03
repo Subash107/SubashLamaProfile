@@ -1,8 +1,6 @@
 name: GitHub Streak Warning
 
 on:
-  push:
-    branches: [main]
   schedule:
     - cron: '15 13 * * *'   # 7:00 PM Nepal Time (UTC+5:45)
   workflow_dispatch:
@@ -38,17 +36,7 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             "https://api.github.com/users/${USERNAME}/events?per_page=30")
 
-          HAS_ACTIVITY=$(echo "$EVENTS" | python3 -c "
-import json, sys
-events = json.load(sys.stdin)
-today = '$TODAY'
-active_types = ('PushEvent','CreateEvent','IssuesEvent','PullRequestEvent','CommitCommentEvent','ReleaseEvent')
-has = any(
-    e.get('type') in active_types and e.get('created_at','')[:10] == today
-    for e in events
-)
-print('yes' if has else 'no')
-" 2>/dev/null || echo "unknown")
+          HAS_ACTIVITY=$(echo "$EVENTS" | TODAY="$TODAY" python3 scripts/github-streak-check.py 2>/dev/null || echo "unknown")
 
           if [ "$HAS_ACTIVITY" = "yes" ]; then
             echo "GitHub activity found today — no warning needed."

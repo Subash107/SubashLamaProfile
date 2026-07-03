@@ -1,8 +1,6 @@
 name: Update Currently Hunting
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       type:
@@ -39,32 +37,13 @@ jobs:
 
       - name: Add hunting item to JSON
         if: github.event_name != 'push'
+        env:
+          TYPE:   ${{ inputs.type }}
+          TITLE:  ${{ inputs.title }}
+          DETAIL: ${{ inputs.detail }}
         run: |
           TODAY=$(date -u +"%Y-%m-%d")
-          python3 -c "
-import json, datetime
-path = 'public/data/hunting.json'
-try:
-    with open(path) as f:
-        data = json.load(f)
-except Exception:
-    data = {'updated': '', 'items': []}
-
-new_item = {
-    'type':   '${{ inputs.type }}',
-    'title':  '${{ inputs.title }}',
-    'detail': '${{ inputs.detail }}'
-}
-
-data['items'] = [i for i in data.get('items',[]) if i.get('type') != new_item['type'] or i.get('title') != new_item['title']]
-data['items'].insert(0, new_item)
-data['items'] = data['items'][:6]
-data['updated'] = '$TODAY'
-
-with open(path, 'w') as f:
-    json.dump(data, f, indent=2)
-print('Updated hunting.json with:', new_item['title'])
-"
+          TODAY="$TODAY" python3 scripts/update-hunting-append.py
 
       - name: Commit update
         if: github.event_name != 'push'

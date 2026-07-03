@@ -1,8 +1,6 @@
 name: Interview Prep 3-Day Reminder
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       company:
@@ -63,12 +61,7 @@ jobs:
           TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          DAYS_UNTIL=$(python3 -c "
-from datetime import date
-interview = date.fromisoformat('${{ inputs.interview_date }}')
-today = date.today()
-print((interview - today).days)
-" 2>/dev/null || echo "?")
+          DAYS_UNTIL=$(INTERVIEW_DATE="${{ inputs.interview_date }}" python3 scripts/interview-scheduler-days-until.py 2>/dev/null || echo "?")
 
           if [ "$DAYS_UNTIL" = "3" ] || [ "$DAYS_UNTIL" = "2" ] || [ "$DAYS_UNTIL" = "1" ]; then
             MSG=$(printf 'INTERVIEW IN %s DAY(S) — %s at %s\n\nFull Prep Checklist:\n\n COMPANY RESEARCH\n  Company mission, products, revenue, recent news\n  Glassdoor reviews, team culture, tech stack\n  Hiring manager on LinkedIn\n\n TECHNICAL PREP\n  SOC lab tour rehearsal (Wazuh, Suricata, MITRE)\n  Review cert talking points: Cisco Ethical Hacker, Endpoint Security\n  Prepare 2 detection engineering stories (STAR format)\n  Know your homelab CVE patching workflow\n\n BEHAVIOURAL\n  Practiced 90-second intro (name, background, why cyber)\n  Why this company? Why SOC/GRC/IAM?\n  Salary: research market rate in advance\n\n LOGISTICS\n  Platform confirmed (Zoom/Teams/phone)\n  Camera, mic, background tested\n  2-3 questions to ask the interviewer\n\nNotes: %s\n\nYou are ready. Go get it.' \
