@@ -1,6 +1,13 @@
 {
-  "updated": "2026-07-09",
+  "updated": "2026-07-10",
   "items": [
+    {
+      "title": "Who Runs the Ransomware Group \u2018The Gentlemen?\u2019",
+      "source": "Krebs on Security",
+      "category": "threat",
+      "url": "https://krebsonsecurity.com/2026/06/who-runs-the-ransomware-group-the-gentlemen/",
+      "date": "2026-07-10"
+    },
     {
       "title": "Who Runs the Ransomware Group \u2018The Gentlemen?\u2019",
       "source": "Krebs on Security",
@@ -62,13 +69,6 @@
       "source": "BleepingComputer",
       "category": "threat",
       "url": "https://www.bleepingcomputer.com",
-      "date": "2026-06-23"
-    },
-    {
-      "title": "NIST Updates Cybersecurity Framework with AI Security Guidance",
-      "source": "NIST",
-      "category": "grc",
-      "url": "https://www.nist.gov/cyberframework",
       "date": "2026-06-23"
     }
   ]
