@@ -1,6 +1,13 @@
 {
-  "updated": "2026-07-10",
+  "updated": "2026-07-11",
   "items": [
+    {
+      "title": "Who Runs the Ransomware Group \u2018The Gentlemen?\u2019",
+      "source": "Krebs on Security",
+      "category": "threat",
+      "url": "https://krebsonsecurity.com/2026/06/who-runs-the-ransomware-group-the-gentlemen/",
+      "date": "2026-07-11"
+    },
     {
       "title": "Who Runs the Ransomware Group \u2018The Gentlemen?\u2019",
       "source": "Krebs on Security",
@@ -63,13 +70,6 @@
       "category": "vuln",
       "url": "https://www.cisa.gov/news-events/alerts",
       "date": "2026-06-24"
-    },
-    {
-      "title": "New Ransomware Group Targets Healthcare Sector with Double Extortion",
-      "source": "BleepingComputer",
-      "category": "threat",
-      "url": "https://www.bleepingcomputer.com",
-      "date": "2026-06-23"
     }
   ]
 }
