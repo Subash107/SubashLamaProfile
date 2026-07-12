@@ -1,6 +1,13 @@
 {
-  "updated": "2026-07-11",
+  "updated": "2026-07-12",
   "items": [
+    {
+      "title": "Who Runs the Ransomware Group \u2018The Gentlemen?\u2019",
+      "source": "Krebs on Security",
+      "category": "threat",
+      "url": "https://krebsonsecurity.com/2026/06/who-runs-the-ransomware-group-the-gentlemen/",
+      "date": "2026-07-12"
+    },
     {
       "title": "Who Runs the Ransomware Group \u2018The Gentlemen?\u2019",
       "source": "Krebs on Security",
@@ -63,13 +70,6 @@
       "category": "threat",
       "url": "https://krebsonsecurity.com/2026/06/who-runs-the-ransomware-group-the-gentlemen/",
       "date": "2026-07-03"
-    },
-    {
-      "title": "CISA Warns of Active Exploitation of Ivanti Connect Secure Vulnerability",
-      "source": "CISA",
-      "category": "vuln",
-      "url": "https://www.cisa.gov/news-events/alerts",
-      "date": "2026-06-24"
     }
   ]
 }
