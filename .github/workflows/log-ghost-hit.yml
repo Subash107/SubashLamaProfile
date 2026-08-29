@@ -1,4 +1,4 @@
-﻿name: Log BBP Ghost Link / Callback Hit
+name: Log BBP Ghost Link / Callback Hit
 
 on:
   repository_dispatch:
@@ -41,7 +41,7 @@ jobs:
           git push
 
       - name: Send email notification
-        uses: dawidd6/action-send-mail@v3
+        uses: dawidd6/action-send-mail@v18
         with:
           server_address: smtp.gmail.com
           server_port: 465
