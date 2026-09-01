@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "clean-css-cli": "5.6.3",
-    "terser": "5.49.0"
+    "terser": "5.51.2"
   },
   "engines": {
     "node": ">=20"
