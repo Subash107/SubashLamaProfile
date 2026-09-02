@@ -76,7 +76,7 @@ Every time someone downloads your resume, the system automatically:
 ### Notification Channels
 | Channel | How |
 |---|---|
-| Telegram bot (@trackerSbash) | GitHub Actions → Telegram API |
+| Telegram bot (@tracker******) | GitHub Actions → Telegram API |
 | ntfy Windows popup | GitHub Actions → ntfy.sh |
 | PowerShell toast | Local watcher script |
 
