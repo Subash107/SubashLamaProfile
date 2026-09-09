@@ -29,7 +29,9 @@ jobs:
           echo "$ANALYSIS"
 
           TOTAL=$(echo "$ANALYSIS" | grep "^total=" | cut -d= -f2)
-          BREAKDOWN=$(echo "$ANALYSIS" | grep -v "^total=")
+          # grep -v matches nothing when the script returns a bare "total=0",
+          # which would abort this step under `bash -e` before the check below.
+          BREAKDOWN=$(echo "$ANALYSIS" | grep -v "^total=" || true)
 
           if [ "${TOTAL:-0}" -eq 0 ]; then
             echo "No downloads this week — skipping."
