@@ -1,0 +1,52 @@
+name: Publish Latest Resume
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'content/resume/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish-resume:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Restore resume timestamps from git history
+        run: |
+          # A fresh checkout stamps every file with the checkout time, which collapses
+          # the "newest wins" rule in sync-resume.ps1 into an alphabetical tiebreak.
+          # Replay each PDF's last commit date so the genuinely newest CV wins.
+          for f in content/resume/*.pdf; do
+            [ -e "$f" ] || continue
+            ts=$(git log -1 --format=%ct -- "$f")
+            [ -n "$ts" ] || continue
+            touch -d "@$ts" "$f"
+            echo "$f -> $(date -u -d "@$ts" +'%Y-%m-%d %H:%M:%S UTC')"
+          done
+
+      - name: Sync latest resume into public
+        shell: pwsh
+        run: ./scripts/sync-resume.ps1
+
+      - name: Commit published resume if it changed
+        run: |
+          if git diff --quiet -- public/assets/docs/cv/; then
+            echo "Published resume already up to date - nothing to commit."
+            exit 0
+          fi
+          git config user.name "Subash Lama"
+          git config user.email "lamasubash107@gmail.com"
+          git add public/assets/docs/cv/
+          git commit -m "chore: publish latest resume $(date -u +%Y-%m-%d)"
+          git push
+          echo "Published resume updated and pushed."

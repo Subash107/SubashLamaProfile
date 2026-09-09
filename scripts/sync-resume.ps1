@@ -48,12 +48,18 @@ if (-not (Test-Path -LiteralPath $resolvedSourceDir -PathType Container)) {
   throw "Resume source folder not found: $resolvedSourceDir"
 }
 
-$resumeFiles = @(Get-ChildItem -LiteralPath $resolvedSourceDir -File -Filter *.pdf | Sort-Object `
+# Backup/draft copies must never be publishable. On a fresh CI checkout every file
+# carries the same mtime, so the Name tiebreak below decides -- and without this
+# filter "Subash_Lama_CV.backup.pdf" sorts first and would be published.
+$excludePattern = '(?i)[._-](backup|bak|old|draft|copy)\.pdf$'
+
+$resumeFiles = @(Get-ChildItem -LiteralPath $resolvedSourceDir -File -Filter *.pdf |
+  Where-Object { $_.Name -notmatch $excludePattern } | Sort-Object `
   @{ Expression = "LastWriteTimeUtc"; Descending = $true }, `
   @{ Expression = "Name"; Descending = $false })
 
 if ($resumeFiles.Count -eq 0) {
-  throw "No PDF resume files found in: $resolvedSourceDir"
+  throw "No publishable PDF resume found in: $resolvedSourceDir (backup/draft copies are ignored)"
 }
 
 $latestResume = $resumeFiles[0]

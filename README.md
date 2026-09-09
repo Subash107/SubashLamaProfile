@@ -53,10 +53,17 @@ For a one-command local Docker launch, use:
 `pwsh ./scripts/deploy-local.ps1`
 
 ## Resume Updates
-- Put your current resume PDF in `content/resume/`.
+- Put your current resume PDF in `content/resume/` and push to `main`.
 - Use a professional source filename such as `Subash-Lama-Resume.pdf`.
-- The newest PDF in that folder is automatically copied to `public/assets/docs/cv/latest-resume.pdf` during local deploy and GitHub Actions.
-- If you keep multiple PDFs there, the most recently modified one becomes the download target.
+- `publish-resume.yml` republishes it to `public/assets/docs/cv/latest-resume.pdf`, commits the
+  result, and Cloudflare Pages serves it on the next deploy.
+- If you keep multiple PDFs there, the most recently **committed** one becomes the download
+  target. The workflow replays each file's git commit date onto it before choosing, because a
+  fresh CI checkout stamps every file with the same timestamp.
+- Backup and draft copies are never publishable: anything matching `*.backup.pdf`, `*.bak.pdf`,
+  `*.old.pdf`, `*.draft.pdf` or `*.copy.pdf` is excluded from selection.
+- `ci.yml` and `build.yml` also run `sync-resume.ps1`, but only to validate the build. They check
+  out with `contents: read` and discard their workspace, so they cannot update the live download.
 
 ## Deployment
 - GitHub Actions automatically publishes the `main` branch to GitHub Pages.
