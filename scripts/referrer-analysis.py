@@ -20,7 +20,7 @@ try:
             if WEEK_AGO and date < WEEK_AGO:
                 continue
             total += 1
-            if not ref or ref in ("", "none", "None", "-"):
+            if not ref or ref.lower() in ("", "none", "-", "direct"):
                 ref = "direct"
             elif "linkedin" in ref.lower():
                 ref = "LinkedIn"

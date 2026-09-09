@@ -96,9 +96,14 @@ jobs:
 
           MSG=$(printf '%s Resume Downloaded!%s%s%s\n\n📍 Location : %s\n🏢 Company  : %s\n💻 Device   : %s / %s / %s\n🌐 IP       : %s\n🔗 Referrer : %s\n🕐 Time     : %s\n\n📋 Log: https://github.com/Subash107/SubashLamaProfile/blob/main/download-logs/resume-downloads.txt' \
             "$LEAD" "$REPEAT_LINE" "$ANON_LINE" "$SOURCE_LINE" "$LOC" "$ORG" "$DEVICE" "$OS" "$BROWSER" "$IP" "$REF" "$TS")
-          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          # MSG contains real newlines and may contain quotes from org/referrer
+          # fields, so it must be JSON-encoded rather than pasted into the literal.
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
             -H "Content-Type: application/json" \
-            -d "{\"chat_id\":\"${{ secrets.TELEGRAM_CHAT_ID }}\",\"text\":\"${MSG}\"}"
+            -d "{\"chat_id\":\"${{ secrets.TELEGRAM_CHAT_ID }}\",\"text\":$(printf '%s' "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}")
+          echo "Telegram response: $RESPONSE"
+          echo "$RESPONSE" | python3 -c "import json,sys; r=json.load(sys.stdin); exit(0 if r.get('ok') else 1)" || { echo "ERROR: Telegram rejected the download alert."; exit 1; }
+          echo "SUCCESS: download alert sent."
 
       - name: Send email notification
         continue-on-error: true
