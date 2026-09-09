@@ -3078,13 +3078,15 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
   /* ── Resume download tracker ── */
   /* PAT is stored securely in Cloudflare Worker — never exposed here */
   function initResumeTracking() {
-    const btn = document.querySelector("[data-resume-download]");
-    if (!btn) return;
+    /* every CV link on the page, not just the first — a plain <a download> that
+       is not hooked here downloads straight from Pages and is never tracked */
+    const btns = document.querySelectorAll("[data-resume-download]");
+    if (!btns.length) return;
 
     /* After deploying the Cloudflare Worker, replace this URL with your Worker URL */
     const TRACKER_URL = "https://lingering-surf-6d77.lamasubash107.workers.dev";
 
-    btn.addEventListener("click", () => {
+    btns.forEach((btn) => btn.addEventListener("click", () => {
 
       const ua = navigator.userAgent;
       const getOS = () => {
@@ -3130,7 +3132,7 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
       };
 
       dispatch();
-    });
+    }));
   }
 
   function initDynamicDates() {
