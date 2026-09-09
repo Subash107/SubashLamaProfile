@@ -7,6 +7,24 @@ on:
 permissions:
   contents: write
 
+# GitHub rejects a repository_dispatch carrying more than 10 client_payload
+# properties. The worker adds 6 server-side (ip, location, org, lead_score,
+# anon_flag, repeat), so the page sends 3 packed fields instead of 9 flat ones.
+#
+# Payload values are supplied by the caller, so they are exposed through env:
+# and referenced as shell variables. They must never be interpolated into a
+# run: block with ${{ }}, which would execute them as script.
+env:
+  P_CLIENT:   ${{ github.event.client_payload.client }}
+  P_REFERRER: ${{ github.event.client_payload.referrer }}
+  P_UTM:      ${{ github.event.client_payload.utm }}
+  P_IP:       ${{ github.event.client_payload.ip }}
+  P_LOCATION: ${{ github.event.client_payload.location }}
+  P_ORG:      ${{ github.event.client_payload.org }}
+  P_LEAD:     ${{ github.event.client_payload.lead_score }}
+  P_ANON:     ${{ github.event.client_payload.anon_flag }}
+  P_REPEAT:   ${{ github.event.client_payload.repeat }}
+
 jobs:
   log:
     runs-on: ubuntu-latest
@@ -18,23 +36,30 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Unpack packed payload fields
+        run: |
+          # client = ts|os|browser|device|tz|lang        utm = source|medium
+          # `read` stops at the first newline, so no value can smuggle extra
+          # lines into $GITHUB_ENV.
+          IFS='|' read -r C_TS C_OS C_BROWSER C_DEVICE C_TZ C_LANG <<< "$P_CLIENT"
+          IFS='|' read -r U_SOURCE U_MEDIUM <<< "$P_UTM"
+          {
+            echo "TS=${C_TS:-$(date -u +%Y-%m-%dT%H:%M:%S.000Z)}"
+            echo "OS=${C_OS:-Unknown}"
+            echo "BROWSER=${C_BROWSER:-Unknown}"
+            echo "DEVICE=${C_DEVICE:-Unknown}"
+            echo "TZ_NAME=${C_TZ:-unknown}"
+            echo "LANG_TAG=${C_LANG:-unknown}"
+            echo "UTM_SOURCE=${U_SOURCE:-direct}"
+            echo "UTM_MEDIUM=${U_MEDIUM:-none}"
+          } >> "$GITHUB_ENV"
+          echo "Unpacked: os=${C_OS} browser=${C_BROWSER} device=${C_DEVICE} utm=${U_SOURCE}"
+
       - name: Append download entry to log
         run: |
           mkdir -p download-logs
-
-          TS="${{ github.event.client_payload.timestamp }}"
-          IP="${{ github.event.client_payload.ip }}"
-          LOC="${{ github.event.client_payload.location }}"
-          ORG="${{ github.event.client_payload.org }}"
-          OS="${{ github.event.client_payload.os }}"
-          BROWSER="${{ github.event.client_payload.browser }}"
-          DEVICE="${{ github.event.client_payload.device }}"
-          TZ="${{ github.event.client_payload.tz }}"
-          LANG="${{ github.event.client_payload.lang }}"
-          REF="${{ github.event.client_payload.referrer }}"
-
           printf "%-26s| %-17s| %-31s| %-29s| %-13s| %-10s| %-9s| %s\n" \
-            "$TS" "$IP" "$LOC" "$ORG" "$OS" "$BROWSER" "$DEVICE" "$REF" \
+            "$TS" "$P_IP" "$P_LOCATION" "$P_ORG" "$OS" "$BROWSER" "$DEVICE" "$P_REFERRER" \
             >> download-logs/resume-downloads.txt
 
       - name: Commit and push log
@@ -43,20 +68,14 @@ jobs:
           git config user.name "Subash Lama"
           git add download-logs/resume-downloads.txt
           git diff --staged --quiet && echo "No changes" && exit 0
-          git commit -m "log: resume download [${{ github.event.client_payload.location }}] ${{ github.event.client_payload.timestamp }}"
+          git commit -m "log: resume download [$P_LOCATION] $TS"
           git push
 
       - name: Send Windows push notification (ntfy.sh)
         run: |
-          LOC="${{ github.event.client_payload.location }}"
-          ORG="${{ github.event.client_payload.org }}"
-          OS="${{ github.event.client_payload.os }}"
-          BROWSER="${{ github.event.client_payload.browser }}"
-          DEVICE="${{ github.event.client_payload.device }}"
-          TS="${{ github.event.client_payload.timestamp }}"
           LOG_URL="https://github.com/Subash107/SubashLamaProfile/blob/main/download-logs/resume-downloads.txt"
           MSG=$(printf 'Someone downloaded your resume!\n\nLocation : %s\nCompany  : %s\nDevice   : %s / %s / %s\nTime     : %s\n\nView log: %s' \
-            "$LOC" "$ORG" "$DEVICE" "$OS" "$BROWSER" "$TS" "$LOG_URL")
+            "$P_LOCATION" "$P_ORG" "$DEVICE" "$OS" "$BROWSER" "$TS" "$LOG_URL")
           curl -s -X POST "https://ntfy.sh/${{ secrets.NTFY_TOPIC }}" \
             -H "Title: Resume Downloaded" \
             -H "Priority: high" \
@@ -65,28 +84,14 @@ jobs:
 
       - name: Send Telegram notification
         run: |
-          LOC="${{ github.event.client_payload.location }}"
-          ORG="${{ github.event.client_payload.org }}"
-          OS="${{ github.event.client_payload.os }}"
-          BROWSER="${{ github.event.client_payload.browser }}"
-          DEVICE="${{ github.event.client_payload.device }}"
-          TS="${{ github.event.client_payload.timestamp }}"
-          IP="${{ github.event.client_payload.ip }}"
-          REF="${{ github.event.client_payload.referrer }}"
-          LEAD="${{ github.event.client_payload.lead_score }}"
-          ANON="${{ github.event.client_payload.anon_flag }}"
-          REPEAT="${{ github.event.client_payload.repeat }}"
-          UTM_SOURCE="${{ github.event.client_payload.utm_source }}"
-          UTM_MEDIUM="${{ github.event.client_payload.utm_medium }}"
-
           REPEAT_LINE=""
-          if [ "$REPEAT" != "new" ] && [ -n "$REPEAT" ]; then
-            REPEAT_LINE=$(printf '\n🔁 REPEAT VISITOR (last: %s)' "$REPEAT")
+          if [ "$P_REPEAT" != "new" ] && [ -n "$P_REPEAT" ]; then
+            REPEAT_LINE=$(printf '\n🔁 REPEAT VISITOR (last: %s)' "$P_REPEAT")
           fi
 
           ANON_LINE=""
-          if [ "$ANON" != "none" ] && [ -n "$ANON" ]; then
-            ANON_LINE=$(printf '\n%s' "$ANON")
+          if [ "$P_ANON" != "none" ] && [ -n "$P_ANON" ]; then
+            ANON_LINE=$(printf '\n%s' "$P_ANON")
           fi
 
           SOURCE_LINE=""
@@ -95,7 +100,7 @@ jobs:
           fi
 
           MSG=$(printf '%s Resume Downloaded!%s%s%s\n\n📍 Location : %s\n🏢 Company  : %s\n💻 Device   : %s / %s / %s\n🌐 IP       : %s\n🔗 Referrer : %s\n🕐 Time     : %s\n\n📋 Log: https://github.com/Subash107/SubashLamaProfile/blob/main/download-logs/resume-downloads.txt' \
-            "$LEAD" "$REPEAT_LINE" "$ANON_LINE" "$SOURCE_LINE" "$LOC" "$ORG" "$DEVICE" "$OS" "$BROWSER" "$IP" "$REF" "$TS")
+            "$P_LEAD" "$REPEAT_LINE" "$ANON_LINE" "$SOURCE_LINE" "$P_LOCATION" "$P_ORG" "$DEVICE" "$OS" "$BROWSER" "$P_IP" "$P_REFERRER" "$TS")
           # MSG contains real newlines and may contain quotes from org/referrer
           # fields, so it must be JSON-encoded rather than pasted into the literal.
           RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
@@ -114,19 +119,19 @@ jobs:
           secure: true
           username: lamasubash107@gmail.com
           password: ${{ secrets.GMAIL_APP_PASSWORD }}
-          subject: "Resume Downloaded — ${{ github.event.client_payload.location }}"
+          subject: "Resume Downloaded — ${{ env.P_LOCATION }}"
           to: lamasubash107@gmail.com
           from: Portfolio Tracker <lamasubash107@gmail.com>
           body: |
             Someone just downloaded your resume!
 
-            Time:      ${{ github.event.client_payload.timestamp }}
-            IP:        ${{ github.event.client_payload.ip }}
-            Location:  ${{ github.event.client_payload.location }}
-            Company:   ${{ github.event.client_payload.org }}
-            OS:        ${{ github.event.client_payload.os }}
-            Browser:   ${{ github.event.client_payload.browser }}
-            Device:    ${{ github.event.client_payload.device }}
-            Referrer:  ${{ github.event.client_payload.referrer }}
+            Time:      ${{ env.TS }}
+            IP:        ${{ env.P_IP }}
+            Location:  ${{ env.P_LOCATION }}
+            Company:   ${{ env.P_ORG }}
+            OS:        ${{ env.OS }}
+            Browser:   ${{ env.BROWSER }}
+            Device:    ${{ env.DEVICE }}
+            Referrer:  ${{ env.P_REFERRER }}
 
             View full log: https://github.com/Subash107/SubashLamaProfile/blob/main/download-logs/resume-downloads.txt

@@ -3107,18 +3107,28 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
         if (/Safari\//.test(ua)) return "Safari";
         return "Unknown";
       };
+      /* GitHub rejects a repository_dispatch carrying more than 10 client_payload
+         properties, and the Worker adds 6 of its own (ip, location, org,
+         lead_score, anon_flag, repeat). Sending 9 flat fields here totalled 15
+         and every dispatch was rejected 422, so pack them into 3.
+         log-download.yml unpacks `client` and `utm` on the other side. */
+      const params = new URLSearchParams(window.location.search);
       const payload = {
         event_type: "resume-download",
         client_payload: {
-          timestamp: new Date().toISOString(),
-          os:        getOS(),
-          browser:   getBrowser(),
-          device:    /Mobi|Android|iPhone|iPad/.test(ua) ? "Mobile" : "Desktop",
-          referrer:  document.referrer || "direct",
-          tz:        Intl.DateTimeFormat().resolvedOptions().timeZone || "unknown",
-          lang:      navigator.language || "unknown",
-          utm_source: new URLSearchParams(window.location.search).get("utm_source") || "direct",
-          utm_medium: new URLSearchParams(window.location.search).get("utm_medium") || "none"
+          client: [
+            new Date().toISOString(),
+            getOS(),
+            getBrowser(),
+            /Mobi|Android|iPhone|iPad/.test(ua) ? "Mobile" : "Desktop",
+            Intl.DateTimeFormat().resolvedOptions().timeZone || "unknown",
+            navigator.language || "unknown"
+          ].join("|"),
+          referrer: document.referrer || "direct",
+          utm: [
+            params.get("utm_source") || "direct",
+            params.get("utm_medium") || "none"
+          ].join("|")
           /* ip, location, org are enriched server-side by the Cloudflare Worker */
         }
       };
