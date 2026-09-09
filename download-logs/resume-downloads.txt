@@ -14,3 +14,4 @@ Timestamp (UTC)           | IP Address       | Location                       | 
 2026-06-20T15:18:24.960Z  | 2604:3d09:b980:64e0:956b:5bcb:1417:e96b| Thunder Bay, CA                | Shaw Communications          | Android      | Chrome    | Mobile   | direct
 2026-06-20T18:38:50.127Z  | 2404:7c00:49:99dc:ad7c:6077:e22a:66cd| Kathmandu, Bagmati Province, NP| VIA NET COMMUNICATION LTD    | Windows 11/10| Chrome    | Desktop  | direct
 2026-06-20T18:45:17.139Z  | 2404:7c00:49:99dc:ad7c:6077:e22a:66cd| Kathmandu, Bagmati Province, NP| VIA NET COMMUNICATION LTD    | Windows 11/10| Edge      | Desktop  | direct
+2026-09-09T10:05:47.000Z  | 0.0.0.0          | DIAGNOSTIC TEST, NP            | CLAUDE DIAGNOSTIC - not a real download| Windows 11/10| Chrome    | Desktop  | CLAUDE-DIAGNOSTIC-TEST
