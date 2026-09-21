@@ -2581,7 +2581,7 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
         io.unobserve(entry.target);
         const el = entry.target;
         const original = el.textContent;
-        el.innerHTML = original.split("").map(c => { const s = document.createElement("span"); s.className = "cipher-char"; s.textContent = c; return s.outerHTML; }).join("");
+        el.innerHTML = Array.from(original).map(c => { const s = document.createElement("span"); s.className = "cipher-char"; s.textContent = c; return s.outerHTML; }).join("");
         const spans = el.querySelectorAll(".cipher-char");
         spans.forEach((span, i) => {
           const orig = span.textContent;
@@ -2606,7 +2606,7 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
       });
     }, { threshold: 0.5 });
 
-    document.querySelectorAll("h4.homelab-title, .soc-d-title, .gh-feed-title").forEach(el => {
+    document.querySelectorAll("h3.homelab-title, .soc-d-title, .gh-feed-title").forEach(el => {
       el.setAttribute("data-cipher", "");
       io.observe(el);
     });
