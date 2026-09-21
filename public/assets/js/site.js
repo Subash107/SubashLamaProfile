@@ -646,6 +646,7 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
     const el = document.getElementById("typingRoles");
     if (!el || prefersReducedMotion()) return;
     const roles = [
+      "AI Security / LLM Red-Teaming (Freelance)",
       "Cybersecurity Analyst",
       "SOC Analyst L1 / L2",
       "Detection Engineer",
@@ -655,7 +656,7 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
       "Security Operations Engineer",
       "Blue Team Operator",
     ];
-    let roleIdx = 0, charIdx = roles[0].length, deleting = false;
+    let roleIdx = 0, charIdx = 0, deleting = false;
     const spd = { type: 62, del: 32, pauseFull: 2400, pauseEmpty: 420 };
     function tick() {
       const cur = roles[roleIdx];

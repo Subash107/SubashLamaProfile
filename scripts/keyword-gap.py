@@ -21,8 +21,9 @@ Experience: 12+ years enterprise IT, transitioning to full cybersecurity role
 Target roles: SOC Analyst, GRC Analyst, IAM Analyst, Cybersecurity Analyst
 
 CERTIFICATIONS (7):
-CompTIA Security+, CompTIA CySA+, CompTIA PenTest+, eJPT,
-Google Cybersecurity Certificate, ISC2 CC, Wazuh Certified Engineer
+Cisco Endpoint Security, Cisco Ethical Hacker, Cisco Introduction to Cybersecurity,
+IBM Cybersecurity Fundamentals, IBM Python for Data Science,
+IBM SkillsBuild Data Analysis with Python, Google Ads Video
 
 CURRENT SKILLS:
 SOC Operations, Wazuh SIEM (self-built lab), Suricata IDS/IPS,

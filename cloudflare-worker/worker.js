@@ -6,7 +6,6 @@
  *   - Hot Lead Detector (scores by company tier)
  *   - Repeat Visitor Alert (Workers KV tracks per-IP history)
  *   - Tor / VPN / Proxy Detection (via cf.threat + AbuseIPDB flags)
- *   - Skips owner's own downloads silently
  *
  * Secrets: GITHUB_PAT
  * KV Binding: DOWNLOAD_KV (for repeat visitor tracking)
@@ -20,9 +19,6 @@ const ALLOWED_ORIGINS = [
   "https://subashlamaprofile.pages.dev",
   "https://subash107.github.io",
 ];
-
-/* Skip own downloads */
-const OWNER_ORGS = ["VIA NET COMMUNICATION LTD", "VIA NET"];
 
 /* Hot Lead scoring — match against org name */
 const HOT_LEADS = [
@@ -881,12 +877,6 @@ export default {
       const country= cf.country        || "";
       const org    = cf.asOrganization || "unknown";
       const location = [city, region, country].filter(Boolean).join(", ") || "unknown";
-
-      /* Skip own downloads */
-      const isOwn = OWNER_ORGS.some(o => org.toUpperCase().includes(o.toUpperCase()));
-      if (isOwn) {
-        return new Response("OK", { status: 200, headers: corsHeaders(origin) });
-      }
 
       /* ── Hot Lead Detection ── */
       const leadScore = scoreLead(org);
