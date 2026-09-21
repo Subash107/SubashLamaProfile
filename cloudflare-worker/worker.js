@@ -395,6 +395,11 @@ export default {
         const ts        = new Date().toISOString();
         const today     = ts.slice(0, 10);
 
+        /* ── Test mode — Subash checking his own site; skip counting/alerting entirely ── */
+        if (payload.test === true) {
+          return new Response("OK (test)", { status: 200, headers: corsHeaders(origin) });
+        }
+
         const visitor = classifyVisitor(org, ua, cf);
 
         /* ── Rate limiting — block aggressive bots (10+ hits in 5 min) ── */
@@ -537,6 +542,7 @@ export default {
           `📍 Location : ${location}`,
           `🏢 Company  : ${org}`,
           `🌐 IP       : ${ip}`,
+          `🖥️ Device   : ${payload.browser || "Unknown"} · ${payload.os || "Unknown"} · ${payload.device || "Unknown"}`,
           `📌 Source   : ${refSource}`,
           `🕐 Time     : ${ts}`,
         ].filter(l => l !== null);
@@ -869,6 +875,11 @@ export default {
 
     try {
       const body = await request.json();
+
+      /* ── Test mode — Subash checking his own site; skip counting/alerting/GitHub dispatch ── */
+      if (body.client_payload?.test === true) {
+        return new Response("OK (test)", { status: 200, headers: corsHeaders(origin) });
+      }
 
       const ip     = request.headers.get("CF-Connecting-IP") || "unknown";
       const cf     = request.cf || {};

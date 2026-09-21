@@ -3077,6 +3077,28 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
   }
 
   /* ── Resume download tracker ── */
+  function getDeviceOS(ua) {
+    if (/Windows NT 1[01]/.test(ua)) return "Windows 11/10";
+    if (/Windows/.test(ua)) return "Windows";
+    if (/Mac OS X/.test(ua)) return "macOS";
+    if (/iPhone/.test(ua)) return "iOS (iPhone)";
+    if (/iPad/.test(ua)) return "iOS (iPad)";
+    if (/Android/.test(ua)) return "Android";
+    if (/Linux/.test(ua)) return "Linux";
+    return "Unknown";
+  }
+  function getDeviceBrowser(ua) {
+    if (/Edg\//.test(ua)) return "Edge";
+    if (/OPR\//.test(ua)) return "Opera";
+    if (/Chrome\//.test(ua)) return "Chrome";
+    if (/Firefox\//.test(ua)) return "Firefox";
+    if (/Safari\//.test(ua)) return "Safari";
+    return "Unknown";
+  }
+  function getDeviceType(ua) {
+    return /Mobi|Android|iPhone|iPad/.test(ua) ? "Mobile" : "Desktop";
+  }
+
   /* PAT is stored securely in Cloudflare Worker — never exposed here */
   function initResumeTracking() {
     /* every CV link on the page, not just the first — a plain <a download> that
@@ -3090,38 +3112,21 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
     btns.forEach((btn) => btn.addEventListener("click", () => {
 
       const ua = navigator.userAgent;
-      const getOS = () => {
-        if (/Windows NT 1[01]/.test(ua)) return "Windows 11/10";
-        if (/Windows/.test(ua)) return "Windows";
-        if (/Mac OS X/.test(ua)) return "macOS";
-        if (/iPhone/.test(ua)) return "iOS (iPhone)";
-        if (/iPad/.test(ua)) return "iOS (iPad)";
-        if (/Android/.test(ua)) return "Android";
-        if (/Linux/.test(ua)) return "Linux";
-        return "Unknown";
-      };
-      const getBrowser = () => {
-        if (/Edg\//.test(ua)) return "Edge";
-        if (/OPR\//.test(ua)) return "Opera";
-        if (/Chrome\//.test(ua)) return "Chrome";
-        if (/Firefox\//.test(ua)) return "Firefox";
-        if (/Safari\//.test(ua)) return "Safari";
-        return "Unknown";
-      };
       /* GitHub rejects a repository_dispatch carrying more than 10 client_payload
          properties, and the Worker adds 6 of its own (ip, location, org,
          lead_score, anon_flag, repeat). Sending 9 flat fields here totalled 15
          and every dispatch was rejected 422, so pack them into 3.
          log-download.yml unpacks `client` and `utm` on the other side. */
-      const params = new URLSearchParams(window.location.search);
+      const params   = new URLSearchParams(window.location.search);
+      const testMode = params.get("test") === "1";
       const payload = {
         event_type: "resume-download",
         client_payload: {
           client: [
             new Date().toISOString(),
-            getOS(),
-            getBrowser(),
-            /Mobi|Android|iPhone|iPad/.test(ua) ? "Mobile" : "Desktop",
+            getDeviceOS(ua),
+            getDeviceBrowser(ua),
+            getDeviceType(ua),
             Intl.DateTimeFormat().resolvedOptions().timeZone || "unknown",
             navigator.language || "unknown"
           ].join("|"),
@@ -3129,8 +3134,10 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
           utm: [
             params.get("utm_source") || "direct",
             params.get("utm_medium") || "none"
-          ].join("|")
-          /* ip, location, org are enriched server-side by the Cloudflare Worker */
+          ].join("|"),
+          /* ip, location, org are enriched server-side by the Cloudflare Worker.
+             Stays under the 10-property GitHub dispatch cap: 4 here + 6 server-side = 10. */
+          ...(testMode ? { test: true } : {})
         }
       };
 
@@ -3169,15 +3176,19 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
 
   function initArrivalPing() {
     const TRACKER_URL = "https://lingering-surf-6d77.lamasubash107.workers.dev";
-    const refSource   = new URLSearchParams(window.location.search).get("ref")
-                        || document.referrer
-                        || "direct";
+    const params      = new URLSearchParams(window.location.search);
+    const refSource   = params.get("ref") || document.referrer || "direct";
+    const ua          = navigator.userAgent;
 
     const payload = {
       event_type: "page-visit",
       client_payload: {
         ref_source: refSource,
         timestamp:  new Date().toISOString(),
+        os:         getDeviceOS(ua),
+        browser:    getDeviceBrowser(ua),
+        device:     getDeviceType(ua),
+        test:       params.get("test") === "1",
       },
     };
 

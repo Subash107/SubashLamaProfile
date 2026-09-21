@@ -1,0 +1,25 @@
+name: Deploy Tracking Worker
+
+on:
+  push:
+    branches: [main]
+    paths: ['cloudflare-worker/worker.js', 'cloudflare-worker/wrangler.toml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy tracking Worker
+        working-directory: cloudflare-worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler deploy worker.js
