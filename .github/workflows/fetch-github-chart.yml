@@ -1,0 +1,43 @@
+name: Fetch GitHub Contribution Chart
+
+on:
+  schedule:
+    - cron: '15 2 * * *'   # Daily 8:00 AM Nepal Time
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Download chart SVG
+        run: |
+          curl -sS --max-time 90 --retry 3 --retry-delay 10 \
+            -o /tmp/gh-contrib-chart.svg \
+            "https://ghchart.rshah.org/50fa7b/Subash107"
+
+          if [ ! -s /tmp/gh-contrib-chart.svg ] || ! head -c 200 /tmp/gh-contrib-chart.svg | grep -qi "<svg"; then
+            echo "Download failed or invalid SVG — keeping last known-good chart."
+            exit 0
+          fi
+
+          mkdir -p public/assets/images
+          mv /tmp/gh-contrib-chart.svg public/assets/images/gh-contrib-chart.svg
+
+      - name: Commit chart
+        run: |
+          git config user.email "lamasubash107@gmail.com"
+          git config user.name "Subash Lama"
+          git add public/assets/images/gh-contrib-chart.svg
+          git diff --staged --quiet && echo "Chart unchanged" && exit 0
+          git commit -m "chore: refresh GitHub contribution chart $(date -u +"%Y-%m-%d")"
+          git push
