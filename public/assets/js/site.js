@@ -3069,7 +3069,7 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
     try {
       const ctrl = new AbortController();
       const t = setTimeout(() => ctrl.abort(), 4000);
-      const res = await fetch("https://check.torproject.org/api/ip", {
+      const res = await fetch("/api/tor-check", {
         cache: "no-store",
         signal: ctrl.signal
       });
