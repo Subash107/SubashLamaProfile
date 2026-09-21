@@ -9,3 +9,5 @@ timestamp,date,ip,location,city,country,org,os,browser,device,referrer,is_hot_le
 2026-06-20T15:18:24.960Z,2026-06-20,2604:3d09:b980:64e0:956b:5bcb:1417:e96b,"Thunder Bay, CA",Thunder Bay,CA,Shaw Communications,Android,Chrome,Mobile,direct,no
 2026-06-20T18:38:50.127Z,2026-06-20,2404:7c00:49:99dc:ad7c:6077:e22a:66cd,"Kathmandu, Bagmati Province, NP",Kathmandu,NP,VIA NET COMMUNICATION LTD,Windows 11/10,Chrome,Desktop,direct,no
 2026-06-20T18:45:17.139Z,2026-06-20,2404:7c00:49:99dc:ad7c:6077:e22a:66cd,"Kathmandu, Bagmati Province, NP",Kathmandu,NP,VIA NET COMMUNICATION LTD,Windows 11/10,Edge,Desktop,direct,no
+2026-09-21T08:06:14.041Z,2026-09-21,113.199.227.17,"Kathmandu, Bagmati Province, NP",Kathmandu,NP,Nepal Telecommunications Corporation,Windows 11/10,Chrome,Desktop,direct,no
+2026-09-21T08:06:46.975Z,2026-09-21,113.199.227.17,"Kathmandu, Bagmati Province, NP",Kathmandu,NP,Nepal Telecommunications Corporation,Windows 11/10,Chrome,Desktop,direct,no
