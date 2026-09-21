@@ -1134,7 +1134,6 @@ document.addEventListener('DOMContentLoaded', () => {
           cardToggle.setAttribute('aria-pressed', showBack ? 'true' : 'false');
           cardToggle.setAttribute('aria-label', `${sectionTitle} ${showBack ? 'show front' : 'show back'}`);
           cardToggle.classList.toggle('is-on', showBack);
-          card.setAttribute('aria-expanded', showBack ? 'true' : 'false');
         };
 
         applyFlipState(showingBack);

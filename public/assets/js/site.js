@@ -704,7 +704,7 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
     const open = () => {
       term.removeAttribute("hidden");
       body.innerHTML = "";
-      addLine("out", 'Welcome to <span style="color:#8ae8ff">subash@portfolio</span>. Type <span style="color:#50fa7b">help</span> to see commands.');
+      addLine("out", 'Welcome to <span class="et-accent-blue">subash@portfolio</span>. Type <span class="et-accent-green">help</span> to see commands.');
       setTimeout(() => input.focus(), 60);
     };
     const close = () => term.setAttribute("hidden", "");
@@ -746,7 +746,7 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
       const raw = input.value.trim();
       const cmd = raw.toLowerCase();
       input.value = "";
-      addLine("prompt", '<span style="color:#8ae8ff">subash@portfolio:~$</span> ' + raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
+      addLine("prompt", '<span class="et-accent-blue">subash@portfolio:~$</span> ' + raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
       if (!cmd) return;
       const fn = cmds[cmd];
       if (fn) {
@@ -2777,6 +2777,8 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
     const sigCopy    = document.getElementById("sigCopy");
     if (!sigBtn || !sigModal) return;
 
+    /* Kept with inline styles on purpose — this exact string is what gets
+       copied to the clipboard, and email clients require inline CSS. */
     const SIG_HTML = `
       <table cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif;font-size:13px;color:#222;">
         <tr>
@@ -2792,8 +2794,25 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
         </tr>
       </table>`;
 
+    /* Class-based twin of SIG_HTML for the on-page preview only — the page's
+       CSP (style-src 'self', no unsafe-inline) blocks inline style="" attributes. */
+    const SIG_PREVIEW_HTML = `
+      <table cellpadding="0" cellspacing="0" border="0" class="sig-preview-table">
+        <tr>
+          <td class="sig-preview-cell sig-preview-cell--left">
+            <div class="sig-preview-name">Subash Lama</div>
+            <div class="sig-preview-role">Cybersecurity Analyst</div>
+          </td>
+          <td class="sig-preview-cell sig-preview-cell--right">
+            <div>&#128231; <a href="mailto:lamasubash107@gmail.com" class="sig-preview-link">lamasubash107@gmail.com</a></div>
+            <div>&#128279; <a href="https://www.linkedin.com/in/subash-lama" class="sig-preview-link">linkedin.com/in/subash-lama</a></div>
+            <div>&#128296; Cisco Certified &bull; SOC &bull; Wazuh &bull; SIEM</div>
+          </td>
+        </tr>
+      </table>`;
+
     const open = () => {
-      if (sigPreview) sigPreview.innerHTML = SIG_HTML;
+      if (sigPreview) sigPreview.innerHTML = SIG_PREVIEW_HTML;
       sigModal.removeAttribute("hidden");
     };
     const close = () => sigModal.setAttribute("hidden", "");
@@ -3399,7 +3418,6 @@ if (typeof window !== "undefined" && window.trustedTypes && window.trustedTypes.
     initResumeVersionBadge();
     initWiresharkViewer();
     initSecurityHeadlines();
-    initDarkLightToggle();
     initMatrixEasterEgg();
 
     const scheduleNonCriticalStartup = () => {
@@ -3836,11 +3854,11 @@ function initSecurityHeadlines() {
     .then(data => {
       if (updated && data.updated) updated.textContent = "Updated " + data.updated;
       const items = data.items || [];
-      if (!items.length) { list.innerHTML = "<p style='color:rgba(255,255,255,0.3);font-size:0.82rem'>No headlines yet — workflow runs daily.</p>"; return; }
+      if (!items.length) { list.innerHTML = "<p class='headline-empty-note'>No headlines yet — workflow runs daily.</p>"; return; }
       list.innerHTML = items.slice(0, 6).map(h => {
         const catCls = "headline-cat headline-cat-" + (h.category || "tool");
         const catLabel = (h.category || "tool").toUpperCase();
-        const link = h.url ? '<a href="' + h.url + '" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">' + h.title + '</a>' : h.title;
+        const link = h.url ? '<a href="' + h.url + '" target="_blank" rel="noopener noreferrer" class="headline-link">' + h.title + '</a>' : h.title;
         return '<div class="headline-card">' +
           '<span class="' + catCls + '">' + catLabel + '</span>' +
           '<div class="headline-body"><h4>' + link + '</h4>' +
@@ -3848,25 +3866,7 @@ function initSecurityHeadlines() {
           "</div></div>";
       }).join("");
     })
-    .catch(() => { list.innerHTML = "<p style='color:rgba(255,255,255,0.3);font-size:0.82rem'>Headlines unavailable.</p>"; });
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   UPGRADE 11 — Dark / Light Mode Toggle
-   ───────────────────────────────────────────────────────────────── */
-function initDarkLightToggle() {
-  const btn = document.getElementById("themeToggle");
-  if (!btn) return;
-
-  const saved = localStorage.getItem("theme");
-  if (saved === "light") document.documentElement.classList.add("light-mode");
-
-  btn.addEventListener("click", () => {
-    const isLight = document.documentElement.classList.toggle("light-mode");
-    localStorage.setItem("theme", isLight ? "light" : "dark");
-    btn.setAttribute("aria-label", isLight ? "Switch to dark mode" : "Switch to light mode");
-    btn.title = isLight ? "Switch to dark mode" : "Switch to light mode";
-  });
+    .catch(() => { list.innerHTML = "<p class='headline-empty-note'>Headlines unavailable.</p>"; });
 }
 
 /* ─────────────────────────────────────────────────────────────────

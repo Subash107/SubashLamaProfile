@@ -44,6 +44,9 @@
       gap: 0.75rem;
       transition: opacity 0.55s ease, filter 0.55s ease, transform 0.55s ease;
     }
+    /* Keeps #main-content as an accessibility landmark only — its children
+       stay direct flex items of .content, exactly as before it existed. */
+    #main-content { display: contents; }
     body.loader-active {
       overflow: hidden;
     }
@@ -239,9 +242,7 @@
       font-size: 0.76rem;
       font-weight: 700;
     }
-    .loader-copy h2,
-    .loader-terminal h2,
-    .loader-reveal-layout h2 {
+    .loader-headline {
       margin: 0 0 0.8rem;
       font-size: clamp(2rem, 4vw, 3.15rem);
       line-height: 0.98;
@@ -1708,7 +1709,7 @@
       hyphens: auto;
       box-sizing: border-box;
     }
-    .project-card h4 {
+    .project-card h3 {
       margin-bottom: 0.5rem;
       font-weight: 600;
       letter-spacing: 0.01em;
@@ -1910,7 +1911,7 @@
       flex-direction: column;
       gap: 0.3rem;
     }
-    .skill-group h4 {
+    .skill-group h3 {
       margin: 0;
       font-size: 1.1rem;
       letter-spacing: 0.03em;
@@ -2760,7 +2761,7 @@
       letter-spacing: 0.08em;
       color: rgba(114, 239, 255, 0.82);
     }
-    .cert-card h4 {
+    .cert-card h3 {
       margin: 0;
       font-size: 0.97rem;
       font-weight: 600;
@@ -2806,7 +2807,7 @@
       flex-wrap: wrap;
       gap: 0.25rem;
     }
-    .exp-card h4 {
+    .exp-card h3 {
       margin: 0;
       font-size: 1rem;
       font-weight: 600;
@@ -3796,7 +3797,7 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.07em;
-      color: rgba(255,255,255,0.42);
+      color: rgba(255,255,255,0.55);
     }
 
     /* ── Card top accent bars per section ── */
@@ -4100,7 +4101,7 @@
       font-weight: 700;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.42);
+      color: rgba(255,255,255,0.55);
     }
     .skill-marquee-track span:not(.mq-dot):hover { color: #8ae8ff; cursor: default; }
     .mq-dot { color: #50fa7b; font-size: 0.45rem; opacity: 0.55; }
@@ -4167,6 +4168,15 @@
       display: flex;
       flex-direction: column;
       gap: 0.35rem;
+    }
+    .theme-switcher-label {
+      font-size: 0.55rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.4);
+      text-align: center;
+      margin-bottom: 0.1rem;
     }
     .theme-btn {
       width: 36px;
@@ -4803,7 +4813,7 @@
     }
     .sw-icon { font-size: 1.1rem; flex-shrink: 0; }
     .sw-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-    .sw-label { font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(138,232,255,0.5); }
+    .sw-label { font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(138,232,255,0.62); }
     .sw-text  { font-size: 0.75rem; color: rgba(255,255,255,0.75); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sw-bar-track {
       height: 3px; background: rgba(255,255,255,0.07);
@@ -4889,7 +4899,7 @@
       opacity: 1; inset: auto;
       padding: 0;
     }
-    .cert-list.timeline-view .cert-card h4 { font-size: 0.82rem; color: rgba(255,255,255,0.85); }
+    .cert-list.timeline-view .cert-card h3 { font-size: 0.82rem; color: rgba(255,255,255,0.85); }
     .cert-list.timeline-view .cert-issuer { font-size: 0.65rem; color: #8ae8ff; }
     .cert-list.timeline-view .cert-date { font-size: 0.65rem; color: rgba(255,255,255,0.35); }
     .cert-list.timeline-view .cert-verify { margin-top: 0; font-size: 0.68rem; }
@@ -5441,6 +5451,12 @@
       background: #ffffff; border-radius: 8px; padding: 1rem 1.25rem;
       color: #222; font-size: 0.8rem; line-height: 1.5; margin-bottom: 0.9rem; min-height: 100px;
     }
+    .sig-preview-table { font-family: Arial, sans-serif; font-size: 13px; color: #222; }
+    .sig-preview-cell--left { padding-right: 14px; border-right: 2px solid #50fa7b; vertical-align: middle; }
+    .sig-preview-cell--right { padding-left: 14px; vertical-align: middle; line-height: 1.6; }
+    .sig-preview-name { font-weight: 900; font-size: 15px; color: #07111c; }
+    .sig-preview-role { color: #555; font-size: 12px; }
+    .sig-preview-link { color: #1a73e8; }
     .sig-copy-btn {
       width: 100%; padding: 0.55rem; font-size: 0.82rem; font-weight: 700;
       background: rgba(80,250,123,0.12); border: 1px solid rgba(80,250,123,0.45);
@@ -5764,10 +5780,10 @@
     /* ── 8. Sound Toggle ── */
     #soundToggle {
       position: fixed; bottom: 7rem; right: 1.25rem; z-index: 20;
-      width: 36px; height: 36px; border-radius: 50%;
+      width: 36px; height: 36px; border-radius: 50%; padding: 0; margin: 0;
       border: 1px solid rgba(255,255,255,0.2);
       background: rgba(7,17,28,0.82); color: rgba(255,255,255,0.5);
-      font-size: 0.9rem; cursor: pointer; backdrop-filter: blur(8px);
+      font-size: 0.9rem; font-family: inherit; cursor: pointer; backdrop-filter: blur(8px);
       transition: border-color 0.2s ease, transform 0.2s ease;
       display: flex; align-items: center; justify-content: center;
     }
@@ -6166,7 +6182,7 @@
 .lf-card { background: rgba(12,19,32,0.7); border: 1px solid rgba(138,232,255,0.15); border-radius: 10px; padding: 1rem; }
 .lf-card:hover { border-color: rgba(138,232,255,0.35); }
 .lf-icon { font-size: 1.4rem; display: block; margin-bottom: 0.4rem; }
-.lf-card h4 { font-size: 0.85rem; font-weight: 700; color: #8ae8ff; margin: 0 0 0.35rem; }
+.lf-card h3 { font-size: 0.85rem; font-weight: 700; color: #8ae8ff; margin: 0 0 0.35rem; }
 .lf-card p { font-size: 0.82rem; color: rgba(255,255,255,0.65); line-height: 1.5; margin: 0; }
 .lf-cta { font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-top: 0.5rem; text-align: center; }
 .lf-cta a { color: #8ae8ff; text-decoration: none; }
@@ -6218,7 +6234,7 @@
   0%, 100% { box-shadow: 0 0 0 4px rgba(80,250,123,0.12), 0 0 14px rgba(80,250,123,0.7); }
   50%       { box-shadow: 0 0 0 7px rgba(80,250,123,0.06), 0 0 22px rgba(80,250,123,0.9); }
 }
-.exp-card h4 { font-size: 1.02rem !important; }
+.exp-card h3 { font-size: 1.02rem !important; }
 .exp-company { font-size: 0.87rem !important; margin: 0.2rem 0 0.5rem !important; }
 .exp-achievements { padding-left: 1.1rem !important; }
 .exp-achievements li { margin-bottom: 0.3rem; font-size: 0.9rem; line-height: 1.55; }
@@ -6264,7 +6280,7 @@
   /* Certs */
   .cert-list { grid-template-columns: repeat(2, 1fr) !important; gap: 0.6rem !important; }
   .cert-card { padding: 0.75rem !important; }
-  .cert-card h4 { font-size: 0.8rem; }
+  .cert-card h3 { font-size: 0.8rem; }
 
   /* Skills */
   .skill-groups { gap: 1rem; }
@@ -6323,7 +6339,7 @@
   0%, 100% { box-shadow: 0 0 0 4px rgba(80,250,123,0.12), 0 0 14px rgba(80,250,123,0.7); }
   50%       { box-shadow: 0 0 0 7px rgba(80,250,123,0.06), 0 0 22px rgba(80,250,123,0.9); }
 }
-.exp-card h4 { font-size: 1.02rem !important; }
+.exp-card h3 { font-size: 1.02rem !important; }
 .exp-company { font-size: 0.87rem !important; margin: 0.2rem 0 0.5rem !important; }
 .exp-achievements { padding-left: 1.1rem !important; }
 .exp-achievements li { margin-bottom: 0.3rem; font-size: 0.9rem; line-height: 1.55; }
@@ -6369,7 +6385,7 @@
   /* Certs */
   .cert-list { grid-template-columns: repeat(2, 1fr) !important; gap: 0.6rem !important; }
   .cert-card { padding: 0.75rem !important; }
-  .cert-card h4 { font-size: 0.8rem; }
+  .cert-card h3 { font-size: 0.8rem; }
 
   /* Skills */
   .skill-groups { gap: 1rem; }
@@ -6704,6 +6720,10 @@
 .compliance-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); border-radius:10px; padding:14px 16px; }
 .compliance-card-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
 .compliance-card-icon { width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+.compliance-card-icon--nist { background:rgba(0,255,136,0.1); }
+.compliance-card-icon--cis  { background:rgba(93,207,255,0.1); }
+.compliance-card-icon--iso  { background:rgba(196,122,255,0.1); }
+.compliance-card-icon--grc  { background:rgba(255,180,0,0.1); }
 .compliance-card-title { font-size:0.85rem; font-weight:700; color:rgba(255,255,255,0.88); }
 .compliance-card-sub { font-size:0.7rem; color:rgba(255,255,255,0.38); }
 .compliance-items { list-style:none; padding:0; margin:0; }
@@ -6835,9 +6855,21 @@
 .light-mode .skill-pill { background:rgba(0,0,0,0.06); color:#334155; border-color:rgba(0,0,0,0.1); }
 .light-mode .terminal-window { background:#1a1a2e; }
 .light-mode .ws-window { background:#1a1a2e; }
-.light-mode #themeToggle { background:rgba(0,0,0,0.08); border-color:rgba(0,0,0,0.2); color:#334155; }
 .roadmap-label { font-size:0.7rem; color:rgba(255,255,255,0.6); text-align:center; line-height:1.3; }
 .roadmap-date  { font-size:0.65rem; color:rgba(255,255,255,0.3); text-align:center; }
 .roadmap-legend { display:flex; gap:14px; flex-wrap:wrap; margin-top:14px; }
 .roadmap-legend-item { display:flex; align-items:center; gap:5px; font-size:0.72rem; color:rgba(255,255,255,0.45); }
 .roadmap-legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.roadmap-legend-dot--achieved { background:#00ff88; border:2px solid #00ff88; }
+.roadmap-legend-dot--progress { background:rgba(93,207,255,0.2); border:2px solid #5dcfff; }
+.roadmap-legend-dot--planned  { background:rgba(255,255,255,0.05); border:2px dashed rgba(255,255,255,0.2); }
+
+.resume-download-count { font-size:0.75em; opacity:0.7; }
+.et-accent-blue { color:#8ae8ff; }
+.et-accent-green { color:#50fa7b; }
+.headline-empty-note { color:rgba(255,255,255,0.3); font-size:0.82rem; }
+.headline-link { color:inherit; text-decoration:none; }
+.visually-hidden-trap { display:none; visibility:hidden; position:absolute; left:-9999px; }
+.link-accent-blue { color:#5dcfff; }
+.footer-badge-wrap { margin-bottom:10px; text-align:center; }
+.footer-badge-img { border-radius:3px; max-width:100%; }

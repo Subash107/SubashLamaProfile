@@ -100,7 +100,7 @@
       '  <div class="parrot-cli-name-output" id="pcName"></div>',
 
       /* Second idle prompt */
-      '  <div class="parrot-cli-idle-row" id="pcIdle" style="display:none">',
+      '  <div class="parrot-cli-idle-row pc-idle-hidden" id="pcIdle">',
       '    <span class="parrot-cli-ps1">',
       '\u250c\u2500\u2500(root\u2625parrot)-[~/subashParrotVM]\n',
       '\u2514\u2500# </span>',
@@ -144,7 +144,7 @@
       await wait(820);
 
       /* Show idle prompt with blinking cursor */
-      idleRow.style.display = '';
+      idleRow.classList.remove('pc-idle-hidden');
     }
 
     onLoaderDone(run);

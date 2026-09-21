@@ -211,6 +211,7 @@
   align-items: baseline;
   margin-top: 0.1rem;
 }
+.pc-idle-hidden { display: none; }
 
 /* ----------------------------------------------------------
    3.  Page HUD  —  fixed corner brackets + sweep line
