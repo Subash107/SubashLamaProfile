@@ -1,6 +1,20 @@
 {
-  "updated": "2026-11-12",
+  "updated": "2026-11-13",
   "items": [
+    {
+      "title": "Who Runs the Ransomware Group Qilin?",
+      "source": "Krebs on Security",
+      "category": "threat",
+      "url": "https://krebsonsecurity.com/2026/11/who-runs-the-ransomware-group-qilin/",
+      "date": "2026-11-13"
+    },
+    {
+      "title": "FBI Arrests Executive at Ransomware Negotiation Firm",
+      "source": "Krebs on Security",
+      "category": "threat",
+      "url": "https://krebsonsecurity.com/2026/10/fbi-arrests-founder-of-ransomware-negotiation-firm/",
+      "date": "2026-11-13"
+    },
     {
       "title": "Who Runs the Ransomware Group Qilin?",
       "source": "Krebs on Security",
@@ -56,20 +70,6 @@
       "category": "threat",
       "url": "https://krebsonsecurity.com/2026/10/fbi-arrests-founder-of-ransomware-negotiation-firm/",
       "date": "2026-11-06"
-    },
-    {
-      "title": "FBI Arrests Executive at Ransomware Negotiation Firm",
-      "source": "Krebs on Security",
-      "category": "threat",
-      "url": "https://krebsonsecurity.com/2026/10/fbi-arrests-founder-of-ransomware-negotiation-firm/",
-      "date": "2026-11-05"
-    },
-    {
-      "title": "FBI Arrests Executive at Ransomware Negotiation Firm",
-      "source": "Krebs on Security",
-      "category": "threat",
-      "url": "https://krebsonsecurity.com/2026/10/fbi-arrests-founder-of-ransomware-negotiation-firm/",
-      "date": "2026-11-03"
     }
   ]
 }
