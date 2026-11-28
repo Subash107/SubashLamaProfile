@@ -1,11 +1,25 @@
 {
-  "updated": "2026-11-27",
+  "updated": "2026-11-28",
   "items": [
     {
       "title": "CTO of \u2018RansomwareHelp\u2019 Indicted for Wire Fraud",
       "source": "Krebs on Security",
       "category": "threat",
       "url": "https://krebsonsecurity.com/2026/11/cto-of-ransomwarehelp-indicted-for-wire-fraud/",
+      "date": "2026-11-28"
+    },
+    {
+      "title": "Who Runs the Ransomware Group Qilin?",
+      "source": "Krebs on Security",
+      "category": "threat",
+      "url": "https://krebsonsecurity.com/2026/11/who-runs-the-ransomware-group-qilin/",
+      "date": "2026-11-28"
+    },
+    {
+      "title": "CTO of \u2018RansomwareHelp\u2019 Indicted for Wire Fraud",
+      "source": "Krebs on Security",
+      "category": "threat",
+      "url": "https://krebsonsecurity.com/2026/11/cto-of-ransomwarehelp-indicted-for-wire-fraud/",
       "date": "2026-11-27"
     },
     {
@@ -56,20 +70,6 @@
       "category": "threat",
       "url": "https://krebsonsecurity.com/2026/11/who-runs-the-ransomware-group-qilin/",
       "date": "2026-11-24"
-    },
-    {
-      "title": "CTO of \u2018RansomwareHelp\u2019 Indicted for Wire Fraud",
-      "source": "Krebs on Security",
-      "category": "threat",
-      "url": "https://krebsonsecurity.com/2026/11/cto-of-ransomwarehelp-indicted-for-wire-fraud/",
-      "date": "2026-11-23"
-    },
-    {
-      "title": "Who Runs the Ransomware Group Qilin?",
-      "source": "Krebs on Security",
-      "category": "threat",
-      "url": "https://krebsonsecurity.com/2026/11/who-runs-the-ransomware-group-qilin/",
-      "date": "2026-11-23"
     }
   ]
 }
